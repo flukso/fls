@@ -1,31 +1,45 @@
-Welcome to the Flukso repository.
+Welcome!
 
-The repository is structured as follows:
-* mote/v[1|2]/openwrt
-The modules, patches and scripts needed to tailor a stock OpenWRT Backfire to
-the Fluksometer hardware. The bulk of development will now be taking place in
-the v2 directory which maps to the v2 hardware.
-* mote/v[1|2]/eagle
-The Eagle schematic, board and BOM files for building a v1 or v2 Flukso sensor
-board.
-* mote/v[1|2]/avr
-The AVR microcontroller code for the Flukso sensor board.
-* server/api
-The Erlang/Webmachine code that handles the Flukso server's JSON/REST API.
-* server/drupal
-Custom Drupal v6 modules that transform a Drupal 6 installation into a community
-metering web platform, see a.o. www.flukso.net or www.mysmartgrid.de.
+fls is the git repo containing the components needed for building a Flukso
+server.
 
+tree:
+.
+|-- api
+|   |-- flukso
+|   |   |-- deps
+|   |   |-- priv
+|   |   |-- src
+|   |   `-- var
+|   `-- webmachine
+|       |-- demo
+|       |-- deps
+|       |-- docs
+|       |-- ebin
+|       |-- include
+|       |-- priv
+|       |-- scripts
+|       |-- src
+|       |-- trace
+|       `-- www
+|-- drupal
+|   |-- modules
+|   |   |-- cache_no_filter
+|   |   |-- image_annotate
+|   |   `-- logger
+|   `-- themes
+|       `-- flukso
+`-- xen
+    `-- debian
 
-For more information about this project and to see the code in action, surf to
-www.flukso.net.
+api: the Erlang/Webmaching code that handles the Flukso server's RESTful API
 
-Interested in contributing code- or schematic-wise? Then please join the
-flukso-dev mailing list.
-You can sign up via the web: http://lists.flukso.net/mailman/listinfo/flukso-dev.
-Or simply drop a mail to this address: flukso-dev-join@lists.flukso.net.
+drupal: custom Drupal 6 modules that transform a stock Drupal installation
+into a community metering web platform, e.g. www.flukso.net and
+www.mysmartgrid.de
 
-You can also harass us via IRC in the #flukso channel on freenode.
+xen: tools to build a Flukso server as Xen domU from scratch
 
-Happy metering!
-Bart.
+$forum = www.flukso.net/forum
+$mailing_list = flukso-dev-join@lists.flukso.net
+$irc = #flukso on freenode
