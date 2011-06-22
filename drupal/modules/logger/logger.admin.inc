@@ -72,7 +72,9 @@ function _logger_account_devices_submit($form, &$form_state) {
   if (!user_access('logger')) {
     $rid = db_result(db_query("SELECT rid FROM {role} WHERE name = '%s'", 'fluksonian'));
     db_query("INSERT INTO {users_roles} (uid, rid) VALUES (%d, %d)", $user->uid, $rid);
-    db_query("INSERT INTO {logger_users} (uid, private) VALUES (%d, %d)", $user->uid, 0);
+
+    $master_token = md5(uniqid(rand(), TRUE));
+    db_query("INSERT INTO {logger_users} (uid, token, private) VALUES (%d, '%s', %d)", $user->uid, $master_token, 0);
   }
 
   drupal_set_message(t("The device is now associated with your account."));
