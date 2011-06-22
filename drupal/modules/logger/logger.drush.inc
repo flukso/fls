@@ -82,6 +82,11 @@ function logger_drush_command() {
     ),
   );
 
+  $items['logger-master-tokens'] = array(
+    'callback'    => '_logger_master_token',
+    'description' => 'Create master tokens for NULL entries in logger_users',
+  );
+
   return $items;
 }
 
@@ -325,6 +330,31 @@ function _logger_tokens($meter = "", $permissions = 62) {
           drush_log(dt('Created an entry in {logger_tokens} with token: @token and meter: @meter', array('@token' => $token , '@meter' => $meter->meter)), 'ok');
         }
       }
+    }
+  }
+}
+
+/**
+ * Populates a master token for each entry in the {logger_users} table
+ * for which no token is available yet.
+ *
+ * @see logger_drush_command
+ */
+function _logger_master_token() {
+  $result = db_query("SELECT uid FROM {logger_users} WHERE token IS NULL");
+
+  while ($usr = db_fetch_object($result)) {
+    $token = md5(uniqid(rand(), TRUE));
+
+    $insert = db_query("UPDATE {logger_users} SET token = '%s' WHERE uid = %d", $token, $usr->uid);
+
+    if (!$insert) {
+      $error = 'Error creating master token for uid @uid';
+      drush_set_error('LOGGER_CREATE_MASTER_TOKEN_ENTRY', dt($error, array('@uid' => $usr->uid)));
+    }
+    else {
+      $msg = 'Created master token @token for uid @uid in {logger_users}';
+      drush_log(dt($msg, array('@token' => $token, '@uid' => $usr->uid)), 'ok'); 
     }
   }
 }
