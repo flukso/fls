@@ -108,11 +108,13 @@ is_auth_POST(ReqData, #state{rrdSensor = Sensor, digest = ClientDigest} = State)
     end.
 
 is_auth_GET(ReqData, #state{rrdSensor = RrdSensor, token = Token} = State) ->
-    {data, Result} = mysql:execute(pool, permissions, [RrdSensor, Token]),
+    {data, Permission} = mysql:execute(pool, permissions, [RrdSensor, Token]),
+    {data, Master} = mysql:execute(pool, master_token, [RrdSensor, Token]),
 
-    {case mysql:get_result_rows(Result) of
-        [[62]] -> true;
-        _Permission -> "Access refused" 
+    {case {mysql:get_result_rows(Permission), mysql:get_result_rows(Master)} of
+        {[[62]], []} -> true;
+        {[], [[_Token]]} -> true;
+        {[], []} -> "Access refused" 
     end,
     ReqData, State}.
 

@@ -32,6 +32,7 @@ ensure_started(App) ->
 mysql_prepare() ->
     mysql:prepare(watchdog, <<"INSERT INTO watchdog (uid, type, message, variables, severity, location, hostname, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?)">>),
     mysql:prepare(permissions, <<"SELECT permissions FROM logger_tokens WHERE meter = ? AND token = ?">>),
+    mysql:prepare(master_token, <<"SELECT token FROM (logger_meters lm INNER JOIN logger_users lu ON lm.uid = lu.uid) WHERE meter = ? AND token = ?">>),
     mysql:prepare(sensor_key, <<"SELECT sha FROM (logger_devices ld INNER JOIN logger_meters lm ON ld.device = lm.device) WHERE lm.meter = ?">>),
     mysql:prepare(sensor_props, <<"SELECT uid, device, night FROM logger_meters WHERE meter = ?">>),
     mysql:prepare(sensor_update, <<"UPDATE logger_meters SET access = ?, night = ?, value = ? WHERE meter = ?">>),
