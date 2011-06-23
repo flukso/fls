@@ -168,8 +168,15 @@ param_to_json(ReqData, #state{rrdSensor = RrdSensor} = State) ->
             _ -> list_to_integer(Counter)
         end],
 
-    JsonResponse = mochijson2:encode({struct, [{<<"lastupdate">>, LastUpdate}]}),
+    {data, Result} = mysql:execute(pool, sensor_param, [RrdSensor]),
+    [Params] = mysql:get_result_rows(Result),
+    FilteredParams = lists:map(fun undefined_to_null/1, Params),
 
+    FieldInfo = mysql:get_result_field_info(Result),
+    Fields = [Field || {_Table, Field, _Length, _Type} <- FieldInfo],
+    Objects = lists:append(lists:zip(Fields, FilteredParams), [{<<"lastupdate">>, LastUpdate}]),
+
+    JsonResponse = mochijson2:encode({struct, Objects}),
     {JsonResponse, ReqData, State}.
 
 process_post(ReqData, State) ->

@@ -35,6 +35,7 @@ mysql_prepare() ->
     mysql:prepare(master_token, <<"SELECT token FROM (logger_meters lm INNER JOIN logger_users lu ON lm.uid = lu.uid) WHERE meter = ? AND token = ?">>),
     mysql:prepare(sensor_key, <<"SELECT sha FROM (logger_devices ld INNER JOIN logger_meters lm ON ld.device = lm.device) WHERE lm.meter = ?">>),
     mysql:prepare(sensor_props, <<"SELECT uid, device, night FROM logger_meters WHERE meter = ?">>),
+    mysql:prepare(sensor_param, <<"SELECT access, type, function, class, voltage, current, phase, constant, enabled FROM logger_meters WHERE meter = ?">>),
     mysql:prepare(sensor_update, <<"UPDATE logger_meters SET access = ?, night = ?, value = ? WHERE meter = ?">>),
     mysql:prepare(sensor_config, <<"UPDATE logger_meters SET class = ?, type = ?, function = ?, voltage = ?, current = ?, phase = ?, constant = ?, enabled = ? WHERE meter = ?">>),
     mysql:prepare(timezone, <<"SELECT timezone FROM users WHERE uid = ?">>),

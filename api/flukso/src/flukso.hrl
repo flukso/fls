@@ -178,6 +178,11 @@ time_to_seconds(Time) ->
         {_Time, TimeSec} -> TimeSec
     end.
 
+undefined_to_null(undefined) ->
+    null;
+undefined_to_null(Field) ->
+    Field.
+
 % severity levels
 -define(EMERGENCY, 0).
 -define(ALERT,     1).
