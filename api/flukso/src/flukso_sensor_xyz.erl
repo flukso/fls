@@ -24,7 +24,8 @@
          malformed_request/2,
          is_authorized/2,
          content_types_provided/2,
-         to_json/2,
+         timeseries_to_json/2,
+         param_to_json/2,
          process_post/2]).
 
 -include_lib("webmachine/include/webmachine.hrl").
@@ -67,6 +68,7 @@ malformed_GET(ReqData, _State) ->
     {RrdFactor, ValidUnit} = check_unit(wrq:get_qs_value("unit", ReqData)),
     {Token, ValidToken} = check_token(wrq:get_req_header("X-Token", ReqData), wrq:get_qs_value("token", ReqData)),
     {JsonpCallback, ValidJsonpCallback} = check_jsonp_callback(wrq:get_qs_value("jsonp_callback", ReqData)),
+    {Param, ValidParam} = check_param(wrq:get_qs_value("param", ReqData)),
 
     State = #state{rrdSensor = RrdSensor, 
                    rrdStart = RrdStart,
@@ -74,13 +76,19 @@ malformed_GET(ReqData, _State) ->
                    rrdResolution = RrdResolution,
                    rrdFactor = RrdFactor,
                    token = Token,
-                   jsonpCallback = JsonpCallback},
+                   jsonpCallback = JsonpCallback,
+                   param = Param},
 
-    {case {ValidVersion, ValidSensor, ValidTime, ValidUnit, ValidToken, ValidJsonpCallback}  of
-	{true, true, true, true, true, true} -> false;
-	_ -> true
-     end, 
-    ReqData, State}.
+    case {ValidVersion, ValidSensor, ValidToken, ValidTime, ValidUnit, ValidJsonpCallback, ValidParam}  of
+        {true, true, true,  true,  true, true, false} ->  % GET timeseries
+            EndState = State#state{return = timeseries},
+            {false, ReqData, EndState};
+        {true, true, true, false, false,    _,  true} ->  % GET param
+            EndState = State#state{return = param},
+            {false, ReqData, EndState};
+	_ ->
+            {true, ReqData, State}
+    end. 
 
 is_authorized(ReqData, State) ->
     case wrq:method(ReqData) of
@@ -118,10 +126,14 @@ is_auth_GET(ReqData, #state{rrdSensor = RrdSensor, token = Token} = State) ->
     end,
     ReqData, State}.
 
-content_types_provided(ReqData, State) -> 
-        {[{"application/json", to_json}], ReqData, State}.
+content_types_provided(ReqData, #state{return = Return} = State) -> 
+        {case Return of
+             timeseries -> [{"application/json", timeseries_to_json}];
+             param -> [{"application/json", param_to_json}]
+         end,
+        ReqData, State}.
 
-to_json(ReqData, #state{rrdSensor = RrdSensor, rrdStart = RrdStart, rrdEnd = RrdEnd, rrdResolution = RrdResolution, rrdFactor = RrdFactor, jsonpCallback = JsonpCallback} = State) -> 
+timeseries_to_json(ReqData, #state{rrdSensor = RrdSensor, rrdStart = RrdStart, rrdEnd = RrdEnd, rrdResolution = RrdResolution, rrdFactor = RrdFactor, jsonpCallback = JsonpCallback} = State) -> 
     case wrq:get_qs_value("interval", ReqData) of
         "night"   -> Path = ?NIGHT_PATH;
         _Interval -> Path = ?BASE_PATH
@@ -145,6 +157,20 @@ to_json(ReqData, #state{rrdSensor = RrdSensor, rrdStart = RrdStart, rrdEnd = Rrd
             {{halt, 404}, ReqData, State}
     end.
 
+param_to_json(ReqData, #state{rrdSensor = RrdSensor} = State) ->
+    Path = [?BASE_PATH, [RrdSensor|".rrd"]],
+    {ok, [_, _, [UpdateString]]} = erlrrd:lastupdate(Path),
+    [Timestamp, Counter] = re:split(UpdateString, "[:][ ]", [{return,list}]),
+    
+    LastUpdate = [list_to_integer(Timestamp),
+        case Counter of
+            "UNKN" -> <<"NaN">>;
+            _ -> list_to_integer(Counter)
+        end],
+
+    JsonResponse = mochijson2:encode({struct, [{<<"lastupdate">>, LastUpdate}]}),
+
+    {JsonResponse, ReqData, State}.
 
 process_post(ReqData, State) ->
     {struct, JsonData} = mochijson2:decode(wrq:req_body(ReqData)),

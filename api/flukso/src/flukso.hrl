@@ -36,7 +36,9 @@
          token,
          device,
          digest,
-         jsonpCallback}).
+         jsonpCallback,
+         param,
+         return}).
 
 %% checks
 check_version(Version) ->
@@ -131,6 +133,13 @@ check_jsonp_callback(JsonpCallback) ->
         {match, [{0, Length}]} -> {JsonpCallback, true};
         _ -> {false, false}
     end.
+
+check_param(undefined) ->
+    {undefined, false};
+check_param("all") ->
+    {"all", true};
+check_param(_) ->
+    {false, false}.
 
 %% helper functions
 unix_time() ->
