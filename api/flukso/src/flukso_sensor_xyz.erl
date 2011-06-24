@@ -127,10 +127,12 @@ is_auth_GET(ReqData, #state{rrdSensor = RrdSensor, token = Token} = State) ->
     ReqData, State}.
 
 content_types_provided(ReqData, #state{return = Return} = State) -> 
-        {case Return of
-             timeseries -> [{"application/json", timeseries_to_json}];
-             param -> [{"application/json", param_to_json}]
-         end,
+        {[{"application/json",
+           case Return of
+               timeseries -> timeseries_to_json;
+               param -> param_to_json;
+               _ -> dummy_callback  % for POST
+           end}],
         ReqData, State}.
 
 timeseries_to_json(ReqData, #state{rrdSensor = RrdSensor, rrdStart = RrdStart, rrdEnd = RrdEnd, rrdResolution = RrdResolution, rrdFactor = RrdFactor, jsonpCallback = JsonpCallback} = State) -> 
