@@ -18,6 +18,7 @@
 
 -define(BASE_PATH, "var/data/base/").
 -define(NIGHT_PATH, "var/data/night/").
+-define(SYSLOG_PATH, "var/data/syslog/").
 
 -define(MINUTE,     60).
 -define(QUARTER,   900).

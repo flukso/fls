@@ -95,13 +95,16 @@ process_post(ReqData, #state{device = Device} = State) ->
 
     {struct, JsonData} = mochijson2:decode(wrq:req_body(ReqData)),
 
-    Version = proplists:get_value(<<"version">>, JsonData),
-    Reset = proplists:get_value(<<"reset">>, JsonData),
-    Uptime = proplists:get_value(<<"uptime">>, JsonData),
-    Memtotal = proplists:get_value(<<"memtotal">>, JsonData),
-    Memcached = proplists:get_value(<<"memcached">>, JsonData),
+    Version    = proplists:get_value(<<"version">>   , JsonData),
+    Reset      = proplists:get_value(<<"reset">>     , JsonData),
+    Uptime     = proplists:get_value(<<"uptime">>    , JsonData),
+    Memtotal   = proplists:get_value(<<"memtotal">>  , JsonData),
+    Memcached  = proplists:get_value(<<"memcached">> , JsonData),
     Membuffers = proplists:get_value(<<"membuffers">>, JsonData),
-    Memfree = proplists:get_value(<<"memfree">>, JsonData),
+    Memfree    = proplists:get_value(<<"memfree">>   , JsonData),
+    SyslogB64  = proplists:get_value(<<"syslog">>    , JsonData),
+
+    store_syslog(Device, base64:decode(SyslogB64)),
 
     NewResets = Resets + Reset,
 
@@ -120,3 +123,6 @@ process_post(ReqData, #state{device = Device} = State) ->
     EmbodiedReqData = wrq:set_resp_body(JsonResponse, DigestedReqData),
 
     {true , EmbodiedReqData, State}.
+
+store_syslog(Device, Syslog) ->
+    file:write_file([?SYSLOG_PATH, [Device | ".gz"]], Syslog).
