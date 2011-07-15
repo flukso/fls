@@ -104,7 +104,7 @@ process_post(ReqData, #state{device = Device} = State) ->
     Memfree    = proplists:get_value(<<"memfree">>   , JsonData),
     SyslogB64  = proplists:get_value(<<"syslog">>    , JsonData),
 
-    store_syslog(Device, base64:decode(SyslogB64)),
+    store_syslog(Device, SyslogB64),
 
     NewResets = Resets + Reset,
 
@@ -124,5 +124,8 @@ process_post(ReqData, #state{device = Device} = State) ->
 
     {true , EmbodiedReqData, State}.
 
-store_syslog(Device, Syslog) ->
-    file:write_file([?SYSLOG_PATH, [Device | ".gz"]], Syslog).
+store_syslog(Device, SyslogB64) when is_binary(SyslogB64) ->
+    Syslog = base64:decode(SyslogB64),
+    file:write_file([?SYSLOG_PATH, [Device | ".gz"]], Syslog);
+store_syslog(_Device, _SyslogB64) ->
+    true.
