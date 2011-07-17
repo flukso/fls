@@ -370,15 +370,15 @@ function _logger_dashboard($type, $function, $interval) {
       switch ($settings_me->water_unit) {
         case 'lpmin':
 	  $unit = 'liter/min';
-          $factor = 6; // 1 dl/s = 6 l/min
+          $factor = 60; // 1 l/s = 60 l/min
           break;
         case 'lpday':
           $unit = 'liter/day';
-          $factor = 8640; // 1 dl/s = 8640 l/day
+          $factor = 86400; // 1 l/s = 86400 l/day
           break;
         case 'm3pyear':
           $unit = 'm3/year';
-          $factor = 3154; // 1 dl/s = 3153600 l/year
+          $factor = 31540; // 1 l/s = 31536000 l/year
           break;
       }
   }
