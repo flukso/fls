@@ -130,7 +130,7 @@ function _logger_measurement_add($auth, $logs) {
         }
       }
     }
-    return $command; //using $command for testing purposes, replace by $info afterwards
+    return $info;
   }
   else
     return xmlrpc_error(-31000, t('Authentication failed.'));
