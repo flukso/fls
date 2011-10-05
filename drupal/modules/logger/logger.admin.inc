@@ -153,21 +153,25 @@ function theme_logger_account_devices_list($items) {
  * @param $type
  *   String defining the sensor type
  */
-function _logger_account_sensors($type = 'electricity') {
+function _logger_account_sensors() {
   global $user;
   $rows = array();
 
-  $result = db_query("SELECT lm.meter, lm.function, lt.token, lt.permissions 
+  $result = db_query("SELECT lm.meter, lm.type, lm.function, lt.token, lt.permissions 
                       FROM {logger_meters} lm
-                      INNER JOIN {logger_tokens} lt ON lm.meter = lt.meter
-                      WHERE lm.uid = %d AND lm.type = '%s' AND lm.enabled = %d
-                      ORDER BY lm.function", $user->uid, $type, 1);
+                      INNER JOIN {logger_tokens} lt
+                        ON lm.meter = lt.meter
+                      WHERE lm.uid = %d
+                        AND (lm.type = '%s' OR lm.type = '%s' OR lm.type = '%s')
+                        AND lm.enabled = %d
+                      ORDER BY lm.function, lm.type",
+                      $user->uid, 'electricity', 'gas', 'water', 1);
 
   while ($sensor = db_fetch_object($result)) {
     $row = array();
     $row[] = $sensor->meter;
     $row[] = $sensor->token;
-    $row[] = $type;
+    $row[] = $sensor->type;
     $row[] = $sensor->function;
 
     $rows[] = $row;
