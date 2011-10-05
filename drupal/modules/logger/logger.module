@@ -174,15 +174,53 @@ function logger_menu() {
     'weight'              => 4,
   );
 
-/**
-  $items['logger/heating'] = array(
-    'title'               => 'heating',
+  $items['logger/gas'] = array(
+    'title'               => 'gas',
     'page callback'       => '_logger_dashboard',
-    'page arguments'      => array('heating', 'main', 'hour'),
+    'page arguments'      => array('gas', 'main', 'day'),
     'access callback'     => TRUE,
     'type'                => MENU_LOCAL_TASK,
   );
-**/
+  $items['logger/gas/hour'] = array(
+    'title'               => 'hour',
+    'page callback'       => '_logger_dashboard',
+    'page arguments'      => array('gas', 'main', 'hour'),
+    'access callback'     => TRUE,
+    'type'                => MENU_LOCAL_TASK,
+    'weight'              => 0,
+  );
+  $items['logger/gas/day'] = array(
+    'title'               => 'day',
+    'page callback'       => '_logger_dashboard',
+    'page arguments'      => array('gas', 'main', 'day'),
+    'access callback'     => TRUE,
+    'type'                => MENU_DEFAULT_LOCAL_TASK,
+    'weight'              => 1,
+  );
+  $items['logger/gas/month'] = array(
+    'title'               => 'month',
+    'page callback'       => '_logger_dashboard',
+    'page arguments'      => array('gas', 'main', 'month'),
+    'access callback'     => TRUE,
+    'type'                => MENU_LOCAL_TASK,
+    'weight'              => 2,
+  );
+  $items['logger/gas/year'] = array(
+    'title'               => 'year',
+    'page callback'       => '_logger_dashboard',
+    'page arguments'      => array('gas', 'main', 'year'),
+    'access callback'     => TRUE,
+    'type'                => MENU_LOCAL_TASK,
+    'weight'              => 3,
+  );
+  $items['logger/gas/night'] = array(
+    'title'               => 'night',
+    'page callback'       => '_logger_dashboard',
+    'page arguments'      => array('gas', 'main', 'night'),
+    'access callback'     => TRUE,
+    'type'                => MENU_LOCAL_TASK,
+    'weight'              => 4,
+  );
 
   $items['logger/add'] = array(
     'title'               => 'add this user to the chart',
@@ -310,7 +348,7 @@ function _logger_dashboard($type, $function, $interval) {
   }
   $end = ((int) (time() / $resolution)) * $resolution;
 
-  $settings_me = db_fetch_object(db_query("SELECT private, electricity_unit, water_unit
+  $settings_me = db_fetch_object(db_query("SELECT private, electricity_unit, water_unit, gas_unit
                                            FROM {logger_users}
                                            WHERE uid = %d", $user->uid));
 
@@ -368,6 +406,23 @@ function _logger_dashboard($type, $function, $interval) {
 
     case 'water':
       switch ($settings_me->water_unit) {
+        case 'lpmin':
+	  $unit = 'liter/min';
+          $factor = 60; // 1 l/s = 60 l/min
+          break;
+        case 'lpday':
+          $unit = 'liter/day';
+          $factor = 86400; // 1 l/s = 86400 l/day
+          break;
+        case 'm3pyear':
+          $unit = 'm3/year';
+          $factor = 31540; // 1 l/s = 31536000 l/year
+          break;
+      }
+      break;
+
+    case 'gas':
+      switch ($settings_me->gas_unit) {
         case 'lpmin':
 	  $unit = 'liter/min';
           $factor = 60; // 1 l/s = 60 l/min
@@ -541,7 +596,7 @@ function _logger_remove($rid) {
   drupal_goto($destination);
 }
 
-function _logger_unit($unit) {
+function _logger_unit($type, $unit) {
   global $user;
 
   switch($unit) {
@@ -558,9 +613,17 @@ function _logger_unit($unit) {
     case 'lpmin':
     case 'lpday':
     case 'm3pyear':
-      db_query("UPDATE {logger_users}
-                SET water_unit = '%s'
-                WHERE uid = %d", $unit, $user->uid);
+      if ($type == 'water') {
+        db_query("UPDATE {logger_users}
+                  SET water_unit = '%s'
+                  WHERE uid = %d", $unit, $user->uid);
+      }
+      elseif ($type == 'gas') {
+        db_query("UPDATE {logger_users}
+                  SET gas_unit = '%s'
+                  WHERE uid = %d", $unit, $user->uid);
+      }
+
       break;
   }
 
@@ -693,10 +756,10 @@ function logger_block($op = 'list', $delta = 0, $edit = array()) {
                                     WHERE uid = %d", $user->uid));
 
         $items = array();
-        $items[0] = l('watt', 'logger/unit/watt', array('attributes' => array('title' => "switch to watt"), 'query' => $destination, 'alias' => TRUE));
-        $items[1] = l('kWh/year', 'logger/unit/kwhpyear', array('attributes' => array('title' => "switch to kWh/year"), 'query' => $destination, 'alias' => TRUE));
-        $items[2] = l('euro/year [@ 0.18eur/kWh]', 'logger/unit/eurpyear', array('attributes' => array('title' => "switch to euro/year"), 'query' => $destination, 'alias' => TRUE));
-        $items[3] = l('aud/year [@ 0.19aud/kWh]', 'logger/unit/audpyear', array('attributes' => array('title' => "switch to aud/year"), 'query' => $destination, 'alias' => TRUE));
+        $items[0] = l('watt', 'logger/unit/electricity/watt', array('attributes' => array('title' => "switch to watt"), 'query' => $destination, 'alias' => TRUE));
+        $items[1] = l('kWh/year', 'logger/unit/electricity/kwhpyear', array('attributes' => array('title' => "switch to kWh/year"), 'query' => $destination, 'alias' => TRUE));
+        $items[2] = l('euro/year [@ 0.18eur/kWh]', 'logger/unit/electricity/eurpyear', array('attributes' => array('title' => "switch to euro/year"), 'query' => $destination, 'alias' => TRUE));
+        $items[3] = l('aud/year [@ 0.19aud/kWh]', 'logger/unit/electricity/audpyear', array('attributes' => array('title' => "switch to aud/year"), 'query' => $destination, 'alias' => TRUE));
 
         // 'unlink' the currently selected unit option
         switch ($unit) {
@@ -717,15 +780,41 @@ function logger_block($op = 'list', $delta = 0, $edit = array()) {
         $block['content'] = theme('logger_item_list', $items);
       }
 
-      elseif ($delta == 'unit' && user_access('logger') && strrpos(' ' . $_GET['q'] . '/electricity', 'logger/water')) {
+      elseif ($delta == 'unit' && user_access('logger') && strrpos(' ' . $_GET['q'], 'logger/water')) {
         $unit = db_result(db_query("SELECT water_unit
                                     FROM {logger_users}
                                     WHERE uid = %d", $user->uid));
 
         $items = array();
-        $items[0] = l('l/min', 'logger/unit/lpmin', array('attributes' => array('title' => "switch to l/min"), 'query' => $destination, 'alias' => TRUE));
-        $items[1] = l('l/day', 'logger/unit/lpday', array('attributes' => array('title' => "switch to l/day"), 'query' => $destination, 'alias' => TRUE));
-        $items[2] = l('m3/year', 'logger/unit/m3pyear', array('attributes' => array('title' => "switch to m3/year"), 'query' => $destination, 'alias' => TRUE));
+        $items[0] = l('l/min', 'logger/unit/water/lpmin', array('attributes' => array('title' => "switch to l/min"), 'query' => $destination, 'alias' => TRUE));
+        $items[1] = l('l/day', 'logger/unit/water/lpday', array('attributes' => array('title' => "switch to l/day"), 'query' => $destination, 'alias' => TRUE));
+        $items[2] = l('m3/year', 'logger/unit/water/m3pyear', array('attributes' => array('title' => "switch to m3/year"), 'query' => $destination, 'alias' => TRUE));
+
+        // 'unlink' the currently selected unit option
+        switch ($unit) {
+          case 'lpmin':
+            $items[0] = 'l/min';
+            break;
+          case 'lpday':
+            $items[1] = 'l/day';
+            break;
+          case 'm3pyear':
+            $items[2] = 'm3/year';
+            break;
+        }
+        $block['subject'] = t('Unit');
+        $block['content'] = theme('logger_item_list', $items);
+      }
+
+      elseif ($delta == 'unit' && user_access('logger') && strrpos(' ' . $_GET['q'], 'logger/gas')) {
+        $unit = db_result(db_query("SELECT gas_unit
+                                    FROM {logger_users}
+                                    WHERE uid = %d", $user->uid));
+
+        $items = array();
+        $items[0] = l('l/min', 'logger/unit/gas/lpmin', array('attributes' => array('title' => "switch to l/min"), 'query' => $destination, 'alias' => TRUE));
+        $items[1] = l('l/day', 'logger/unit/gas/lpday', array('attributes' => array('title' => "switch to l/day"), 'query' => $destination, 'alias' => TRUE));
+        $items[2] = l('m3/year', 'logger/unit/gas/m3pyear', array('attributes' => array('title' => "switch to m3/year"), 'query' => $destination, 'alias' => TRUE));
 
         // 'unlink' the currently selected unit option
         switch ($unit) {
@@ -847,8 +936,11 @@ function _logger_sensors_form() {
   if (strrpos(' ' . $_GET['q'] . '/electricity', 'logger/electricity')) {
     $type = 'electricity';
   }
-  else {
+  elseif (strrpos(' ' . $_GET['q'], 'logger/water')) {
     $type = 'water';
+  }
+  elseif (strrpos(' ' . $_GET['q'], 'logger/gas')) {
+    $type = 'gas';
   }
 
   $sensors = db_query("SELECT meter, access, function, value, chart 
