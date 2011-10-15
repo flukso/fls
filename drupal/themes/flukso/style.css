@@ -420,7 +420,7 @@ a.read-more {
  * --------------------------------------------------------------------- */
 table {
 	border-collapse: separate;
-	width: 660px;
+	width: 600px;
 	font-size: 1em;
 }
 
@@ -680,3 +680,26 @@ div.geshifilter {
 	background-color: #f3f3f3;
 }
 
+/* ------------------------------------------------------------------------
+ * Sexy checkout buttons
+ * --------------------------------------------------------------------- */
+
+#edit-checkout, #edit-continue,
+div.add-to-cart input[type=submit],
+input#edit-checkout,
+#uc-paypal-wps-form #edit-submit,
+#uc-cart-checkout-review-form #edit-submit {
+	color: #fff;
+	background: #7E0303 url('images/bgrad.png') repeat-x top center;
+	border: 1px solid #ff2400;
+	font-weight: bold;
+	cursor: pointer;
+}
+
+#edit-checkout:hover, #edit-continue:hover,
+div.add-to-cart input[type=submit]:hover,
+input#edit-checkout:hover,
+#uc-paypal-wps-form #edit-submit:hover,
+#uc-cart-checkout-review-form #edit-submit:hover {
+	background: #7E0303 url('images/bgrad_hover.png') repeat-x top center;
+}
