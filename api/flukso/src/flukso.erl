@@ -29,19 +29,6 @@ ensure_started(App) ->
 	    ok
     end.
 
-mysql_prepare() ->
-    mysql:prepare(watchdog, <<"INSERT INTO watchdog (uid, type, message, variables, severity, location, hostname, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?)">>),
-    mysql:prepare(permissions, <<"SELECT permissions FROM logger_tokens WHERE meter = ? AND token = ?">>),
-    mysql:prepare(master_token, <<"SELECT token FROM (logger_meters lm INNER JOIN logger_users lu ON lm.uid = lu.uid) WHERE meter = ? AND token = ?">>),
-    mysql:prepare(sensor_key, <<"SELECT sha FROM (logger_devices ld INNER JOIN logger_meters lm ON ld.device = lm.device) WHERE lm.meter = ?">>),
-    mysql:prepare(sensor_props, <<"SELECT uid, device, night FROM logger_meters WHERE meter = ?">>),
-    mysql:prepare(sensor_param, <<"SELECT access, type, function, class, voltage, current, phase, constant, enabled FROM logger_meters WHERE meter = ?">>),
-    mysql:prepare(sensor_update, <<"UPDATE logger_meters SET access = ?, night = ?, value = ? WHERE meter = ?">>),
-    mysql:prepare(sensor_config, <<"UPDATE logger_meters SET class = ?, type = ?, function = ?, voltage = ?, current = ?, phase = ?, constant = ?, enabled = ? WHERE meter = ?">>),
-    mysql:prepare(timezone, <<"SELECT timezone FROM users WHERE uid = ?">>),
-    mysql:prepare(device_key, <<"SELECT sha FROM logger_devices WHERE device = ?">>),
-    mysql:prepare(device_props, <<"SELECT sha, upgrade, resets FROM logger_devices WHERE device = ?">>),
-    mysql:prepare(device_update, <<"UPDATE logger_devices SET access = ?, version = ?, upgrade = ?, resets = ?, uptime = ?, memtotal = ?, memfree = ?, memcached = ?, membuffers = ? WHERE device = ?">>).
 
 %% @spec start_link() -> {ok,Pid::pid()}
 %% @doc Starts the app for inclusion in a supervisor tree
@@ -50,7 +37,7 @@ start_link() ->
     ensure_started(crypto),
     ensure_started(erlrrd),
     ensure_started(mysql),
-    mysql_prepare(),
+    sql:prepare(),
     ensure_started(webmachine),
     flukso_sup:start_link().
 
@@ -61,7 +48,7 @@ start() ->
     ensure_started(crypto),
     ensure_started(erlrrd),
     ensure_started(mysql),
-    mysql_prepare(),
+    sql:prepare(),
     ensure_started(webmachine),
     application:start(flukso).
 
