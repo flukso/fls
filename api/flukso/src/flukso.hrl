@@ -16,8 +16,6 @@
 %%%
 %% @doc Common record definitions and helper functions for the Flukso API. 
 
--define(BASE_PATH, "var/data/base/").
--define(NIGHT_PATH, "var/data/night/").
 -define(SYSLOG_PATH, "var/data/syslog/").
 
 -define(MINUTE,     60).

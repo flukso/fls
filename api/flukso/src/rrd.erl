@@ -21,23 +21,52 @@
 
 -export([fetch/4,
          fetch/5,
+
          update/2,
-         update/3]).
+         update/3,
+
+         lastupdate/1,
+         lastupdate/2]).
 
 -define(RRD_BASE_PATH, "var/data/base/").
 -define(RRD_NIGHT_PATH, "var/data/night/").
 
 
 fetch(Sensor, Start, End, Resolution) ->
-    fetch(?RRD_BASE_PATH, Sensor, Start, End, Resolution).
+    fetch(base, Sensor, Start, End, Resolution).
 
-fetch(Path, Sensor, Start, End, Resolution) ->
-    erlrrd:fetch(erlrrd:c([[Path, [Sensor|".rrd"]], "AVERAGE",
+fetch(Rrd, Sensor, Start, End, Resolution) ->
+    erlrrd:fetch(erlrrd:c([path(Rrd, Sensor), "AVERAGE",
                            ["-s ", Start], ["-e ", End], ["-r ", Resolution]])).
 
 
 update(Sensor, Data) ->
-    update(?RRD_BASE_PATH, Sensor, Data).
+    update(base, Sensor, Data).
 
-update(Path, Sensor, Data) ->
-    erlrrd:update([Path, [Sensor|".rrd"], " ", Data]).
+update(Rrd, Sensor, Data) ->
+    erlrrd:update([path(Rrd, Sensor), " ", Data]).
+
+
+lastupdate(Sensor) ->
+    lastupdate(base, Sensor).
+
+lastupdate(Rrd, Sensor) ->
+    {ok, [_, _, [UpdateString]]} = erlrrd:lastupdate(path(Rrd, Sensor)),
+    [Timestamp, Counter] = re:split(UpdateString, "[:][ ]", [{return,list}]),
+    
+    [list_to_integer(Timestamp),
+        case Counter of
+            "UNKN" -> <<"NaN">>;
+            _ -> list_to_integer(Counter)
+        end].
+
+
+% helper functions
+path(Rrd, Sensor) ->
+    case Rrd of
+        base  -> Path = ?RRD_BASE_PATH;
+        night -> Path = ?RRD_NIGHT_PATH
+    end,
+
+    [Path, [Sensor|".rrd"]].
+    

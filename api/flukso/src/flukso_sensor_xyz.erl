@@ -137,13 +137,13 @@ content_types_provided(ReqData, #state{return = Return} = State) ->
 
 timeseries_to_json(ReqData, #state{rrdSensor = RrdSensor, rrdStart = RrdStart, rrdEnd = RrdEnd, rrdResolution = RrdResolution, rrdFactor = RrdFactor, jsonpCallback = JsonpCallback} = State) -> 
     case wrq:get_qs_value("interval", ReqData) of
-        "night"   -> Path = ?NIGHT_PATH;
-        _Interval -> Path = ?BASE_PATH
+        "night"   -> Rrd = night;
+        _Interval -> Rrd = base
     end,
 
 %% debugging: io:format("~s~n", [erlrrd:c([[Path, [RrdSensor|".rrd"]], "AVERAGE", ["-s ", RrdStart], ["-e ", RrdEnd], ["-r ", RrdResolution]])]),
 
-    case rrd:fetch(Path, RrdSensor, RrdStart, RrdEnd, RrdResolution) of
+    case rrd:fetch(Rrd, RrdSensor, RrdStart, RrdEnd, RrdResolution) of
         {ok, Response} ->
             Filtered = [re:split(X, "[:][ ]", [{return,list}]) || [X] <- Response, string:str(X, ":") == 11],
             Datapoints = [[list_to_integer(X), round(list_to_float(Y) * RrdFactor)] || [X, Y] <- Filtered, string:len(Y) /= 3],
@@ -160,15 +160,7 @@ timeseries_to_json(ReqData, #state{rrdSensor = RrdSensor, rrdStart = RrdStart, r
     end.
 
 param_to_json(ReqData, #state{rrdSensor = RrdSensor} = State) ->
-    Path = [?BASE_PATH, [RrdSensor|".rrd"]],
-    {ok, [_, _, [UpdateString]]} = erlrrd:lastupdate(Path),
-    [Timestamp, Counter] = re:split(UpdateString, "[:][ ]", [{return,list}]),
-    
-    LastUpdate = [list_to_integer(Timestamp),
-        case Counter of
-            "UNKN" -> <<"NaN">>;
-            _ -> list_to_integer(Counter)
-        end],
+    LastUpdate = rrd:lastupdate(RrdSensor),
 
     {data, Result} = mysql:execute(pool, sensor_param, [RrdSensor]),
     [Params] = mysql:get_result_rows(Result),
@@ -249,7 +241,7 @@ update_night(RrdSensor, Uid, Midnight, LastTimestamp, ReqData) when LastTimestam
             NightAverage = lists:foldl(fun(X, Sum) -> X / 12 + Sum end, 0.0, Datapoints),
             RrdData = [integer_to_list(LastMidnight + 5 * ?HOUR), ":", float_to_list(NightAverage)],
 
-            case rrd:update(?NIGHT_PATH, RrdSensor, RrdData) of
+            case rrd:update(night, RrdSensor, RrdData) of
                 {ok, _Response} ->
                      logger(Uid, <<"rrdupdate.night">>, <<"Successful update of night rrd.">>, ?INFO, ReqData);
 
