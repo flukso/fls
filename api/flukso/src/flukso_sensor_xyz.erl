@@ -48,11 +48,16 @@ malformed_request(ReqData, State) ->
     end.
 
 malformed_POST(ReqData, _State) ->
-    {_Version, ValidVersion} = check_version(wrq:get_req_header("X-Version", ReqData)),
-    {RrdSensor, ValidSensor} = check_sensor(wrq:path_info(sensor, ReqData)),
-    {Digest, ValidDigest} = check_digest(wrq:get_req_header("X-Digest", ReqData)),
+    {_Version, ValidVersion} =
+        check_version(wrq:get_req_header("X-Version", ReqData)),
 
-    State = #state{rrdSensor = RrdSensor,
+    {Sensor, ValidSensor} =
+        check_sensor(wrq:path_info(sensor, ReqData)),
+
+    {Digest, ValidDigest} =
+        check_digest(wrq:get_req_header("X-Digest", ReqData)),
+
+    State = #state{sensor = Sensor,
                    digest = Digest},
 
     {case {ValidVersion, ValidSensor, ValidDigest} of
@@ -62,24 +67,43 @@ malformed_POST(ReqData, _State) ->
     ReqData, State}.
 
 malformed_GET(ReqData, _State) ->
-    {_Version, ValidVersion} = check_version(wrq:get_req_header("X-Version", ReqData), wrq:get_qs_value("version", ReqData)),
-    {RrdSensor, ValidSensor} = check_sensor(wrq:path_info(sensor, ReqData)),
-    {RrdStart, RrdEnd, RrdResolution, ValidTime} = check_time(wrq:get_qs_value("interval", ReqData), wrq:get_qs_value("start", ReqData), wrq:get_qs_value("end", ReqData), wrq:get_qs_value("resolution", ReqData)),
-    {RrdFactor, ValidUnit} = check_unit(wrq:get_qs_value("unit", ReqData)),
-    {Token, ValidToken} = check_token(wrq:get_req_header("X-Token", ReqData), wrq:get_qs_value("token", ReqData)),
-    {JsonpCallback, ValidJsonpCallback} = check_jsonp_callback(wrq:get_qs_value("jsonp_callback", ReqData)),
-    {Param, ValidParam} = check_param(wrq:get_qs_value("param", ReqData)),
+    {_Version, ValidVersion} =
+        check_version(wrq:get_req_header("X-Version", ReqData),
+                      wrq:get_qs_value("version", ReqData)),
 
-    State = #state{rrdSensor = RrdSensor, 
-                   rrdStart = RrdStart,
-                   rrdEnd = RrdEnd,
-                   rrdResolution = RrdResolution,
-                   rrdFactor = RrdFactor,
-                   token = Token,
-                   jsonpCallback = JsonpCallback,
-                   param = Param},
+    {Sensor, ValidSensor} =
+        check_sensor(wrq:path_info(sensor, ReqData)),
 
-    case {ValidVersion, ValidSensor, ValidToken, ValidTime, ValidUnit, ValidJsonpCallback, ValidParam}  of
+    {Start, End, Resolution, ValidTime} =
+        check_time(wrq:get_qs_value("interval", ReqData),
+                   wrq:get_qs_value("start", ReqData),
+                   wrq:get_qs_value("end", ReqData),
+                   wrq:get_qs_value("resolution", ReqData)),
+
+    {Factor, ValidUnit} =
+        check_unit(wrq:get_qs_value("unit", ReqData)),
+
+    {Token, ValidToken} =
+        check_token(wrq:get_req_header("X-Token", ReqData),
+                    wrq:get_qs_value("token", ReqData)),
+
+    {Jsonp, ValidJsonp} =
+        check_jsonp(wrq:get_qs_value("jsonp", ReqData)),
+
+    {Param, ValidParam} =
+        check_param(wrq:get_qs_value("param", ReqData)),
+
+    State = #state{sensor     = Sensor, 
+                   start      = Start,
+                   'end'      = End,
+                   resolution = Resolution,
+                   factor     = Factor,
+                   token      = Token,
+                   jsonp      = Jsonp,
+                   param      = Param},
+
+    case {ValidVersion, ValidSensor, ValidToken, ValidTime,
+                         ValidUnit, ValidJsonp, ValidParam}  of
         {true, true, true,  true,  true, true, false} ->  % GET timeseries
             EndState = State#state{return = timeseries},
             {false, ReqData, EndState};
@@ -96,7 +120,7 @@ is_authorized(ReqData, State) ->
         'GET'  -> is_auth_GET(ReqData, State)
     end.
 
-is_auth_POST(ReqData, #state{rrdSensor = Sensor, digest = ClientDigest} = State) ->
+is_auth_POST(ReqData, #state{sensor = Sensor, digest = ClientDigest} = State) ->
     {data, Result} = mysql:execute(pool, sensor_key, [Sensor]),
 
     case mysql:get_result_rows(Result) of
@@ -115,9 +139,9 @@ is_auth_POST(ReqData, #state{rrdSensor = Sensor, digest = ClientDigest} = State)
             {"No proper provisioning for this sensor", ReqData, State}
     end.
 
-is_auth_GET(ReqData, #state{rrdSensor = RrdSensor, token = Token} = State) ->
-    {data, Permission} = mysql:execute(pool, permissions, [RrdSensor, Token]),
-    {data, Master} = mysql:execute(pool, master_token, [RrdSensor, Token]),
+is_auth_GET(ReqData, #state{sensor = Sensor, token = Token} = State) ->
+    {data, Permission} = mysql:execute(pool, permissions, [Sensor, Token]),
+    {data, Master} = mysql:execute(pool, master_token, [Sensor, Token]),
 
     {case {mysql:get_result_rows(Permission), mysql:get_result_rows(Master)} of
         {[[62]], []} -> true;
@@ -135,23 +159,33 @@ content_types_provided(ReqData, #state{return = Return} = State) ->
            end}],
         ReqData, State}.
 
-timeseries_to_json(ReqData, #state{rrdSensor = RrdSensor, rrdStart = RrdStart, rrdEnd = RrdEnd, rrdResolution = RrdResolution, rrdFactor = RrdFactor, jsonpCallback = JsonpCallback} = State) -> 
+timeseries_to_json(ReqData, #state{sensor     = Sensor,
+                                   start      = Start,
+                                   'end'      = End,
+                                   resolution = Resolution,
+                                   factor     = Factor,
+                                   jsonp      = Jsonp} = State) -> 
     case wrq:get_qs_value("interval", ReqData) of
         "night"   -> Rrd = night;
         _Interval -> Rrd = base
     end,
 
-%% debugging: io:format("~s~n", [erlrrd:c([[Path, [RrdSensor|".rrd"]], "AVERAGE", ["-s ", RrdStart], ["-e ", RrdEnd], ["-r ", RrdResolution]])]),
-
-    case rrd:fetch(Rrd, RrdSensor, RrdStart, RrdEnd, RrdResolution) of
+    case rrd:fetch(Rrd, Sensor, Start, End, Resolution) of
         {ok, Response} ->
-            Filtered = [re:split(X, "[:][ ]", [{return,list}]) || [X] <- Response, string:str(X, ":") == 11],
-            Datapoints = [[list_to_integer(X), round(list_to_float(Y) * RrdFactor)] || [X, Y] <- Filtered, string:len(Y) /= 3],
-            Nans = [[list_to_integer(X), list_to_binary(Y)] || [X, Y] <- Filtered, string:len(Y) == 3],
+            Filtered = [re:split(X, "[:][ ]", [{return,list}])
+                    || [X] <- Response, string:str(X, ":") == 11],
+
+            Datapoints = [[list_to_integer(X), round(list_to_float(Y) * Factor)]
+                    || [X, Y] <- Filtered, string:len(Y) /= 3],
+
+            Nans = [[list_to_integer(X), list_to_binary(Y)]
+                    || [X, Y] <- Filtered, string:len(Y) == 3],
+
             Final = mochijson2:encode(lists:merge(Datapoints, Nans)),
-            {case JsonpCallback of
+
+            {case Jsonp of
                 undefined -> Final;
-                _ -> [JsonpCallback, "(", Final, ");"]
+                _ -> [Jsonp, "(", Final, ");"]
              end,
             ReqData, State};
 
@@ -159,22 +193,24 @@ timeseries_to_json(ReqData, #state{rrdSensor = RrdSensor, rrdStart = RrdStart, r
             {{halt, 404}, ReqData, State}
     end.
 
-param_to_json(ReqData, #state{rrdSensor = RrdSensor} = State) ->
-    LastUpdate = rrd:lastupdate(RrdSensor),
+param_to_json(ReqData, #state{sensor = Sensor} = State) ->
+    LastUpdate = rrd:lastupdate(Sensor),
 
-    {data, Result} = mysql:execute(pool, sensor_param, [RrdSensor]),
+    {data, Result} = mysql:execute(pool, sensor_param, [Sensor]),
     [Params] = mysql:get_result_rows(Result),
     FilteredParams = lists:map(fun undefined_to_null/1, Params),
 
     FieldInfo = mysql:get_result_field_info(Result),
     Fields = [Field || {_Table, Field, _Length, _Type} <- FieldInfo],
-    Objects = lists:append(lists:zip(Fields, FilteredParams), [{<<"lastupdate">>, LastUpdate}]),
+    Objects = lists:append(lists:zip(Fields, FilteredParams),
+                           [{<<"lastupdate">>, LastUpdate}]),
 
     JsonResponse = mochijson2:encode({struct, Objects}),
     {JsonResponse, ReqData, State}.
 
 process_post(ReqData, State) ->
     {struct, JsonData} = mochijson2:decode(wrq:req_body(ReqData)),
+
     Payload = {proplists:get_value(<<"measurements">>, JsonData),
                proplists:get_value(<<"config">>, JsonData)},
 
@@ -191,7 +227,7 @@ process_post(ReqData, State) ->
 
 % JSON: {"config":{"type":"electricity","enable":0,"class":"analog","current":50,"voltage":230}}
 % Mochijson2: {struct,[{<<"config">>, {struct,[{<<"type">>,<<"electricity">>}, {<<"enable">>,0}, ... ]} }]}
-process_config({struct, Params}, ReqData, #state{rrdSensor = Sensor} = State) ->
+process_config({struct, Params}, ReqData, #state{sensor = Sensor} = State) ->
     Args = [proplists:get_value(<<"class">>,    Params),
             proplists:get_value(<<"type">>,     Params),
             proplists:get_value(<<"function">>, Params),
@@ -208,40 +244,52 @@ process_config({struct, Params}, ReqData, #state{rrdSensor = Sensor} = State) ->
 
 % JSON: {"measurements":[[<TS1>,<VALUE1>],...,[<TSn>,<VALUEn>]]}
 % Mochijson2: {struct,[{<<"measurements">>,[[<TS1>,<VALUE1>],...,[<TSn>,<VALUEn>]]}]}
-process_measurements(Measurements, ReqData, #state{rrdSensor = RrdSensor} = State) ->
-    RrdData = [[integer_to_list(Time), ":", integer_to_list(Counter), " "] || [Time, Counter] <- Measurements],
+process_measurements(Measurements, ReqData, #state{sensor = Sensor} = State) ->
+    Data = [[integer_to_list(Time), ":", integer_to_list(Counter), " "]
+        || [Time, Counter] <- Measurements],
+
     [LastTimestamp, LastValue] = lists:last(Measurements),
 
-    {data, Result} = mysql:execute(pool, sensor_props, [RrdSensor]),
+    {data, Result} = mysql:execute(pool, sensor_props, [Sensor]),
     [[Uid, _Device, Midnight]] = mysql:get_result_rows(Result),
 
-    case rrd:update(RrdSensor, RrdData) of    
-        {ok, _RrdResponse} ->
-            RrdResponse = "ok",
-            NewMidnight = update_night(RrdSensor, Uid, Midnight, LastTimestamp, ReqData),
-            mysql:execute(pool, sensor_update, [unix_time(), NewMidnight, LastValue, RrdSensor]);
+    case rrd:update(Sensor, Data) of    
+        {ok, _Response} ->
+            Response = "ok",
 
-        {error, RrdResponse} ->
-            logger(Uid, <<"rrdupdate.base">>, list_to_binary(RrdResponse), ?ERROR, ReqData)
+            NewMidnight =
+                update_night(Sensor, Uid, Midnight, LastTimestamp, ReqData),
+
+            mysql:execute(pool, sensor_update,
+                [unix_time(), NewMidnight, LastValue, Sensor]);
+
+        {error, Response} ->
+            logger(Uid, <<"rrdupdate.base">>, list_to_binary(Response), ?ERROR, ReqData)
     end,
 
-    JsonResponse = mochijson2:encode({struct, [{<<"response">>, list_to_binary(RrdResponse)}]}),
+    JsonResponse = mochijson2:encode({struct, [{<<"response">>, list_to_binary(Response)}]}),
     {true , wrq:set_resp_body(JsonResponse, ReqData), State}.
 
-update_night(RrdSensor, Uid, Midnight, LastTimestamp, ReqData) when LastTimestamp > Midnight + 6 * ?HOUR ->
+update_night(Sensor, Uid, Midnight, LastTimestamp, ReqData)
+                  when LastTimestamp > Midnight + 6 * ?HOUR ->
+
     LastMidnight = calculate_midnight(unix_time(), Uid),
-    RrdStart = integer_to_list(LastMidnight + 2 * ?HOUR),
-    RrdEnd = integer_to_list(LastMidnight + 5 * ?HOUR),
-    RrdResolution = integer_to_list(?QUARTER),
+    Start = integer_to_list(LastMidnight + 2 * ?HOUR),
+    End = integer_to_list(LastMidnight + 5 * ?HOUR),
+    Resolution = integer_to_list(?QUARTER),
 
-    case rrd:fetch(RrdSensor, RrdStart, RrdEnd, RrdResolution) of
+    case rrd:fetch(Sensor, Start, End, Resolution) of
         {ok, Response} ->
-            Filtered = [re:split(X, "[:][ ]", [{return,list}]) || [X] <- Response, string:str(X, ":") == 11],
-            Datapoints = [list_to_float(Y) || [_X, Y] <- Filtered, string:len(Y) /= 3],
-            NightAverage = lists:foldl(fun(X, Sum) -> X / 12 + Sum end, 0.0, Datapoints),
-            RrdData = [integer_to_list(LastMidnight + 5 * ?HOUR), ":", float_to_list(NightAverage)],
+            Filtered = [re:split(X, "[:][ ]", [{return,list}])
+                || [X] <- Response, string:str(X, ":") == 11],
 
-            case rrd:update(night, RrdSensor, RrdData) of
+            Datapoints = [list_to_float(Y)
+                || [_X, Y] <- Filtered, string:len(Y) /= 3],
+
+            NightAverage = lists:foldl(fun(X, Sum) -> X / 12 + Sum end, 0.0, Datapoints),
+            Data = [integer_to_list(LastMidnight + 5 * ?HOUR), ":", float_to_list(NightAverage)],
+
+            case rrd:update(night, Sensor, Data) of
                 {ok, _Response} ->
                      logger(Uid, <<"rrdupdate.night">>, <<"Successful update of night rrd.">>, ?INFO, ReqData);
 
@@ -254,7 +302,7 @@ update_night(RrdSensor, Uid, Midnight, LastTimestamp, ReqData) when LastTimestam
     end,
 
     LastMidnight + ?DAY;
-update_night(_RrdSensor, _Uid, Midnight, _LastTimestamp, _ReqData) ->
+update_night(_Sensor, _Uid, Midnight, _LastTimestamp, _ReqData) ->
     Midnight.
 
 calculate_midnight(Timestamp, Uid) ->

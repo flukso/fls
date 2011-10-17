@@ -27,15 +27,15 @@
 -define(YEAR, 31536000).
 
 -record(state,
-        {rrdSensor,
-         rrdStart,
-         rrdEnd,
-         rrdResolution,
-         rrdFactor,
+        {sensor,
+         start,
+         'end',
+         resolution,
+         factor,
          token,
          device,
          digest,
-         jsonpCallback,
+         jsonp,
          param,
          return}).
 
@@ -127,13 +127,13 @@ check_unit(Unit) ->
         {_Unit, RrdFactor} -> {RrdFactor, true}
     end.
 
-check_jsonp_callback(undefined) ->
+check_jsonp(undefined) ->
     {undefined, true};
-check_jsonp_callback(JsonpCallback) ->
-    Length = string:len(JsonpCallback),
+check_jsonp(Jsonp) ->
+    Length = string:len(Jsonp),
 
-    case re:run(JsonpCallback, "[0-9a-zA-Z_]+", []) of
-        {match, [{0, Length}]} -> {JsonpCallback, true};
+    case re:run(Jsonp, "[0-9a-zA-Z_]+", []) of
+        {match, [{0, Length}]} -> {Jsonp, true};
         _ -> {false, false}
     end.
 
