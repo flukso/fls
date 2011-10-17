@@ -219,10 +219,3 @@ logger(Uid, Type, Message, Severity, ReqData) when Severity =< ?LOGLEVEL ->
         ]);
 logger(_Uid, _Type, _Message, _Severity, _ReqData) ->
     true.
-
-% erlrrd wrappers
-rrd_fetch(Path, RrdSensor, RrdStart, RrdEnd, RrdResolution) ->
-    erlrrd:fetch(erlrrd:c([[Path, [RrdSensor|".rrd"]], "AVERAGE", ["-s ", RrdStart], ["-e ", RrdEnd], ["-r ", RrdResolution]])).
-
-rrd_update(Path, RrdSensor, RrdData) ->
-    erlrrd:update([Path, [RrdSensor|".rrd"], " ", RrdData]).

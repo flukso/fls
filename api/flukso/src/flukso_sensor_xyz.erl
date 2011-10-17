@@ -143,7 +143,7 @@ timeseries_to_json(ReqData, #state{rrdSensor = RrdSensor, rrdStart = RrdStart, r
 
 %% debugging: io:format("~s~n", [erlrrd:c([[Path, [RrdSensor|".rrd"]], "AVERAGE", ["-s ", RrdStart], ["-e ", RrdEnd], ["-r ", RrdResolution]])]),
 
-    case rrd_fetch(Path, RrdSensor, RrdStart, RrdEnd, RrdResolution) of
+    case rrd:fetch(Path, RrdSensor, RrdStart, RrdEnd, RrdResolution) of
         {ok, Response} ->
             Filtered = [re:split(X, "[:][ ]", [{return,list}]) || [X] <- Response, string:str(X, ":") == 11],
             Datapoints = [[list_to_integer(X), round(list_to_float(Y) * RrdFactor)] || [X, Y] <- Filtered, string:len(Y) /= 3],
@@ -223,7 +223,7 @@ process_measurements(Measurements, ReqData, #state{rrdSensor = RrdSensor} = Stat
     {data, Result} = mysql:execute(pool, sensor_props, [RrdSensor]),
     [[Uid, _Device, Midnight]] = mysql:get_result_rows(Result),
 
-    case rrd_update(?BASE_PATH, RrdSensor, RrdData) of    
+    case rrd:update(RrdSensor, RrdData) of    
         {ok, _RrdResponse} ->
             RrdResponse = "ok",
             NewMidnight = update_night(RrdSensor, Uid, Midnight, LastTimestamp, ReqData),
@@ -242,14 +242,14 @@ update_night(RrdSensor, Uid, Midnight, LastTimestamp, ReqData) when LastTimestam
     RrdEnd = integer_to_list(LastMidnight + 5 * ?HOUR),
     RrdResolution = integer_to_list(?QUARTER),
 
-    case rrd_fetch(?BASE_PATH, RrdSensor, RrdStart, RrdEnd, RrdResolution) of
+    case rrd:fetch(RrdSensor, RrdStart, RrdEnd, RrdResolution) of
         {ok, Response} ->
             Filtered = [re:split(X, "[:][ ]", [{return,list}]) || [X] <- Response, string:str(X, ":") == 11],
             Datapoints = [list_to_float(Y) || [_X, Y] <- Filtered, string:len(Y) /= 3],
             NightAverage = lists:foldl(fun(X, Sum) -> X / 12 + Sum end, 0.0, Datapoints),
             RrdData = [integer_to_list(LastMidnight + 5 * ?HOUR), ":", float_to_list(NightAverage)],
 
-            case rrd_update(?NIGHT_PATH, RrdSensor, RrdData) of
+            case rrd:update(?NIGHT_PATH, RrdSensor, RrdData) of
                 {ok, _Response} ->
                      logger(Uid, <<"rrdupdate.night">>, <<"Successful update of night rrd.">>, ?INFO, ReqData);
 
