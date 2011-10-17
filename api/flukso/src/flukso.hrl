@@ -94,8 +94,12 @@ check_time(Interval, undefined, undefined, Resolution) ->
         {false, _} -> {false, false, false, false};
         {_, false} -> {false, false, false, false};
         {IntervalSec, ResolutionSec} -> 
-            AlignedEnd = time_align(Now, ResolutionSec),
-            AlignedStart = AlignedEnd - IntervalSec,
+            % since the current interval will always return NaN
+            % we exclude it by subtracting ResolutionSec from Now
+            AlignedEnd = time_align(up, Now - ResolutionSec, ResolutionSec),
+            % make sure we return IntervalSec/ResolutionSec entries
+            % so we add ResolutionSec to AlignedEnd - IntervalSec
+            AlignedStart = time_align(down, AlignedEnd - IntervalSec + ResolutionSec, ResolutionSec),
             {integer_to_list(AlignedStart), integer_to_list(AlignedEnd), integer_to_list(ResolutionSec), true}
     end;
 check_time(undefined, Start, undefined, Resolution) ->
@@ -106,8 +110,8 @@ check_time(undefined, Start, End, Resolution) ->
     case {re:run(Start, "[0-9]+", []), re:run(End, "[0-9]+", []), time_to_seconds(Resolution)} of
         {_, _, false} -> {false, false, false, false};
         {{match, [{0,_}]}, {match, [{0,_}]}, ResolutionSec} ->
-            AlignedStart = time_align(list_to_integer(Start), ResolutionSec),
-            AlignedEnd = time_align(list_to_integer(End), ResolutionSec),
+            AlignedStart = time_align(down, list_to_integer(Start), ResolutionSec),
+            AlignedEnd = time_align(up, list_to_integer(End), ResolutionSec),
             {integer_to_list(AlignedStart), integer_to_list(AlignedEnd), integer_to_list(ResolutionSec), true};
         _ -> {false, false, false, false}
     end;
@@ -147,8 +151,12 @@ unix_time() ->
     {Megaseconds, Seconds, _Microseconds} = erlang:now(),
     Megaseconds*1000000 + Seconds.
 
-time_align(Time, Resolution) ->
-    (Time div Resolution) * Resolution.
+time_align(down, Time, Resolution) ->
+    (Time div Resolution) * Resolution;
+time_align(up, Time, Resolution) ->
+    % subtract 1 from Time to make sure we don't return
+    % an extra entry when Time is a multiple of Resolution
+    ((Time - 1) div Resolution) * Resolution.
 
 default_resolution(Interval) ->
     DefResolutions = [{"15min", "minute"},
