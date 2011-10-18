@@ -34,6 +34,12 @@
 fetch(Sensor, Start, End, Resolution) ->
     fetch(base, Sensor, Start, End, Resolution).
 
+fetch(Rrd, Sensor, Start, End, Resolution) when is_integer(Start) ->
+    fetch(Rrd,
+          Sensor,
+          integer_to_list(Start),
+          integer_to_list(End),
+          integer_to_list(Resolution));
 fetch(Rrd, Sensor, Start, End, Resolution) ->
     erlrrd:fetch(erlrrd:c([path(Rrd, Sensor), "AVERAGE",
                            ["-s ", Start], ["-e ", End], ["-r ", Resolution]])).
