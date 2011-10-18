@@ -172,22 +172,13 @@ timeseries_to_json(ReqData, #state{sensor     = Sensor,
         _Interval -> Rrd = base
     end,
 
-    case rrd:fetch(Rrd, Sensor, Start, End, Resolution) of
-        {ok, Response} ->
-            Filtered = [re:split(X, "[:][ ]", [{return,list}])
-                    || [X] <- Response, string:str(X, ":") == 11],
-
-            Datapoints = [[list_to_integer(X), round(list_to_float(Y) * Factor)]
-                    || [X, Y] <- Filtered, string:len(Y) /= 3],
-
-            Nans = [[list_to_integer(X), list_to_binary(Y)]
-                    || [X, Y] <- Filtered, string:len(Y) == 3],
-
-            Final = mochijson2:encode(lists:merge(Datapoints, Nans)),
+    case rrd:fetch(Rrd, Sensor, Start, End, Resolution, Factor) of
+        {ok, Datapoints, Nans} ->
+            Reply = mochijson2:encode(lists:merge(Datapoints, Nans)),
 
             {case Jsonp of
-                undefined -> Final;
-                _ -> [Jsonp, "(", Final, ");"]
+                undefined -> Reply;
+                _ -> [Jsonp, "(", Reply, ");"]
              end,
             ReqData, State};
 
@@ -280,16 +271,15 @@ update_night(Sensor, Uid, Midnight, LastTimestamp, ReqData)
     End = integer_to_list(LastMidnight + 5 * ?HOUR),
     Resolution = integer_to_list(?QUARTER),
 
-    case rrd:fetch(Sensor, Start, End, Resolution) of
-        {ok, Response} ->
-            Filtered = [re:split(X, "[:][ ]", [{return,list}])
-                || [X] <- Response, string:str(X, ":") == 11],
+    case rrd:fetch(Sensor, Start, End, Resolution, raw) of
+        {ok, Datapoints, _Nans} ->
+            Values = [Y || [_X, Y] <- Datapoints],
 
-            Datapoints = [list_to_float(Y)
-                || [_X, Y] <- Filtered, string:len(Y) /= 3],
+            NightAverage =
+                lists:foldl(fun(X, Sum) -> X / 12 + Sum end, 0.0, Values),
 
-            NightAverage = lists:foldl(fun(X, Sum) -> X / 12 + Sum end, 0.0, Datapoints),
-            Data = [integer_to_list(LastMidnight + 5 * ?HOUR), ":", float_to_list(NightAverage)],
+            Data =
+                [integer_to_list(LastMidnight + 5 * ?HOUR), ":", float_to_list(NightAverage)],
 
             case rrd:update(night, Sensor, Data) of
                 {ok, _Response} ->

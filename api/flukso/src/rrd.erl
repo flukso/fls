@@ -19,8 +19,8 @@
 -module(rrd).
 -author('Bart Van Der Meerssche <bart.vandermeerssche@flukso.net>').
 
--export([fetch/4,
-         fetch/5,
+-export([fetch/5,
+         fetch/6,
 
          update/2,
          update/3,
@@ -31,18 +31,36 @@
 -include("flukso.hrl").
 
 
-fetch(Sensor, Start, End, Resolution) ->
-    fetch(base, Sensor, Start, End, Resolution).
+fetch(Sensor, Start, End, Resolution, Factor) ->
+    fetch(base, Sensor, Start, End, Resolution, Factor).
 
-fetch(Rrd, Sensor, Start, End, Resolution) when is_integer(Start) ->
+fetch(Rrd, Sensor, Start, End, Resolution, Factor) when is_integer(Start) ->
     fetch(Rrd,
           Sensor,
           integer_to_list(Start),
           integer_to_list(End),
-          integer_to_list(Resolution));
-fetch(Rrd, Sensor, Start, End, Resolution) ->
-    erlrrd:fetch(erlrrd:c([path(Rrd, Sensor), "AVERAGE",
-                           ["-s ", Start], ["-e ", End], ["-r ", Resolution]])).
+          integer_to_list(Resolution),
+          Factor);
+fetch(Rrd, Sensor, Start, End, Resolution, Factor) ->
+    Query = erlrrd:c([path(Rrd, Sensor), "AVERAGE",
+                     ["-s ", Start], ["-e ", End], ["-r ", Resolution]]),
+
+    case erlrrd:fetch(Query) of
+         {ok, Response} ->
+            Filtered = [re:split(X, "[:][ ]", [{return,list}])
+                    || [X] <- Response, string:str(X, ":") == 11],
+
+            Datapoints = [[list_to_integer(X), y(Y, Factor)]
+                    || [X, Y] <- Filtered, string:len(Y) /= 3],
+
+            Nans = [[list_to_integer(X), list_to_binary(Y)]
+                    || [X, Y] <- Filtered, string:len(Y) == 3],
+
+            {ok, Datapoints, Nans};
+
+        {error, Reason} ->
+            {error, Reason}
+    end.
 
 
 update(Sensor, Data) ->
@@ -74,4 +92,10 @@ path(Rrd, Sensor) ->
     end,
 
     [Path, [Sensor|".rrd"]].
-    
+
+
+y(Y, raw) ->
+    list_to_float(Y);
+y(Y, Factor) when is_integer(Factor) ->
+    round(list_to_float(Y) * Factor).
+
