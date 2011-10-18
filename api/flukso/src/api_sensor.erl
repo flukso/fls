@@ -16,7 +16,7 @@
 %%%
 %% @doc Flukso API: /sensor/xyz resource specification 
 
--module(flukso_sensor_xyz).
+-module(api_sensor).
 -author('Bart Van Der Meerssche <bart.vandermeerssche@flukso.net>').
 
 -export([init/1,

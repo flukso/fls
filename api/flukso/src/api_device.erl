@@ -16,7 +16,7 @@
 %%%
 %% @doc Flukso API: /device/xyz resource specification 
 
--module(flukso_device_xyz).
+-module(api_device).
 -author('Bart Van Der Meerssche <bart.vandermeerssche@flukso.net>').
 
 -export([init/1,
