@@ -105,10 +105,7 @@ times(Interval, undefined, undefined, Resolution) ->
             AlignedStart =
                 align(down, AlignedEnd - IntervalSec + ResolutionSec, ResolutionSec),
 
-            {integer_to_list(AlignedStart),
-             integer_to_list(AlignedEnd),
-             integer_to_list(ResolutionSec),
-             true}
+            {AlignedStart, AlignedEnd, ResolutionSec, true}
     end;
 times(undefined, Start, undefined, Resolution) ->
     times(undefined, Start, integer_to_list(unix()), Resolution);
@@ -128,10 +125,7 @@ times(undefined, Start, End, Resolution) ->
             AlignedEnd =
                 align(up, list_to_integer(End), ResolutionSec),
 
-            {integer_to_list(AlignedStart),
-             integer_to_list(AlignedEnd),
-             integer_to_list(ResolutionSec),
-             true};
+            {AlignedStart, AlignedEnd, ResolutionSec, true};
 
         _ -> {false, false, false, false}
     end;
