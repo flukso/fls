@@ -29,7 +29,9 @@
          process_post/2]).
 
 -include_lib("webmachine/include/webmachine.hrl").
+
 -include("flukso.hrl").
+
 
 init([]) -> 
     {ok, undefined}.
@@ -49,13 +51,13 @@ malformed_request(ReqData, State) ->
 
 malformed_POST(ReqData, _State) ->
     {_Version, ValidVersion} =
-        check_version(wrq:get_req_header("X-Version", ReqData)),
+        check:version(wrq:get_req_header("X-Version", ReqData)),
 
     {Sensor, ValidSensor} =
-        check_sensor(wrq:path_info(sensor, ReqData)),
+        check:sensor(wrq:path_info(sensor, ReqData)),
 
     {Digest, ValidDigest} =
-        check_digest(wrq:get_req_header("X-Digest", ReqData)),
+        check:digest(wrq:get_req_header("X-Digest", ReqData)),
 
     State = #state{sensor = Sensor,
                    digest = Digest},
@@ -68,30 +70,30 @@ malformed_POST(ReqData, _State) ->
 
 malformed_GET(ReqData, _State) ->
     {_Version, ValidVersion} =
-        check_version(wrq:get_req_header("X-Version", ReqData),
+        check:version(wrq:get_req_header("X-Version", ReqData),
                       wrq:get_qs_value("version", ReqData)),
 
     {Sensor, ValidSensor} =
-        check_sensor(wrq:path_info(sensor, ReqData)),
+        check:sensor(wrq:path_info(sensor, ReqData)),
 
     {Start, End, Resolution, ValidTime} =
-        check_time(wrq:get_qs_value("interval", ReqData),
+        check:times(wrq:get_qs_value("interval", ReqData),
                    wrq:get_qs_value("start", ReqData),
                    wrq:get_qs_value("end", ReqData),
                    wrq:get_qs_value("resolution", ReqData)),
 
     {Factor, ValidUnit} =
-        check_unit(wrq:get_qs_value("unit", ReqData)),
+        check:unit(wrq:get_qs_value("unit", ReqData)),
 
     {Token, ValidToken} =
-        check_token(wrq:get_req_header("X-Token", ReqData),
+        check:token(wrq:get_req_header("X-Token", ReqData),
                     wrq:get_qs_value("token", ReqData)),
 
     {Jsonp, ValidJsonp} =
-        check_jsonp(wrq:get_qs_value("jsonp", ReqData)),
+        check:jsonp(wrq:get_qs_value("jsonp", ReqData)),
 
     {Param, ValidParam} =
-        check_param(wrq:get_qs_value("param", ReqData)),
+        check:param(wrq:get_qs_value("param", ReqData)),
 
     State = #state{sensor     = Sensor, 
                    start      = Start,
@@ -261,10 +263,10 @@ process_measurements(Measurements, ReqData, #state{sensor = Sensor} = State) ->
                 update_night(Sensor, Uid, Midnight, LastTimestamp, ReqData),
 
             mysql:execute(pool, sensor_update,
-                [unix_time(), NewMidnight, LastValue, Sensor]);
+                [check:unix(), NewMidnight, LastValue, Sensor]);
 
         {error, Response} ->
-            logger(Uid, <<"rrdupdate.base">>, list_to_binary(Response), ?ERROR, ReqData)
+            flog:drupal(Uid, <<"rrdupdate.base">>, list_to_binary(Response), ?ERROR, ReqData)
     end,
 
     JsonResponse = mochijson2:encode({struct, [{<<"response">>, list_to_binary(Response)}]}),
@@ -273,7 +275,7 @@ process_measurements(Measurements, ReqData, #state{sensor = Sensor} = State) ->
 update_night(Sensor, Uid, Midnight, LastTimestamp, ReqData)
                   when LastTimestamp > Midnight + 6 * ?HOUR ->
 
-    LastMidnight = calculate_midnight(unix_time(), Uid),
+    LastMidnight = calculate_midnight(check:unix(), Uid),
     Start = integer_to_list(LastMidnight + 2 * ?HOUR),
     End = integer_to_list(LastMidnight + 5 * ?HOUR),
     Resolution = integer_to_list(?QUARTER),
@@ -291,14 +293,14 @@ update_night(Sensor, Uid, Midnight, LastTimestamp, ReqData)
 
             case rrd:update(night, Sensor, Data) of
                 {ok, _Response} ->
-                     logger(Uid, <<"rrdupdate.night">>, <<"Successful update of night rrd.">>, ?INFO, ReqData);
+                     flog:drupal(Uid, <<"rrdupdate.night">>, <<"Successful update of night rrd.">>, ?INFO, ReqData);
 
                 {error, Reason} ->
-                     logger(Uid, <<"rrdupdate.night">>, list_to_binary(Reason), ?ERROR, ReqData)
+                     flog:drupal(Uid, <<"rrdupdate.night">>, list_to_binary(Reason), ?ERROR, ReqData)
             end;
 
         {error, Reason} ->
-            logger(Uid, <<"rrdupdate.night">>, list_to_binary(Reason), ?ERROR, ReqData)
+            flog:drupal(Uid, <<"rrdupdate.night">>, list_to_binary(Reason), ?ERROR, ReqData)
     end,
 
     LastMidnight + ?DAY;
@@ -321,3 +323,8 @@ closest_midnight(ProposedMidnight, Timestamp) when ProposedMidnight > Timestamp 
     closest_midnight(ProposedMidnight - ?DAY, Timestamp);
 closest_midnight(ProposedMidnight, _Timestamp) ->
     ProposedMidnight.
+
+undefined_to_null(undefined) ->
+    null;
+undefined_to_null(Field) ->
+    Field.

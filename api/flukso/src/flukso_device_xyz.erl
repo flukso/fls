@@ -26,7 +26,9 @@
          process_post/2]).
 
 -include_lib("webmachine/include/webmachine.hrl").
+
 -include("flukso.hrl").
+
 
 init([]) -> 
     {ok, undefined}.
@@ -44,9 +46,14 @@ malformed_request(ReqData, State) ->
     end.
 
 malformed_POST(ReqData, _State) ->
-    {_Version, ValidVersion} = check_version(wrq:get_req_header("X-Version", ReqData)),
-    {Device, ValidDevice} = check_device(wrq:path_info(device, ReqData)),
-    {Digest, ValidDigest} = check_digest(wrq:get_req_header("X-Digest", ReqData)),
+    {_Version, ValidVersion} =
+        check:version(wrq:get_req_header("X-Version", ReqData)),
+
+    {Device, ValidDevice} =
+        check:device(wrq:path_info(device, ReqData)),
+
+    {Digest, ValidDigest} =
+        check:digest(wrq:get_req_header("X-Digest", ReqData)),
 
     State = #state{device = Device,
                    digest = Digest},
@@ -109,11 +116,11 @@ process_post(ReqData, #state{device = Device} = State) ->
     NewResets = Resets + Reset,
 
     mysql:execute(pool, device_update,
-        [unix_time(), Version, 0, NewResets, Uptime, Memtotal, Memfree, Memcached, Membuffers, Device]),
+        [check:unix(), Version, 0, NewResets, Uptime, Memtotal, Memfree, Memcached, Membuffers, Device]),
 
 
-    JsonResponse = mochijson2:encode({struct, [{<<"upgrade">>,       Upgrade},
-                                               {<<"timestamp">>, unix_time()}
+    JsonResponse = mochijson2:encode({struct, [{<<"upgrade">>,        Upgrade},
+                                               {<<"timestamp">>, check:unix()}
                                               ]}),
 
     <<X:160/big-unsigned-integer>> = crypto:sha_mac(Key, JsonResponse),

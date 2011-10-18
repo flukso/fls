@@ -28,8 +28,7 @@
          lastupdate/1,
          lastupdate/2]).
 
--define(RRD_BASE_PATH, "var/data/base/").
--define(RRD_NIGHT_PATH, "var/data/night/").
+-include("flukso.hrl").
 
 
 fetch(Sensor, Start, End, Resolution) ->
