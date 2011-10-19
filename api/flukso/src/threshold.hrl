@@ -26,11 +26,13 @@
 -define(RAISED,   2).
 
 % Threshold alarm record
--record(threshold,
+-record(thld,
         {sensor,
          type,
          resolution,
          threshold,
          state,
-         timestamp
+         s_timestamp,
+         value,
+         v_timestamp
         }).

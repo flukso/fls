@@ -30,19 +30,34 @@
 
 run(Sensor) ->
     {data, Alarms} = mysql:execute(pool, alarm_sensor_load, [Sensor]),
-    lists:map(fun check/1, mysql:get_result_rows(Alarms)).
+    Thlds = lists:map(fun to_thld/1, mysql:get_result_rows(Alarms)),
+    lists:map(fun check/1, Thlds).
 
 % helpers
-check([_, _, _, _, ?DISABLED, _]) ->
-    {ok, disabled};
-check([Sensor, Type, ?NIGHT, Threshold, State, Start]) ->
-    check(night, [Sensor, Type, ?DAY, Threshold, State, Start]);        
-check(Alarm) ->
-    check(base, Alarm).        
+to_thld([Sensor, Type, Resolution, Threshold, State, Timestamp]) ->
+    #thld{
+        sensor = Sensor,
+        type = Type,
+        resolution = Resolution,
+        threshold = Threshold,
+        state = State,
+        s_timestamp = Timestamp}. 
 
-check(Rrd, [Sensor, Type, Resolution, Threshold, State, Start]) ->
+check(#thld{state = ?DISABLED}) ->
+    {ok, disabled};
+check(#thld{resolution = ?NIGHT} = Thld) ->
+    check(night, Thld#thld{resolution = ?DAY});
+check(Thld) ->
+    check(base, Thld).        
+
+check(Rrd, #thld{sensor = Sensor, s_timestamp = Start, resolution = Resolution} = Thld) ->
     io:format("data: ~s, ~p, ~p, ~p, ~p, ~p~n",
-              [Sensor, Type, Resolution, Threshold, State, Start]),
+              [Thld#thld.sensor,
+               Thld#thld.type,
+               Thld#thld.resolution,
+               Thld#thld.threshold,
+               Thld#thld.state,
+               Thld#thld.s_timestamp]),
 
     End = check:unix(),
 
@@ -52,19 +67,19 @@ check(Rrd, [Sensor, Type, Resolution, Threshold, State, Start]) ->
 
         {ok, Datapoints, _Nans} ->
             [Timestamp, Value] = lists:last(Datapoints),
-            action(Type, State, Threshold, Value, Timestamp);
+            action(Thld#thld{v_timestamp = Timestamp, value = Value});
 
         {error, Reason} ->
             {error, Reason}
     end.
 
-action(?HIGH, ?CLEARED, Threshold, Value, Timestamp) when Value >= Threshold ->
+action(#thld{type = ?HIGH, state = ?CLEARED} = Thld) when Thld#thld.value >= Thld#thld.threshold ->
     {ok, raise};
-action(?HIGH, ?RAISED,  Threshold, Value, Timestamp) when Value <  Threshold ->
+action(#thld{type = ?HIGH, state = ?RAISED}  = Thld) when Thld#thld.value <  Thld#thld.threshold ->
     {ok, clear};
-action(?LOW,  ?CLEARED, Threshold, Value, Timestamp) when Value =< Threshold ->
+action(#thld{type = ?LOW,  state = ?CLEARED} = Thld) when Thld#thld.value =< Thld#thld.threshold ->
     {ok, raise};
-action(?LOW,  ?RAISED,  Threshold, Value, Timestamp) when Value >  Threshold ->
+action(#thld{type = ?LOW,  state = ?RAISED}  = Thld) when Thld#thld.value >  Thld#thld.threshold ->
     {ok, clear};
-action(_, _, _, _, _) ->
+action(_) ->
     {ok, nochange}.
