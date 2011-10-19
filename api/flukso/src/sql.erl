@@ -153,7 +153,20 @@
        WHERE
            device = ?">>).
 
+-define(SQL_ALARM_SENSOR_LOAD,
+    <<"SELECT
+           sensor,
+           type,
+           resolution,
+           threshold,
+           state,
+           timestamp
+       FROM
+           alarm_sensor
+       WHERE
+           sensor = ?">>).
 
+                   
 % TODO: use a binary:replace to clean up \n's in the query strings
 prepare() ->
     mysql:prepare(watchdog, ?SQL_WATCHDOG),
@@ -167,4 +180,5 @@ prepare() ->
     mysql:prepare(timezone, ?SQL_TIMEZONE),
     mysql:prepare(device_key, ?SQL_DEVICE_KEY),
     mysql:prepare(device_props, ?SQL_DEVICE_PROPS),
-    mysql:prepare(device_update, ?SQL_DEVICE_UPDATE).
+    mysql:prepare(device_update, ?SQL_DEVICE_UPDATE),
+    mysql:prepare(alarm_sensor_load, ?SQL_ALARM_SENSOR_LOAD).
