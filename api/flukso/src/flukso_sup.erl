@@ -72,6 +72,10 @@ init([]) ->
         {event, start_link, []},
         permanent, 5000, worker, [event, event_hdlr]},
 
-    Processes = [Web, Event],
+    Alarm = {alarm,
+        {alarm, start_link, []},
+        permanent, 5000, worker, [alarm, alarm_hdlr]},
+
+    Processes = [Web, Event, Alarm],
 
     {ok, {{one_for_one, 10, 10}, Processes}}.

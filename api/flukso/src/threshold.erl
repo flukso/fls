@@ -76,37 +76,21 @@ check(Rrd, #thld{sensor = Sensor, s_timestamp = Start, resolution = Resolution} 
 
 
 action(#thld{type = ?HIGH, state = ?CLEARED} = Thld) when Thld#thld.value >= Thld#thld.threshold ->
-    raise(Thld);
+    update(Thld#thld{state = ?RAISED,  s_timestamp = Thld#thld.v_timestamp});
 action(#thld{type = ?HIGH, state = ?RAISED}  = Thld) when Thld#thld.value <  Thld#thld.threshold ->
-    clear(Thld);
+    update(Thld#thld{state = ?CLEARED, s_timestamp = Thld#thld.v_timestamp});
 action(#thld{type = ?LOW,  state = ?CLEARED} = Thld) when Thld#thld.value =< Thld#thld.threshold ->
-    raise(Thld);
+    update(Thld#thld{state = ?RAISED,  s_timestamp = Thld#thld.v_timestamp});
 action(#thld{type = ?LOW,  state = ?RAISED}  = Thld) when Thld#thld.value >  Thld#thld.threshold ->
-    clear(Thld);
+    update(Thld#thld{state = ?CLEARED, s_timestamp = Thld#thld.v_timestamp});
 action(_) ->
     {ok, nochange}.
 
 
-raise(Thld) ->
-    NewThld = Thld#thld{
-        state       = ?RAISED,
-        s_timestamp = Thld#thld.v_timestamp},
+update(#thld{sensor = Sensor, state = State, s_timestamp = Timestamp} = Thld) ->
+    alarm:threshold(Thld),
 
-    update(NewThld).
-
-
-clear(Thld) ->
-    NewThld = Thld#thld{
-        state       = ?CLEARED,
-        s_timestamp = Thld#thld.v_timestamp},
-
-    update(NewThld).
-
-
-update(#thld{sensor = Sensor, state = State, s_timestamp = Timestamp}) ->
-    Args = [State, Timestamp, Sensor],
-
-    case mysql:execute(pool, alarm_sensor_update, Args) of
+    case mysql:execute(pool, alarm_sensor_update, [State, Timestamp, Sensor]) of
         {updated, _Result} -> {ok, updated};
         {error, Reason} -> {error, Reason}
     end.

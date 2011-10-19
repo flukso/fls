@@ -14,6 +14,8 @@
     event,
     event_hdlr,
     threshold,
+    alarm,
+    alarm_hdlr,
     flog
   ]},
   {registered, []},
