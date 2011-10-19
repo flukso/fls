@@ -7,7 +7,14 @@
     flukso_sup,
     flukso_deps,
     api_sensor,
-    api_device
+    api_device,
+    sql,
+    rrd,
+    check,
+    event,
+    event_hdlr,
+    threshold,
+    flog
   ]},
   {registered, []},
   {mod, {flukso_app, []}},

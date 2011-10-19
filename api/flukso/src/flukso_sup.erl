@@ -63,8 +63,15 @@ init([]) ->
 		 {port, 9999},
                  {log_dir, "var/log"},
 		 {dispatch, Dispatch}],
+
     Web = {webmachine_mochiweb,
-	   {webmachine_mochiweb, start, [WebConfig]},
-	   permanent, 5000, worker, dynamic},
-    Processes = [Web],
+        {webmachine_mochiweb, start, [WebConfig]},
+        permanent, 5000, worker, dynamic},
+
+    Event = {event,
+        {event, start_link, []},
+        permanent, 5000, worker, [event, event_hdlr]},
+
+    Processes = [Web, Event],
+
     {ok, {{one_for_one, 10, 10}, Processes}}.

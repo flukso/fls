@@ -16,19 +16,17 @@
 %%%
 %% @doc Sensor threshold alarm functions 
 
--module(alarm).
+-module(threshold).
 -author('Bart Van Der Meerssche <bart.vandermeerssche@flukso.net>').
 
 % remove before flight!
--compile(export_all).
+% -compile(export_all).
 
--export([init/0, run/1]).
+-export([run/1]).
 
 -include("flukso.hrl").
--include("alarm.hrl").
+-include("threshold.hrl").
 
-init() ->
-    io:format("test").
 
 run(Sensor) ->
     {data, Alarms} = mysql:execute(pool, alarm_sensor_load, [Sensor]),
