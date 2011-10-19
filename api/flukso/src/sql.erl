@@ -166,19 +166,22 @@
        WHERE
            sensor = ?">>).
 
-                   
+-define(STATEMENTS,
+    [{watchdog, ?SQL_WATCHDOG},
+     {permissions, ?SQL_PERMISSIONS},
+     {master_token, ?SQL_MASTER_TOKEN},
+     {sensor_key, ?SQL_SENSOR_KEY},
+     {sensor_props, ?SQL_SENSOR_PROPS},
+     {sensor_param, ?SQL_SENSOR_PARAM},
+     {sensor_update, ?SQL_SENSOR_UPDATE},
+     {sensor_config, ?SQL_SENSOR_CONFIG},
+     {timezone, ?SQL_TIMEZONE},
+     {device_key, ?SQL_DEVICE_KEY},
+     {device_props, ?SQL_DEVICE_PROPS},
+     {device_update, ?SQL_DEVICE_UPDATE},
+     {alarm_sensor_load, ?SQL_ALARM_SENSOR_LOAD}
+    ]).
+
 % TODO: use a binary:replace to clean up \n's in the query strings
 prepare() ->
-    mysql:prepare(watchdog, ?SQL_WATCHDOG),
-    mysql:prepare(permissions, ?SQL_PERMISSIONS),
-    mysql:prepare(master_token, ?SQL_MASTER_TOKEN),
-    mysql:prepare(sensor_key, ?SQL_SENSOR_KEY),
-    mysql:prepare(sensor_props, ?SQL_SENSOR_PROPS),
-    mysql:prepare(sensor_param, ?SQL_SENSOR_PARAM),
-    mysql:prepare(sensor_update, ?SQL_SENSOR_UPDATE),
-    mysql:prepare(sensor_config, ?SQL_SENSOR_CONFIG),
-    mysql:prepare(timezone, ?SQL_TIMEZONE),
-    mysql:prepare(device_key, ?SQL_DEVICE_KEY),
-    mysql:prepare(device_props, ?SQL_DEVICE_PROPS),
-    mysql:prepare(device_update, ?SQL_DEVICE_UPDATE),
-    mysql:prepare(alarm_sensor_load, ?SQL_ALARM_SENSOR_LOAD).
+    [ mysql:prepare(Id, Query) || {Id, Query} <- ?STATEMENTS ].
