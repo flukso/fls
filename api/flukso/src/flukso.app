@@ -21,4 +21,4 @@
   {registered, []},
   {mod, {flukso_app, []}},
   {env, []},
-  {applications, [kernel, stdlib, crypto, erlrrd, mysql, webmachine]}]}.
+  {applications, [kernel, stdlib, crypto, public_key, ssl, erlrrd, mysql, esmtp, webmachine]}]}.

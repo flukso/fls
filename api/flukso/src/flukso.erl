@@ -38,6 +38,8 @@ start_link() ->
     ensure_started(erlrrd),
     ensure_started(mysql),
     sql:prepare(),
+    ensure_started(ssl),
+    ensure_started(esmtp),
     ensure_started(webmachine),
     flukso_sup:start_link().
 
@@ -49,6 +51,8 @@ start() ->
     ensure_started(erlrrd),
     ensure_started(mysql),
     sql:prepare(),
+    ensure_started(ssl),
+    ensure_started(esmtp),
     ensure_started(webmachine),
     application:start(flukso).
 
@@ -57,6 +61,8 @@ start() ->
 stop() -> 
     Res = application:stop(flukso),
     application:stop(webmachine),
+    application:stop(esmtp),
+    application:stop(ssl),
     application:stop(mysql),
     application:stop(erlrrd),
     application:stop(crypto),
