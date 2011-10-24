@@ -34,9 +34,9 @@
 init([]) ->
     {ok, []}.
 
-handle_event({threshold, #thld{sensor = Sensor, state = State, s_timestamp = Timestamp}}, StateHdlr) ->
-    io:format("alarm: ~s, ~p, ~p~n", [Sensor, State, Timestamp]),
-    {ok, StateHdlr};
+handle_event({threshold, Thld}, State) ->
+    threshold:mail(Thld),
+    {ok, State};
 handle_event(_, State) ->
     {ok, State}.
 
@@ -51,3 +51,5 @@ code_change(_OldVsn, State, _Extra) ->
 
 terminate(_Reason, _State) ->
     ok.
+
+

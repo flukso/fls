@@ -175,6 +175,14 @@
        WHERE
            sensor = ?">>).
 
+-define(SQL_ALARM_SENSOR_PROPS,
+    <<"SELECT
+           name, mail, type, function
+       FROM
+           (logger_meters lm INNER JOIN users u ON lm.uid = u.uid)
+       WHERE
+           meter = ?">>).
+
 
 -define(STATEMENTS,
     [{watchdog, ?SQL_WATCHDOG},
@@ -190,7 +198,8 @@
      {device_props, ?SQL_DEVICE_PROPS},
      {device_update, ?SQL_DEVICE_UPDATE},
      {alarm_sensor_load, ?SQL_ALARM_SENSOR_LOAD},
-     {alarm_sensor_update, ?SQL_ALARM_SENSOR_UPDATE}
+     {alarm_sensor_update, ?SQL_ALARM_SENSOR_UPDATE},
+     {alarm_sensor_props, ?SQL_ALARM_SENSOR_PROPS}
     ]).
 
 % TODO: use a binary:replace to clean up \n's in the query strings

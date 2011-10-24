@@ -46,6 +46,10 @@
 -define(MONTH, 2419200).
 -define(YEAR, 31536000).
 
+% unit conversion factors from rrd to ...
+-define(FACTOR_WATT,         3600).     % Wh/s -> Watt
+-define(FACTOR_LPERDAY, 24 * 3600).     % L/s -> L/day
+
 % alarm/logging severity levels
 -define(EMERGENCY, 0).
 -define(ALERT,     1).
