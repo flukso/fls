@@ -1,0 +1,3 @@
+[submodule "api/flukso/deps/esmtp"]
+	path = api/flukso/deps/esmtp
+	url = git://github.com/archaelus/esmtp.git
