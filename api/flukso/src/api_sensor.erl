@@ -254,7 +254,9 @@ process_measurements(Measurements, ReqData, #state{sensor = Sensor} = State) ->
                 update_night(Sensor, Uid, Midnight, LastTimestamp, ReqData),
 
             mysql:execute(pool, sensor_update,
-                [check:unix(), NewMidnight, LastValue, Sensor]);
+                [check:unix(), NewMidnight, LastValue, Sensor]),
+
+            event:sensor_update(Sensor);
 
         {error, Response} ->
             flog:drupal(Uid, <<"rrdupdate.base">>, list_to_binary(Response), ?ERROR, ReqData)
