@@ -124,6 +124,8 @@ function _logger_measurement_add($auth, $logs) {
           }
           // {logger_meters} is updated with the true metervalue $value, NOT $value*$meterdata->factor since we're not normalising this entry!
           db_query("UPDATE {logger_meters} SET access = %d, night = %d, value = %d WHERE meter = '%s'", time(), $meterdata->night, $value, $meter);
+
+          _logger_sensor_update($meter);
         }
         else {
           watchdog_xmlrpc('logger.measurementAdd', 'shell command execution failed: %return %command', array('%command' => $command, '%return' => $return), WATCHDOG_ERROR);
@@ -171,4 +173,15 @@ function _logger_serialise($data) {
   else {
     return (string)$data;
   }
+}
+
+/**
+ * Trigger a sensor update event in webmachine
+ */
+function _logger_sensor_update($sensor) {
+  $host = "localhost:9999";
+  $token = db_result(db_query("SELECT token FROM {logger_tokens} WHERE meter = '%s'", $sensor));
+
+  $ch = curl_init("http://$host/sensor/$sensor?version=1.0&token=$token&update=true");
+  curl_exec($ch);
 }
