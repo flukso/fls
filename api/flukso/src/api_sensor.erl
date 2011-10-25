@@ -78,9 +78,9 @@ malformed_GET(ReqData, _State) ->
 
     {Start, End, Resolution, ValidTime} =
         check:times(wrq:get_qs_value("interval", ReqData),
-                   wrq:get_qs_value("start", ReqData),
-                   wrq:get_qs_value("end", ReqData),
-                   wrq:get_qs_value("resolution", ReqData)),
+                    wrq:get_qs_value("start", ReqData),
+                    wrq:get_qs_value("end", ReqData),
+                    wrq:get_qs_value("resolution", ReqData)),
 
     {Factor, ValidUnit} =
         check:unit(wrq:get_qs_value("unit", ReqData)),
