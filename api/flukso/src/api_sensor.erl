@@ -26,6 +26,7 @@
          content_types_provided/2,
          timeseries_to_json/2,
          param_to_json/2,
+         update_to_json/2,
          process_post/2]).
 
 -include_lib("webmachine/include/webmachine.hrl").
@@ -95,6 +96,9 @@ malformed_GET(ReqData, _State) ->
     {Param, ValidParam} =
         check:param(wrq:get_qs_value("param", ReqData)),
 
+    {_Update, ValidUpdate} =
+        check:update(wrq:get_qs_value("update", ReqData)),
+
     State = #state{sensor     = Sensor, 
                    start      = Start,
                    'end'      = End,
@@ -105,14 +109,17 @@ malformed_GET(ReqData, _State) ->
                    param      = Param},
 
     case {ValidVersion, ValidSensor, ValidToken, ValidTime,
-                         ValidUnit, ValidJsonp, ValidParam}  of
-        {true, true, true,  true,  true, true, false} ->  % GET timeseries
+                        ValidUnit, ValidJsonp, ValidParam, ValidUpdate}  of
+        {true, true, true,  true,  true, true, false, false} ->  % GET timeseries
             EndState = State#state{return = timeseries},
             {false, ReqData, EndState};
-        {true, true, true, false, false,    _,  true} ->  % GET param
+        {true, true, true, false, false,    _,  true, false} ->  % GET param
             EndState = State#state{return = param},
             {false, ReqData, EndState};
-	_ ->
+        {true, true, true, false, false,    _, false,  true} ->  % 'GET' update
+            EndState = State#state{return = update},
+            {false, ReqData, EndState};
+	    _ ->
             {true, ReqData, State}
     end. 
 
@@ -157,6 +164,7 @@ content_types_provided(ReqData, #state{return = Return} = State) ->
            case Return of
                timeseries -> timeseries_to_json;
                param -> param_to_json;
+               update -> update_to_json;
                _ -> dummy_callback  % for POST
            end}],
         ReqData, State}.
@@ -200,6 +208,10 @@ param_to_json(ReqData, #state{sensor = Sensor} = State) ->
 
     JsonResponse = mochijson2:encode({struct, Objects}),
     {JsonResponse, ReqData, State}.
+
+update_to_json(ReqData, #state{sensor = Sensor} = State) ->
+    event:sensor_update(Sensor),
+    {"\"sensor update event triggered\"", ReqData, State}.
 
 process_post(ReqData, State) ->
     {struct, JsonData} = mochijson2:decode(wrq:req_body(ReqData)),

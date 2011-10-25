@@ -32,6 +32,7 @@
          unit/1,
          jsonp/1,
          param/1,
+         update/1,
 
          unix/0]).
 
@@ -159,6 +160,14 @@ param("all") ->
     {"all", true};
 param(_) ->
     {false, false}.
+
+update(undefined) ->
+    {undefined, false};
+update("true") ->
+    {"true", true};
+update(_) ->
+    {false, false}.
+
 
 %% helper functions
 unix() ->
