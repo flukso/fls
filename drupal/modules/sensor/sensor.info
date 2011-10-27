@@ -1,0 +1,6 @@
+name = Sensor
+description = Implements the Flukso sensor administration pages
+package = Flukso
+core = 6.x
+version = 6.x-0.1
+; dependencies[] =

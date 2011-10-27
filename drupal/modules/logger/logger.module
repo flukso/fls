@@ -268,15 +268,6 @@ function logger_menu() {
     'file'                => 'logger.admin.inc',
     'weight'              => 3,
   );
-  $items['user/%user_uid_optional/sensors'] = array(
-    'title'               => 'Sensors',
-    'page callback'       => '_logger_account_sensors',
-    'access callback'     => '_logger_account_access',
-    'access arguments'    => array('logger', 1),
-    'type'                => MENU_LOCAL_TASK,
-    'file'                => 'logger.admin.inc',
-    'weight'              => 3,
-  );
 
   return $items;
 }
@@ -680,10 +671,6 @@ function logger_theme() {
       'file' => 'logger.admin.inc',
     ),
     'logger_account_devices_list' => array(
-      'arguments' => array('items' => NULL),
-      'file' => 'logger.admin.inc',
-    ),
-    'logger_account_sensors_list' => array(
       'arguments' => array('items' => NULL),
       'file' => 'logger.admin.inc',
     ),

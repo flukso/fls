@@ -148,57 +148,6 @@ function theme_logger_account_devices_list($items) {
 }
 
 /**
- * Callback function for the user/x/sensors page
- *
- * @param $type
- *   String defining the sensor type
- */
-function _logger_account_sensors() {
-  global $user;
-  $rows = array();
-
-  $result = db_query("SELECT lm.meter, lm.type, lm.function, lt.token, lt.permissions 
-                      FROM {logger_meters} lm
-                      INNER JOIN {logger_tokens} lt
-                        ON lm.meter = lt.meter
-                      WHERE lm.uid = %d
-                        AND (lm.type = '%s' OR lm.type = '%s' OR lm.type = '%s')
-                        AND lm.enabled = %d
-                      ORDER BY lm.function, lm.type",
-                      $user->uid, 'electricity', 'gas', 'water', 1);
-
-  while ($sensor = db_fetch_object($result)) {
-    $row = array();
-    $row[] = $sensor->meter;
-    $row[] = $sensor->token;
-    $row[] = $sensor->type;
-    $row[] = $sensor->function;
-
-    $rows[] = $row;
-  }
-
-  return theme('logger_account_sensors_list', $rows);
-}
-
-/**
- * Theme function for displaying the user's sensors
- *
- * @param $items
- *   An array of table rows.
- */
-function theme_logger_account_sensors_list($items) {
-  if (count($items) > 0) {
-    $headers = array(t('Sensor'), t('Token'), t('Type'), t('Function'));
-    $output  = theme('table', $headers, $items);
-  }
-  else {
-    $output = t('No sensors available.');
-  }
-
-  return $output;
-}
-
-/**
  * Callback function for the user/x/privacy page
  */
 function _logger_account_privacy() {
