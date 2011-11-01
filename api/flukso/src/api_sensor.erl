@@ -91,7 +91,7 @@ malformed_GET(ReqData, _State) ->
                     wrq:get_qs_value("token", ReqData)),
 
     {Jsonp, ValidJsonp} =
-        check:jsonp(wrq:get_qs_value("jsonp", ReqData)),
+        check:jsonp(wrq:get_qs_value("callback", ReqData)),
 
     {Param, ValidParam} =
         check:param(wrq:get_qs_value("param", ReqData)),
