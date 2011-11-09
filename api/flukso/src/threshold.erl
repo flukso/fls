@@ -48,14 +48,14 @@ to_thld([Sensor, Type, Resolution, Threshold, State, Timestamp]) ->
 check(#thld{state = ?DISABLED}) ->
     {ok, disabled};
 check(#thld{resolution = ?NIGHT} = Thld) ->
-    check(night, Thld#thld{resolution = ?DAY});
+    check(night, Thld);
 check(Thld) ->
     check(base, Thld).        
 
 check(Rrd, #thld{sensor = Sensor, s_timestamp = Start, resolution = Resolution} = Thld) ->
     End = check:unix(),
 
-    case rrd:fetch(Rrd, Sensor, Start, End, Resolution, raw) of
+    case rrd:fetch(Rrd, Sensor, Start, End, abs(Resolution), raw) of
         {ok, [], _Nans} ->
             {ok, nodata};
 
