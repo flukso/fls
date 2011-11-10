@@ -1,0 +1,6 @@
+name = Chart
+description = Render Flukso time series charts
+package = Flukso
+core = 6.x
+version = 6.x-0.1
+; dependencies[] =

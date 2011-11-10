@@ -1,0 +1,13 @@
+--- a/highstock.src.js	2011-11-10 18:48:45.000000000 +0000
++++ b/highstock.src.js	2011-11-10 18:49:08.000000000 +0000
+@@ -10893,8 +10893,8 @@
+ 					if (i && options.step) {
+ 						var lastPoint = segment[i - 1];
+ 						segmentPath.push(
+-							point.plotX,
+-							lastPoint.plotY
++							lastPoint.plotX,
++							point.plotY
+ 						);
+ 					}
+ 
