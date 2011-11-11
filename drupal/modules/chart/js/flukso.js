@@ -1,5 +1,5 @@
 $(function() {
-	$.getJSON('https://www.flukso.net/api/sensor/c1411c6b4f9910bbbab09f145f8533b9?version=1.0&token=d8a8ab8893ea73f768b66b45234b5c3a&interval=day&resolution=15min&unit=watt&callback=?', function(data) {
+	$.getJSON('https://www.flukso.net/api/sensor/c1411c6b4f9910bbbab09f145f8533b9?version=1.0&token=d8a8ab8893ea73f768b66b45234b5c3a&interval=week&resolution=15min&unit=watt&callback=?', function(data) {
 
 		var formatPoint = function(point) {
 			point[0] = point[0] * 1000;
@@ -54,10 +54,10 @@ $(function() {
 
 			rangeSelector: {
 				enabled: false
-				//selected: 1
 			},
 
 			xAxis: {
+				range: 24 * 3600 * 1000, /* = day */
 				gridLineWidth: 1,
 				gridLineDashStyle: 'ShortDot',
 				lineColor: '#000',
