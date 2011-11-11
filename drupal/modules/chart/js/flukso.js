@@ -126,3 +126,9 @@ function pollServer() {
 $(document).ready(function() {
 	pollServer();
 });
+
+$('#gas').click(function() {
+    alert('Handler for .click() on gas called.');
+    return false; /* preventDefault and stopPropagation */
+});
+

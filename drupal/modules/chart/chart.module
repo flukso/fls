@@ -43,6 +43,21 @@ function _chart_render() {
   drupal_add_js(CHART_PATH . '/js/highstock.src.js');
   drupal_add_js(CHART_PATH . '/js/flukso.js');
 
-  $output = '<div id="chart" style="height: 500px; width: 600px; margin: 0 0 0 0.6em;"></div>';
+  $output .= '<ul class="tabs primary">';
+  $output .= '<li id="electricity" class="active"><a href="/chart" class="active">electricity</a></li>';
+  $output .= '<li id="gas"><a href="/chart">gas</a></li>';
+  $output .= '<li id="water"><a href="/chart">water</a></li>';
+  $output .= '</ul>';
+
+  $output .= '<ul class="tabs secondary">';
+  $output .= '<li id="hour"><a href="/chart">hour</a></li>';
+  $output .= '<li id="day" class="active" ><a href="/chart" class="active">day</a></li>';
+  $output .= '<li id="month"><a href="/chart">month</a></li>';
+  $output .= '<li id="year"><a href="/chart">year</a></li>';
+  $output .= '<li id="night"><a href="/chart">night</a></li>';
+  $output .= '</ul>';
+
+  $output .= '<div id="chart" style="height: 500px; width: 600px; margin: 1.5em 0 0 0.8em;"></div>';
+
   return $output;
 }
