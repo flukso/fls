@@ -23,7 +23,7 @@ $(function() {
 				renderTo: 'chart',
 				backgroundColor: '#f3f3f3',
 				animation: {
-					duration : 250,
+					duration : 400,
 					easing : 'swing'
 				}
 			},
@@ -42,6 +42,12 @@ $(function() {
 
 			plotOptions: {
 				line: {
+					animation: {
+						duration : 400,
+						easing : 'swing'
+					},
+
+					connectNulls: false,
 					lineWidth: 1
 				}
 			},
