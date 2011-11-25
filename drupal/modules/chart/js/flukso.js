@@ -12,6 +12,9 @@ window.chartConfig = {
 			duration : 400,
 			easing : 'swing'
 		},
+
+		events: {
+        },
 	},
 
 	colors: [
@@ -95,10 +98,10 @@ window.chartConfig = {
 	series: []
 };
 
-function pollServer() {
-	$.getJSON('https://www.flukso.net/api/sensor/c1411c6b4f9910bbbab09f145f8533b9?version=1.0&token=d8a8ab8893ea73f768b66b45234b5c3a&interval=week&resolution=15min&unit=watt&callback=?', function(data) {
-
+$($.getJSON('https://www.flukso.net/api/sensor/c1411c6b4f9910bbbab09f145f8533b9?version=1.0&token=d8a8ab8893ea73f768b66b45234b5c3a&interval=week&resolution=15min&unit=watt&callback=?',
+	function(data) {
 		var formatPoint = function(point) {
+			/* convert to ms timestamps */
 			point[0] = point[0] * 1000;
 
 			if (point[1] == 'nan') {
@@ -120,15 +123,23 @@ function pollServer() {
 		chartConfig.series.push(series);
 
 		window.chart = new Highcharts.StockChart(chartConfig);
-	});
-}
+	})
+);
 
-$(document).ready(function() {
-	pollServer();
+$('ul.tabs li').click(function() {
+    /* remove active class from former tab */
+	$(this).siblings().removeClass('active');
+	$(this).siblings().children().removeClass('active');
+
+    /* activate newly clicked tab */
+	$(this).addClass('active');
+	$(this).children().addClass('active');
+
+    /* determine the type and interval */
+    var type = $('ul.tabs.primary li.active').attr('id');
+    var interval = $('ul.tabs.secondary li.active').attr('id');
+
+    /* insert some magic here */
+
+	return false; /* preventDefault and stopPropagation */
 });
-
-$('#gas').click(function() {
-    alert('Handler for .click() on gas called.');
-    return false; /* preventDefault and stopPropagation */
-});
-
