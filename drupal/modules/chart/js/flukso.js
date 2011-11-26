@@ -98,33 +98,63 @@ window.chartConfig = {
 	series: []
 };
 
-$($.getJSON('https://www.flukso.net/api/sensor/c1411c6b4f9910bbbab09f145f8533b9?version=1.0&token=d8a8ab8893ea73f768b66b45234b5c3a&interval=week&resolution=15min&unit=watt&callback=?',
-	function(data) {
-		var formatPoint = function(point) {
-			/* convert to ms timestamps */
-			point[0] = point[0] * 1000;
+$(function () {
+	/* closure returning a unique callback for each getJSON invocation */
+	function createCb(sensorId) {
+		return function (data) {
+			var formatPoint = function(point) {
+				/* convert to ms timestamps */
+				point[0] = point[0] * 1000;
 
-			if (point[1] == 'nan') {
-				point[1] = null
+				if (point[1] == 'nan') {
+					point[1] = null
+				};
+
+				return point;
 			};
 
-			return point;
-		};
+			var series = {
+				name: sensorId,
+				data: data.map(formatPoint),
+				step: true,
+				tooltip: {
+					yDecimals: 0
+				}
+			};
+ 
+			chartConfig.series.push(series);
 
-		var series = {
-			name: 'flukso sensor',
-			data: data.map(formatPoint),
-			step: true,
-			tooltip: {
-				yDecimals: 0
+			/* AJAX callback synchronization through semaphore
+			 * we start rendering the chart after the last reply has been received
+			 */
+			chartSemaphore--;
+
+			if (chartSemaphore == 0) {
+				console.log('charting now!');
+				window.chart = new Highcharts.StockChart(chartConfig);
 			}
 		};
- 
-		chartConfig.series.push(series);
+	};
 
-		window.chart = new Highcharts.StockChart(chartConfig);
-	})
-);
+	var baseUrl = 'https://www.flukso.net/api/sensor/';
+	var sensorId = 'c1411c6b4f9910bbbab09f145f8533b9';
+	var callback = '?callback=?';
+	var queryParams = {
+		version: '1.0',
+		token: 'd8a8ab8893ea73f768b66b45234b5c3a',
+		interval: 'week',
+		resolution: '15min',
+		unit: 'watt'
+	};
+
+	window.chartSemaphore = 0;
+
+	for (var i=0; i<4; i++) {
+		chartSemaphore++;
+		$.getJSON(baseUrl + sensorId + callback, queryParams, createCb(i));
+	};
+});
+
 
 $('ul.tabs li').click(function() {
     /* remove active class from former tab */
