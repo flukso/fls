@@ -22,7 +22,7 @@
 -define(RRD_BASE_PATH,   "var/data/base/").
 -define(RRD_NIGHT_PATH, "var/data/night/").
 
-% webmachine state record
+% webmachine state records
 -record(state,
     {'sensor',
      'start',
@@ -34,7 +34,9 @@
      'digest',
      'jsonp',
      'param',
-     'return'}).
+     'return',
+     'uid',
+     'session'}).
 
 % interval definitions
 -define(MINUTE,     60).

@@ -36,6 +36,14 @@
        VALUES
            (?, ?, ?, ?, ?, ?, ?, ?)">>).
 
+-define(SQL_SESSION,
+    <<"SELECT
+           uid
+       FROM
+           sessions
+       WHERE
+           sid = ?">>).
+
 -define(SQL_PERMISSIONS,
     <<"SELECT 
            permissions
@@ -186,6 +194,7 @@
 
 -define(STATEMENTS,
     [{watchdog, ?SQL_WATCHDOG},
+     {session, ?SQL_SESSION},
      {permissions, ?SQL_PERMISSIONS},
      {master_token, ?SQL_MASTER_TOKEN},
      {sensor_key, ?SQL_SENSOR_KEY},

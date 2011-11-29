@@ -24,8 +24,11 @@
 
          sensor/1,
          device/1,
+         uid/1,
+ 
          token/2,
          digest/1,
+         session/1,
 
          times/4,
 
@@ -60,6 +63,10 @@ sensor(Sensor) ->
 device(Device) ->
     hex(Device, 32).
 
+uid(Uid) ->
+    UidInt = (catch list_to_integer(Uid)),
+    {UidInt, is_number(UidInt)}.
+
 token(undefined, undefined) ->
     {false, false};
 token(Token, undefined) ->
@@ -72,9 +79,18 @@ token(_, _) ->
 digest(Digest) ->
     hex(Digest, 40).
 
+session(Session) ->
+    alphanum(Session, 26).
+
 % local
 hex(String, Length) ->
     case re:run(String, "[0-9a-f]+", []) of 
+        {match, [{0, Length}]} -> {String, true};
+        _ -> {false, false}
+    end.
+
+alphanum(String, Length) ->
+    case re:run(String, "[0-9a-z]+", []) of 
         {match, [{0, Length}]} -> {String, true};
         _ -> {false, false}
     end.
