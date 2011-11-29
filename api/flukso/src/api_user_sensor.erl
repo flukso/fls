@@ -52,11 +52,15 @@ malformed_request(ReqData, _State) ->
     {Session, ValidSession} =
         check:session(wrq:get_cookie_value(session_name(), ReqData)),
 
-    State = #state{uid = Uid,
-                   session = Session},
+    {Jsonp, ValidJsonp} =
+        check:jsonp(wrq:get_qs_value("callback", ReqData)),
 
-    {case {ValidVersion, ValidUid, ValidSession} of
-        {true, true, true} -> false;
+    State = #state{uid     = Uid,
+                   session = Session,
+                   jsonp   = Jsonp},
+
+    {case {ValidVersion, ValidUid, ValidSession, ValidJsonp} of
+        {true, true, true, true} -> false;
         _ -> true
      end,
     ReqData, State}.
@@ -79,7 +83,7 @@ is_authorized(ReqData, #state{uid = ClientUid, session = Session} = State) ->
 content_types_provided(ReqData, State) -> 
         {[{"application/json", to_json}], ReqData, State}.
 
-to_json(ReqData, #state{uid = Uid} = State) ->
+to_json(ReqData, #state{uid = Uid, jsonp = Jsonp} = State) ->
     {data, Result} = mysql:execute(pool, user_sensor, [Uid]),
 
     Data = [{struct, [{<<"sensor">>, Sensor},
@@ -87,7 +91,13 @@ to_json(ReqData, #state{uid = Uid} = State) ->
                       {<<"function">>, Function}]}
               || [Sensor, Type, Function] <- mysql:get_result_rows(Result)],
 
-    {mochijson2:encode(Data), ReqData, State}.
+    Reply = mochijson2:encode(Data),
+
+    {case Jsonp of
+        undefined -> Reply;
+        _ -> [Jsonp, "(", Reply, ");"]
+     end,
+    ReqData, State}.
 
 % Local functions
 session_name() ->
