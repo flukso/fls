@@ -119,6 +119,16 @@
        WHERE
            meter = ?">>).
 
+-define(SQL_USER_SENSOR,
+    <<"SELECT
+           meter,
+           type,
+           function
+       FROM
+           logger_meters
+       WHERE
+           uid = ? AND enabled = 1">>).
+
 -define(SQL_TIMEZONE,
     <<"SELECT
            timezone
@@ -202,6 +212,7 @@
      {sensor_param, ?SQL_SENSOR_PARAM},
      {sensor_update, ?SQL_SENSOR_UPDATE},
      {sensor_config, ?SQL_SENSOR_CONFIG},
+     {user_sensor, ?SQL_USER_SENSOR},
      {timezone, ?SQL_TIMEZONE},
      {device_key, ?SQL_DEVICE_KEY},
      {device_props, ?SQL_DEVICE_PROPS},

@@ -79,9 +79,15 @@ is_authorized(ReqData, #state{uid = ClientUid, session = Session} = State) ->
 content_types_provided(ReqData, State) -> 
         {[{"application/json", to_json}], ReqData, State}.
 
-to_json(ReqData, State) ->
-    Reply = "fill in this blank",
-    {Reply, ReqData, State}.
+to_json(ReqData, #state{uid = Uid} = State) ->
+    {data, Result} = mysql:execute(pool, user_sensor, [Uid]),
+
+    Data = [{struct, [{<<"sensor">>, Sensor},
+                      {<<"type">>, Type},
+                      {<<"function">>, Function}]}
+              || [Sensor, Type, Function] <- mysql:get_result_rows(Result)],
+
+    {mochijson2:encode(Data), ReqData, State}.
 
 % Local functions
 session_name() ->
