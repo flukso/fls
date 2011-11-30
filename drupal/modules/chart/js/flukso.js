@@ -99,9 +99,30 @@ window.chartConfig = {
 };
 
 $(function () {
+	var processSensors = function(uidSensorsObject) {
+		/* hardcode the uid for the time being */
+		var Uid = 1;
+
+		window.flukso = new Array();
+		flukso[Uid] = { "sensors" : uidSensorsObject };
+
+		getSensorData("electricity", "day");
+	};
+
+	var baseUrl = 'https://www.flukso.net/api/user/1/sensor';
+	var callback = '?callback=?';
+	var queryParams = {
+		version: '1.0'
+	};
+
+	/* GET /user/<uid>/sensor?version=1.0&callback=? */
+	$.getJSON(baseUrl + callback, queryParams, processSensors);
+});
+
+window.getSensorData = function(type, interval) {
 	/* closure returning a unique callback for each getJSON invocation */
 	function createCb(sensorId) {
-		return function (data) {
+		return function(data) {
 			var formatPoint = function(point) {
 				/* convert to ms timestamps */
 				point[0] = point[0] * 1000;
@@ -124,8 +145,8 @@ $(function () {
  
 			chartConfig.series.push(series);
 
-			/* AJAX callback synchronization through semaphore
-			 * we start rendering the chart after the last reply has been received
+			/* AJAX callback synchronization through the semaphore
+			 * the last request to return will take care of chart rendering
 			 */
 			chartSemaphore--;
 
@@ -141,19 +162,35 @@ $(function () {
 	var callback = '?callback=?';
 	var queryParams = {
 		version: '1.0',
-		token: 'd8a8ab8893ea73f768b66b45234b5c3a',
+		token: '9b2b5b4cd37f3741fc7cc2b7d69bdab2',
 		interval: 'week',
 		resolution: '15min',
 		unit: 'watt'
 	};
 
+    chartConfig.series = [];
 	window.chartSemaphore = 0;
 
-	for (var i=0; i<4; i++) {
-		chartSemaphore++;
-		$.getJSON(baseUrl + sensorId + callback, queryParams, createCb(i));
+	/* hardcoded Uid */
+	var Uid = 1;
+
+	for (var i in flukso[Uid].sensors) {
+		var sensorObj = flukso[Uid].sensors[i];
+
+        /* debugging */
+		console.log(sensorObj);
+
+		if (sensorObj.type == type) {
+			chartSemaphore++;
+			$.getJSON(baseUrl + sensorObj.sensor + callback, queryParams, createCb(sensorObj.function));
+		};
 	};
-});
+
+	/* TODO return to previous tab when no data for this type is present */
+	if (chartSemaphore == 0) {
+		window.chart = new Highcharts.StockChart(chartConfig);
+	};
+};
 
 
 $('ul.tabs li').click(function() {
@@ -170,6 +207,7 @@ $('ul.tabs li').click(function() {
     var interval = $('ul.tabs.secondary li.active').attr('id');
 
     /* insert some magic here */
+    getSensorData(type, interval);
 
 	return false; /* preventDefault and stopPropagation */
 });
