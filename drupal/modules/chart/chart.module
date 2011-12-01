@@ -40,8 +40,12 @@ function chart_menu() {
 } 
 
 function _chart_render() {
+  global $user;
+
   drupal_add_js(CHART_PATH . '/js/highstock.src.js');
   drupal_add_js(CHART_PATH . '/js/flukso.js');
+
+  drupal_add_js(array('uid' => $user->uid) , 'setting');
 
   $output .= '<ul class="tabs primary">';
   $output .= '<li id="electricity" class="active"><a href="/chart" class="active">electricity</a></li>';

@@ -101,16 +101,16 @@ window.chartConfig = {
 
 $(function () {
 	var processSensors = function(uidSensorsObject) {
-		/* hardcode the uid for the time being */
-		var Uid = 1;
-
 		window.flukso = new Array();
-		flukso[Uid] = { "sensors" : uidSensorsObject };
+		flukso[uid] = { "sensors" : uidSensorsObject };
 
+		/* render the default chart */
 		getSensorData("electricity", "day");
 	};
 
-	var baseUrl = 'https://www.flukso.net/api/user/1/sensor';
+	var uid = Drupal.settings.uid;
+
+	var baseUrl = 'https://www.flukso.net/api/user/' + uid + '/sensor';
 	var callback = '?callback=?';
 	var queryParams = {
 		version: '1.0'
@@ -198,11 +198,10 @@ window.getSensorData = function(type, interval) {
 
 	window.chartSemaphore = 0;
 
-	/* hardcoded Uid */
-	var Uid = 1;
+	var uid = Drupal.settings.uid;
 
-	for (var i in flukso[Uid].sensors) {
-		var sensorObj = flukso[Uid].sensors[i];
+	for (var i in flukso[uid].sensors) {
+		var sensorObj = flukso[uid].sensors[i];
 
         /* debugging */
 		console.log(sensorObj);
