@@ -4,6 +4,8 @@ Highcharts.setOptions({
 	}
 });
 
+window.chart = null;
+
 window.chartConfig = {
 	chart: {
 		renderTo: 'chart',
@@ -46,7 +48,6 @@ window.chartConfig = {
 	},
 
 	xAxis: {
-		range: 24 * 3600 * 1000, /* = day */
 		gridLineWidth: 1,
 		gridLineDashStyle: 'ShortDot',
 		lineColor: '#000',
@@ -121,7 +122,7 @@ $(function () {
 
 window.getSensorData = function(type, interval) {
 	/* closure returning a unique callback for each getJSON invocation */
-	function createCb(sensorId) {
+	var createCb = function(sensorId) {
 		return function(data) {
 			var formatPoint = function(point) {
 				/* convert to ms timestamps */
@@ -151,24 +152,50 @@ window.getSensorData = function(type, interval) {
 			chartSemaphore--;
 
 			if (chartSemaphore == 0) {
-				console.log('charting now!');
 				window.chart = new Highcharts.StockChart(chartConfig);
 			}
 		};
 	};
 
+	const SECOND  = 1000; /* ms */
+	const MINUTE  =  60 * SECOND;
+	const QUARTER =  15 * MINUTE;
+	const HOUR    =  60 * MINUTE;
+	const DAY     =  24 * HOUR;
+	const WEEK    =   7 * DAY;
+	const MONTH   =  30 * DAY;
+	const YEAR    = 365 * DAY;
+
+	var timeParams = {
+		hour  : { interval : "day"  , resolution : "minute", range : HOUR  },
+		day   : { interval : "week" , resolution : "15min" , range : DAY   },
+		month : { interval : "year" , resolution : "day"   , range : MONTH },
+		year  : { interval : "year" , resolution : "week"  , range : YEAR  },
+		night : { interval : "night", resolution : "day"   , range : MONTH }
+    };
+
 	var baseUrl = 'https://www.flukso.net/api/sensor/';
-	var sensorId = 'c1411c6b4f9910bbbab09f145f8533b9';
 	var callback = '?callback=?';
 	var queryParams = {
 		version: '1.0',
-		token: '9b2b5b4cd37f3741fc7cc2b7d69bdab2',
-		interval: 'week',
-		resolution: '15min',
-		unit: 'watt'
+		token: '9b2b5b4cd37f3741fc7cc2b7d69bdab2',	/* TODO use the site cookie instead */
+		interval: timeParams[interval].interval,	/* we fetch a bigger interval than requested */
+		resolution: timeParams[interval].resolution,
+		unit: 'watt'								/* TODO stop hardcoding the unit */
 	};
 
-    chartConfig.series = [];
+	chartConfig.series = [];
+
+	/* For some weird reason, the rendering of the chart changes the
+	 * original chartConfig object. So we're catching this case here.
+	 */
+	if (chart == null) {
+		chartConfig.xAxis.range = timeParams[interval].range;
+	}
+	else {
+		chartConfig.xAxis[0].range = timeParams[interval].range;
+	};
+
 	window.chartSemaphore = 0;
 
 	/* hardcoded Uid */
@@ -188,7 +215,7 @@ window.getSensorData = function(type, interval) {
 
 	/* TODO return to previous tab when no data for this type is present */
 	if (chartSemaphore == 0) {
-		window.chart = new Highcharts.StockChart(chartConfig);
+		location.reload();
 	};
 };
 
@@ -209,5 +236,6 @@ $('ul.tabs li').click(function() {
     /* insert some magic here */
     getSensorData(type, interval);
 
-	return false; /* preventDefault and stopPropagation */
+	/* preventDefault and stopPropagation */
+	return false;
 });
