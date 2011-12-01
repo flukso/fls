@@ -178,7 +178,6 @@ window.getSensorData = function(type, interval) {
 	var callback = '?callback=?';
 	var queryParams = {
 		version: '1.0',
-		token: '9b2b5b4cd37f3741fc7cc2b7d69bdab2',	/* TODO use the site cookie instead */
 		interval: timeParams[interval].interval,	/* we fetch a bigger interval than requested */
 		resolution: timeParams[interval].resolution,
 		unit: 'watt'								/* TODO stop hardcoding the unit */
