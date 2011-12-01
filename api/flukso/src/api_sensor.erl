@@ -90,6 +90,9 @@ malformed_GET(ReqData, _State) ->
         check:token(wrq:get_req_header("X-Token", ReqData),
                     wrq:get_qs_value("token", ReqData)),
 
+    {Session, ValidSession} =
+        check:session(wrq:get_cookie_value(check:session_name(), ReqData)),
+
     {Jsonp, ValidJsonp} =
         check:jsonp(wrq:get_qs_value("callback", ReqData)),
 
@@ -105,10 +108,11 @@ malformed_GET(ReqData, _State) ->
                    resolution = Resolution,
                    factor     = Factor,
                    token      = Token,
+                   session    = Session,
                    jsonp      = Jsonp,
                    param      = Param},
 
-    case {ValidVersion, ValidSensor, ValidToken, ValidTime,
+    case {ValidVersion, ValidSensor, ValidToken or ValidSession, ValidTime,
                         ValidUnit, ValidJsonp, ValidParam, ValidUpdate}  of
         {true, true, true,  true,  true, true, false, false} ->  % GET timeseries
             EndState = State#state{return = timeseries},
@@ -148,14 +152,18 @@ is_auth_POST(ReqData, #state{sensor = Sensor, digest = ClientDigest} = State) ->
             {"No proper provisioning for this sensor", ReqData, State}
     end.
 
-is_auth_GET(ReqData, #state{sensor = Sensor, token = Token} = State) ->
+is_auth_GET(ReqData, #state{sensor = Sensor, token = Token, session = Session} = State) ->
     {data, Permission} = mysql:execute(pool, permissions, [Sensor, Token]),
     {data, Master} = mysql:execute(pool, master_token, [Sensor, Token]),
+    {data, Suid} = mysql:execute(pool, session, [Session]),
 
-    {case {mysql:get_result_rows(Permission), mysql:get_result_rows(Master)} of
-        {[[62]], []} -> true;
-        {[], [[_Token]]} -> true;
-        {[], []} -> "Access refused" 
+    {case { mysql:get_result_rows(Permission),
+            mysql:get_result_rows(Master),
+            mysql:get_result_rows(Suid) } of
+        {[[62]], [], []} -> true;
+        {[], [[_Token]], []} -> true;
+        {[], [], [[_Uid]]} -> true; 
+        {[], [], []} -> "Access refused" 
     end,
     ReqData, State}.
 

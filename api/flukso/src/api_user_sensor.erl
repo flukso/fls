@@ -50,7 +50,7 @@ malformed_request(ReqData, _State) ->
         check:uid(wrq:path_info(uid, ReqData)),
 
     {Session, ValidSession} =
-        check:session(wrq:get_cookie_value(session_name(), ReqData)),
+        check:session(wrq:get_cookie_value(check:session_name(), ReqData)),
 
     {Jsonp, ValidJsonp} =
         check:jsonp(wrq:get_qs_value("callback", ReqData)),
@@ -98,9 +98,3 @@ to_json(ReqData, #state{uid = Uid, jsonp = Jsonp} = State) ->
         _ -> [Jsonp, "(", Reply, ");"]
      end,
     ReqData, State}.
-
-% Local functions
-session_name() ->
-    {ok, Cookie_domain} = application:get_env(flukso, cookie_domain),
-    <<X:128/big-unsigned-integer>> = erlang:md5(Cookie_domain),
-    "SESS" ++ lists:flatten(io_lib:format("~32.16.0b", [X])).

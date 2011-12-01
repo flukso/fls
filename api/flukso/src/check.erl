@@ -29,6 +29,7 @@
          token/2,
          digest/1,
          session/1,
+         session_name/0,
 
          times/4,
 
@@ -79,8 +80,15 @@ token(_, _) ->
 digest(Digest) ->
     hex(Digest, 40).
 
+session(undefined) ->
+    {false, false};
 session(Session) ->
     alphanum(Session, 26).
+
+session_name() ->
+    {ok, Cookie_domain} = application:get_env(flukso, cookie_domain),
+    <<X:128/big-unsigned-integer>> = erlang:md5(Cookie_domain),
+    "SESS" ++ lists:flatten(io_lib:format("~32.16.0b", [X])).
 
 % local
 hex(String, Length) ->
