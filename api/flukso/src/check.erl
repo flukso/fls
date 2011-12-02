@@ -215,6 +215,7 @@ default_resolution(Interval) ->
                       {"week", "day"},
                       {"month", "day"},
                       {"year", "week"},
+                      {"decade", "week"},
                       {"night", "day"}],
 
     case lists:keyfind(Interval, 1, DefResolutions) of
@@ -230,6 +231,7 @@ time_to_seconds(Time) ->
              {"week", ?WEEK},
              {"month", ?MONTH},
              {"year", ?YEAR},
+             {"decade", ?DECADE},
              {"night", ?MONTH}],
 
     case lists:keyfind(Time, 1, Times) of

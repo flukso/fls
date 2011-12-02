@@ -39,14 +39,15 @@
      'session'}).
 
 % interval definitions
--define(MINUTE,     60).
--define(QUARTER,   900).
--define(HOUR,     3600).
--define(DAY,     86400).
--define(NIGHT,  -86400).
--define(WEEK,   604800).
--define(MONTH, 2419200).
--define(YEAR, 31536000).
+-define(MINUTE,        60).
+-define(QUARTER,      900).
+-define(HOUR,        3600).
+-define(DAY,        86400).
+-define(NIGHT,     -86400).
+-define(WEEK,      604800).
+-define(MONTH,    2419200).
+-define(YEAR,    31536000).
+-define(DECADE, 315360000).
 
 % unit conversion factors from rrd to ...
 -define(FACTOR_WATT,         3600).     % Wh/s -> Watt
