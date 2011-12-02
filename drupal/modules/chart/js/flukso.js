@@ -165,13 +165,14 @@ window.getSensorData = function(type, interval) {
 	const WEEK    =   7 * DAY;
 	const MONTH   =  30 * DAY;
 	const YEAR    = 365 * DAY;
+	const DECADE  =  10 * YEAR;
 
 	var timeParams = {
-		hour  : { interval : "day"  , resolution : "minute", range : HOUR  },
-		day   : { interval : "week" , resolution : "15min" , range : DAY   },
-		month : { interval : "year" , resolution : "day"   , range : MONTH },
-		year  : { interval : "year" , resolution : "week"  , range : YEAR  },
-		night : { interval : "night", resolution : "day"   , range : MONTH }
+		hour  : { interval : "day"    , resolution : "minute", range : HOUR  },
+		day   : { interval : "week"   , resolution : "15min" , range : DAY   },
+		month : { interval : "year"   , resolution : "day"   , range : MONTH },
+		year  : { interval : "decade" , resolution : "week"  , range : YEAR  },
+		night : { interval : "night"  , resolution : "day"   , range : MONTH }
     };
 
 	var unitParams = {
