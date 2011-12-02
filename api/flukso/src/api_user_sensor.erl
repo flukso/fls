@@ -69,6 +69,8 @@ is_authorized(ReqData, #state{uid = ClientUid, session = Session} = State) ->
     {data, Result} = mysql:execute(pool, session, [Session]),
 
     case mysql:get_result_rows(Result) of
+        [[1]] ->
+            true;
         [[SessionUid]] ->
             {case ClientUid of
                  SessionUid -> true;
