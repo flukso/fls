@@ -174,13 +174,19 @@ window.getSensorData = function(type, interval) {
 		night : { interval : "night", resolution : "day"   , range : MONTH }
     };
 
+	var unitParams = {
+		electricity : "watt",
+		water       : "lperday",
+		gas         : "lperday"
+	};
+
 	var baseUrl = 'https://www.flukso.net/api/sensor/';
 	var callback = '?callback=?';
 	var queryParams = {
 		version: '1.0',
 		interval: timeParams[interval].interval,	/* we fetch a bigger interval than requested */
 		resolution: timeParams[interval].resolution,
-		unit: 'watt'								/* TODO stop hardcoding the unit */
+		unit: unitParams[type]
 	};
 
 	chartConfig.series = [];
@@ -190,9 +196,11 @@ window.getSensorData = function(type, interval) {
 	 */
 	if (chart == null) {
 		chartConfig.xAxis.range = timeParams[interval].range;
+		chartConfig.yAxis.title.text = unitParams[type];
 	}
 	else {
 		chartConfig.xAxis[0].range = timeParams[interval].range;
+		chartConfig.yAxis[0].title.text = unitParams[type];
 	};
 
 	window.chartSemaphore = 0;
