@@ -96,6 +96,6 @@ path(Rrd, Sensor) ->
 
 y(Y, raw) ->
     list_to_float(Y);
-y(Y, Factor) when is_integer(Factor) ->
+y(Y, Factor) when is_number(Factor) ->
     round(list_to_float(Y) * Factor).
 

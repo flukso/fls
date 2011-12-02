@@ -161,7 +161,10 @@ unit(Unit) ->
     Units = [{"watt", 3600},
              {"kwhperyear", 31536},
              {"eurperyear", 5676},
-             {"audperyear", 5991}],
+             {"audperyear", 5991},
+             {"lpermin", 60},
+             {"lperday", 24 * 60 * 60},
+             {"m3peryear", 365 * 24 * 3600 / 1000}],
 
     case lists:keyfind(Unit, 1, Units) of
         false -> {false, false};
