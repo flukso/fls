@@ -216,7 +216,7 @@ window.getSensorData = function(type, interval) {
 
 		if (sensorObj.type == type) {
 			chartSemaphore++;
-			$.getJSON(baseUrl + sensorObj.sensor + callback, queryParams, createCb(sensorObj.function));
+			$.getJSON(baseUrl + sensorObj.sensor + callback, queryParams, createCb(sensorObj['function']));
 		};
 	};
 
