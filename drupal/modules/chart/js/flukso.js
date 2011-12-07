@@ -157,22 +157,24 @@ window.getSensorData = function(type, interval) {
 		};
 	};
 
-	const SECOND  = 1000; /* ms */
-	const MINUTE  =  60 * SECOND;
-	const QUARTER =  15 * MINUTE;
-	const HOUR    =  60 * MINUTE;
-	const DAY     =  24 * HOUR;
-	const WEEK    =   7 * DAY;
-	const MONTH   =  30 * DAY;
-	const YEAR    = 365 * DAY;
-	const DECADE  =  10 * YEAR;
+	var time = {
+		SECOND:		1000, /* ms */
+		MINUTE:		 60 * 1000,
+		QUARTER:	 15 *  60 * 1000,
+		HOUR:		 60 *  60 * 1000,
+		DAY:		 24 *  60 * 60 * 1000,
+		WEEK:		  7 *  24 * 60 * 60 * 1000,
+		MONTH:		 30 *  24 * 60 * 60 * 1000,
+		YEAR:		365 *  24 * 60 * 60 * 1000,
+		DECADE:		 10 * 365 * 24 * 60 * 60 * 1000
+	};
 
 	var timeParams = {
-		hour  : { interval : "day"    , resolution : "minute", range : HOUR  },
-		day   : { interval : "week"   , resolution : "15min" , range : DAY   },
-		month : { interval : "year"   , resolution : "day"   , range : MONTH },
-		year  : { interval : "decade" , resolution : "week"  , range : YEAR  },
-		night : { interval : "night"  , resolution : "day"   , range : MONTH }
+		hour  : { interval : "day"    , resolution : "minute", range : time.HOUR  },
+		day   : { interval : "week"   , resolution : "15min" , range : time.DAY   },
+		month : { interval : "year"   , resolution : "day"   , range : time.MONTH },
+		year  : { interval : "decade" , resolution : "week"  , range : time.YEAR  },
+		night : { interval : "night"  , resolution : "day"   , range : time.MONTH }
     };
 
 	var unitParams = {
