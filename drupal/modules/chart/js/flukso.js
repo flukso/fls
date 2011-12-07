@@ -16,7 +16,7 @@ window.chartConfig = {
 		},
 
 		events: {
-        },
+		}
 	},
 
 	colors: [
