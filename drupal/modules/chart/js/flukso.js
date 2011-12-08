@@ -235,8 +235,8 @@ window.getSensorData = function(type, interval) {
 	for (var i in flukso[uid].sensors) {
 		var sensorObj = flukso[uid].sensors[i];
 
-        /* debugging */
-		console.log(sensorObj);
+        /* debugging
+		console.log(sensorObj); */
 
 		if (sensorObj.type == type) {
 			chartSemaphore++;
