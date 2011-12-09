@@ -1,3 +1,6 @@
+/* ES5 directive to switch to strict mode */
+"use strict";
+
 /* provide a map method to the Array object for older, non-ES5 implementations */
 if (!Array.prototype.map) {
 	Array.prototype.map = function(fun /*, thisp*/) {
