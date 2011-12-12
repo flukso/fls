@@ -45,11 +45,14 @@ window.chartConfig = {
 	},
 
 	colors: [
-		'#f1572f', 
-		'#44c3D3', 
-		'#7aab5a', 
-		'#fbdf0d', 
-		'#a052a0',
+		'#E41A1C',	// red
+		'#377EB8',	// blue
+		'#4DAF4A',	// green
+		'#FF7F00',	// orange
+		'#984EA3',	// purple
+		'#999999',	// grey
+		'#A65628',	// brown
+		'#F781BF'	// pink
 	],
 
 	credits: {
@@ -64,7 +67,7 @@ window.chartConfig = {
 			},
 
 			connectNulls: false,
-			lineWidth: 1
+			lineWidth: 2
 		}
 	},
 
