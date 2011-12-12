@@ -21,7 +21,7 @@
     {registered, []},
     {mod, {flukso_app, []}},
     {env, [
-        {cookie_domain, "flukso.net"}
+        {cookie_domain, ".flukso.net"}
     ]},
     {applications, [
         kernel,
