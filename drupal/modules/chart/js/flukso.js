@@ -55,6 +55,18 @@ window.chartConfig = {
 		'#F781BF'	// pink
 	],
 
+/* light color palette 
+	colors: [
+		'#FB8072',	// red
+		'#80B1D3',	// blue
+		'#B3DE69',	// green
+		'#FDB462',	// orange
+		'#BEBADA',	// purple
+		'#8DD3C7',	// ?
+		'#FCCDE5'	// pink
+		'#D9D9D9',	// grey
+	],
+*/
 	credits: {
 		enabled: false
 	},
