@@ -77,7 +77,28 @@ function _logger_account_devices_submit($form, &$form_state) {
     db_query("INSERT INTO {logger_users} (uid, token, private) VALUES (%d, '%s', %d)", $user->uid, $master_token, 0);
   }
 
-  drupal_set_message(t("The device is now associated with your account."));
+  drupal_set_message(sprintf("The device with serial FL%s is now associated with your account.", $serial));
+}
+
+/**
+ * Callback function for the user/x/device/y/remove path
+ * 
+ * @param $did
+ *   ID of the device that needs to be removed from the user account
+ */
+function _logger_account_device_remove($did) {
+  global $user;
+
+  // built-in check so that user is only able to remove own devices
+  db_query("UPDATE {logger_devices} SET uid = 0 WHERE device = '%s' AND uid = %d", $did, $user->uid);   
+  db_query("UPDATE {logger_meters} SET uid = 0 WHERE device = '%s' AND uid = %d", $did, $user->uid);
+
+  $serial = db_result(db_query("SELECT serial FROM {logger_devices} WHERE device = '%s'", $did));
+  drupal_set_message(sprintf("The device with serial FL%s has been removed from your account.", $serial));
+
+  // return to the user/x/devices page
+  $destination = drupal_get_destination();
+  drupal_goto($destination);
 }
 
 /**
@@ -92,7 +113,7 @@ function theme_logger_account_devices($form) {
   global $user;
   $rows = array();
 
-  $result = db_query("SELECT serial, access, resets, uptime
+  $result = db_query("SELECT device, serial, access, resets, uptime
                       FROM {logger_devices}
                       WHERE uid = %d
                       ORDER BY serial", $user->uid);
@@ -111,15 +132,19 @@ function theme_logger_account_devices($form) {
 
   while ($device = db_fetch_object($result)) {
     $row = array();
-    $row[] = $device->serial;
+    $row[] = 'FL' . $device->serial;
     $row[] = $device->resets;
     $row[] = unix_to_userlocaltime($device->access);
     $row[] = seconds_to_dayshours($device->uptime);
 
+    $dest = drupal_get_destination();
+    $path = sprintf('user/%d/device/%s/remove', $user->uid, $device->device);
+    $row[] = l(t('remove'), $path, array('query' => $dest, 'alias' => TRUE));
+
     $rows[] = $row;
   }
 
-  $rows[] = array(drupal_render($form['serial']), array('data' => drupal_render($form['submit']), 'colspan' => 3));
+  $rows[] = array(drupal_render($form['serial']), array('data' => drupal_render($form['submit']), 'colspan' => 4));
 
   $output = drupal_render($form);
   $output .= theme('logger_account_devices_list', $rows);
@@ -137,7 +162,7 @@ function theme_logger_account_devices($form) {
  */
 function theme_logger_account_devices_list($items) {
   if (count($items) > 0) {
-    $headers = array(t('Serial'), t('Resets'), t('Last heartbeat'), t('Uptime'));
+    $headers = array(t('Serial'), t('Resets'), t('Last heartbeat'), t('Uptime'), t('Operations'));
     $output  = theme('table', $headers, $items);
   }
   else {
