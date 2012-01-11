@@ -97,7 +97,7 @@ function _logger_account_device_remove($did) {
   drupal_set_message(sprintf("The device with serial FL%s has been removed from your account.", $serial));
 
   // return to the user/x/devices page
-  $destination = drupal_get_destination();
+  $destination = sprintf("/user/%d/devices", $user->uid);
   drupal_goto($destination);
 }
 
@@ -137,9 +137,8 @@ function theme_logger_account_devices($form) {
     $row[] = unix_to_userlocaltime($device->access);
     $row[] = seconds_to_dayshours($device->uptime);
 
-    $dest = drupal_get_destination();
     $path = sprintf('user/%d/device/%s/remove', $user->uid, $device->device);
-    $row[] = l(t('remove'), $path, array('query' => $dest, 'alias' => TRUE));
+    $row[] = l(t('remove'), $path);
 
     $rows[] = $row;
   }
