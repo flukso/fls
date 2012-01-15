@@ -140,7 +140,7 @@ window.chartConfig = {
 };
 
 $(function () {
-	var processSensors = function(uidSensorsObject) {
+	function processSensors(uidSensorsObject) {
 		window.flukso = new Array();
 		flukso[uid] = { "sensors" : uidSensorsObject };
 
@@ -162,7 +162,7 @@ $(function () {
 
 window.getSensorData = function(type, interval) {
 	/* closure returning a unique callback for each getJSON invocation */
-	var createCb = function(sensorId) {
+	function createCb(sensorId) {
 		return function(data) {
 			var formatPoint = function(point) {
 				/* convert to ms timestamps */
