@@ -1,28 +1,6 @@
 /* ES5 directive to switch to strict mode */
 "use strict";
 
-/* provide a map method to the Array object for older, non-ES5 implementations */
-if (!Array.prototype.map) {
-	Array.prototype.map = function(fun /*, thisp*/) {
-		var len = this.length;
-
-		if (typeof fun != "function") {
-			throw new TypeError();
-		};
-
-		var res = new Array(len);
-		var thisp = arguments[1];
-
-		for (var i = 0; i < len; i++) {
-			if (i in this) {
-				res[i] = fun.call(thisp, this[i], i, this);
-			};
-		};
-
-		return res;
-	};
-};
-
 Highcharts.setOptions({
 	global: {
 		useUTC: false
@@ -177,7 +155,7 @@ window.getSensorData = function(type, interval) {
 
 			var series = {
 				name: sensorId,
-				data: data.map(formatPoint),
+				data: _.map(data, formatPoint),
 				step: true,
 				tooltip: {
 					yDecimals: 0

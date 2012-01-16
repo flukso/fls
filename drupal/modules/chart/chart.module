@@ -42,6 +42,8 @@ function chart_menu() {
 function _chart_render() {
   global $user;
 
+  drupal_add_js(CHART_PATH . '/js/underscore-min.js');
+  drupal_add_js(CHART_PATH . '/js/backbone-min.js');
   drupal_add_js(CHART_PATH . '/js/highstock.src.js');
   drupal_add_js(CHART_PATH . '/js/flukso.js');
 
