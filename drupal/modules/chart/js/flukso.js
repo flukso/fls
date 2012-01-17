@@ -117,27 +117,6 @@ window.chartConfig = {
 	series: []
 };
 
-$(function () {
-	function processSensors(uidSensorsObject) {
-		window.flukso = new Array();
-		flukso[uid] = { "sensors" : uidSensorsObject };
-
-		/* render the default chart */
-		getSensorData("electricity", "day");
-	};
-
-	var uid = Drupal.settings.uid;
-
-	var baseUrl = 'https://www.flukso.net/api/user/' + uid + '/sensor';
-	var callback = '?callback=?';
-	var queryParams = {
-		version: '1.0'
-	};
-
-	/* GET /user/<uid>/sensor?version=1.0&callback=? */
-	$.getJSON(baseUrl + callback, queryParams, processSensors);
-});
-
 window.getSensorData = function(type, interval) {
 	/* closure returning a unique callback for each getJSON invocation */
 	function createCb(sensorId) {
@@ -188,17 +167,17 @@ window.getSensorData = function(type, interval) {
 	};
 
 	var timeParams = {
-		hour  : { interval : "day"    , resolution : "minute", range : time.HOUR  },
+		hour  : { interval : "day"	  , resolution : "minute", range : time.HOUR  },
 		day   : { interval : "week"   , resolution : "15min" , range : time.DAY   },
-		month : { interval : "year"   , resolution : "day"   , range : time.MONTH },
+		month : { interval : "year"   , resolution : "day"	 , range : time.MONTH },
 		year  : { interval : "decade" , resolution : "week"  , range : time.YEAR  },
-		night : { interval : "night"  , resolution : "day"   , range : time.MONTH }
-    };
+		night : { interval : "night"  , resolution : "day"	 , range : time.MONTH }
+	};
 
 	var unitParams = {
 		electricity : "watt",
-		water       : "lperday",
-		gas         : "lperday"
+		water		: "lperday",
+		gas			: "lperday"
 	};
 
 	var baseUrl = 'https://www.flukso.net/api/sensor/';
@@ -231,7 +210,7 @@ window.getSensorData = function(type, interval) {
 	for (var i in flukso[uid].sensors) {
 		var sensorObj = flukso[uid].sensors[i];
 
-        /* debugging
+		/* debugging
 		console.log(sensorObj); */
 
 		if (sensorObj.type == type) {
@@ -248,21 +227,56 @@ window.getSensorData = function(type, interval) {
 
 
 $('ul.tabs li').click(function() {
-    /* remove active class from former tab */
+	/* remove active class from former tab */
 	$(this).siblings().removeClass('active');
 	$(this).siblings().children().removeClass('active');
 
-    /* activate newly clicked tab */
+	/* activate newly clicked tab */
 	$(this).addClass('active');
 	$(this).children().addClass('active');
 
-    /* determine the type and interval */
-    var type = $('ul.tabs.primary li.active').attr('id');
-    var interval = $('ul.tabs.secondary li.active').attr('id');
+	/* determine the type and interval */
+	var type = $('ul.tabs.primary li.active').attr('id');
+	var interval = $('ul.tabs.secondary li.active').attr('id');
 
-    /* insert some magic here */
-    getSensorData(type, interval);
+	/* insert some magic here */
+	getSensorData(type, interval);
 
 	/* preventDefault and stopPropagation */
 	return false;
+});
+
+$(function() {
+	var ChartRouter = Backbone.Router.extend({
+		routes: {
+			":type/:interval" : "switchChart"
+		},
+
+		switchChart: function(type, interval) {
+			getSensorData(type, interval);
+		}
+	});
+
+	var chartRouter = new ChartRouter();
+
+	Backbone.history.start({root: "/chart"});
+
+	function processSensors(uidSensorsObject) {
+		window.flukso = new Array();
+		flukso[uid] = { "sensors" : uidSensorsObject };
+
+		/* render the default chart */
+		chartRouter.navigate("electricity/day", true);
+	};
+
+	var uid = Drupal.settings.uid;
+
+	var baseUrl = 'https://www.flukso.net/api/user/' + uid + '/sensor';
+	var callback = '?callback=?';
+	var queryParams = {
+		version: '1.0'
+	};
+
+	/* GET /user/<uid>/sensor?version=1.0&callback=? */
+	$.getJSON(baseUrl + callback, queryParams, processSensors);
 });
