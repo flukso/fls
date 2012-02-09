@@ -225,62 +225,65 @@ window.getSensorData = function(type, interval) {
 	};
 };
 
+/* Create namespace for the Flukso app */
+window.Flukso = {};
+
+Flukso.TabsView = Backbone.View.extend({
+	el: $("ul.tabs li"),
+
+	events: {
+		"click": "clickTab"
+	},
+
+	/* initialize? */
+
+	clickTab: function(e) {
+		/* What isn't instantly obvious is that under the bonnet, Backbone
+		 * uses jQuery's .delegate() to provide instant support for event
+		 * delegation but goes a little further, extending it so that this
+		 * always refers to the current view object. [1]
+		 *
+		 * So we cannot use $(this) to alter the target's properties.
+		 *
+		 * [1] https://github.com/addyosmani/backbone-fundamentals#views
+		 */
+		var _this = e.currentTarget;
+
+		/* this click event should not bubble up to the default handler */
+		e.preventDefault();
+		e.stopPropagation();
+
+		/* remove active class from former tab */
+		$(_this).siblings().removeClass('active');
+		$(_this).siblings().children().removeClass('active');
+
+		/* activate newly clicked tab */
+		$(_this).addClass('active');
+		$(_this).children().addClass('active');
+
+		/* determine the type and interval */
+		var type = $('ul.tabs.primary li.active').attr('id');
+		var interval = $('ul.tabs.secondary li.active').attr('id');
+
+		/* insert some magic here */
+		Flukso.router.navigate(type + "/" + interval, true);
+	}
+});
+
+Flukso.Router = Backbone.Router.extend({
+	routes: {
+		":type/:interval" : "switchChart"
+	},
+
+	switchChart: function(type, interval) {
+		getSensorData(type, interval);
+	}
+});
+
+/* setup/glue code */
 $(function() {
-	var TabsView = Backbone.View.extend({
-		el: $("ul.tabs li"),
-
-		events: {
-			"click": "clickTab"
-		},
-
-		/* initialize? */
-
-		clickTab: function(e) {
-			/* What isn't instantly obvious is that under the bonnet, Backbone
-			 * uses jQuery's .delegate() to provide instant support for event
-			 * delegation but goes a little further, extending it so that this
-			 * always refers to the current view object. [1]
-			 *
-			 * So we cannot use $(this) to alter the target's properties.
-			 *
-			 * [1] https://github.com/addyosmani/backbone-fundamentals#views
-			 */
-			var _this = e.currentTarget;
-
-            /* this click event should not bubble up to the default handler */
-            e.preventDefault();
-            e.stopPropagation();
-
-            /* remove active class from former tab */
-            $(_this).siblings().removeClass('active');
-            $(_this).siblings().children().removeClass('active');
-
-            /* activate newly clicked tab */
-            $(_this).addClass('active');
-            $(_this).children().addClass('active');
-
-            /* determine the type and interval */
-            var type = $('ul.tabs.primary li.active').attr('id');
-            var interval = $('ul.tabs.secondary li.active').attr('id');
-
-            /* insert some magic here */
-			router.navigate(type + "/" + interval, true);
-		}
-	});
-
-	var tabsView = new TabsView();
-
-	var Router = Backbone.Router.extend({
-		routes: {
-			":type/:interval" : "switchChart"
-		},
-
-		switchChart: function(type, interval) {
-			getSensorData(type, interval);
-		}
-	});
-
-	var router = new Router();
+	Flukso.tabsView = new Flukso.TabsView();
+	Flukso.router = new Flukso.Router();
 
 	Backbone.history.start({root: "/chart"});
 
@@ -289,7 +292,7 @@ $(function() {
 		flukso[uid] = { "sensors" : uidSensorsObject };
 
 		/* render the default chart */
-		router.navigate("electricity/day", true);
+		Flukso.router.navigate("electricity/day", true);
 	};
 
 	var uid = Drupal.settings.uid;
