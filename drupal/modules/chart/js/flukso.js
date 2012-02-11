@@ -1,15 +1,43 @@
 /* ES5 directive to switch to strict mode */
 "use strict";
 
+/* Highcharts general options tweaking */
 Highcharts.setOptions({
 	global: {
 		useUTC: false
 	}
 });
 
-window.chart = null;
+/* Create a namespace and define constants for the Flukso app */
+window.Flukso = {
+	time: {
+		SECOND:		1000, /* ms */
+		MINUTE:		 60 * 1000,
+		QUARTER:	 15 *  60 * 1000,
+		HOUR:		 60 *  60 * 1000,
+		DAY:		 24 *  60 * 60 * 1000,
+		WEEK:		  7 *  24 * 60 * 60 * 1000,
+		MONTH:		 30 *  24 * 60 * 60 * 1000,
+		YEAR:		365 *  24 * 60 * 60 * 1000,
+		DECADE:		 10 * 365 * 24 * 60 * 60 * 1000
+	}
+};
 
-window.chartConfig = {
+Flukso.timeParams = {
+	hour  : { interval : "day"	  , resolution : "minute", range : Flukso.time.HOUR  },
+	day   : { interval : "week"   , resolution : "15min" , range : Flukso.time.DAY   },
+	month : { interval : "year"   , resolution : "day"	 , range : Flukso.time.MONTH },
+	year  : { interval : "decade" , resolution : "week"  , range : Flukso.time.YEAR  },
+	night : { interval : "night"  , resolution : "day"	 , range : Flukso.time.MONTH }
+};
+
+Flukso.unitParams = {
+	electricity : "watt",
+	water		: "lperday",
+	gas			: "lperday"
+};
+
+Flukso.chartConfig = {
 	chart: {
 		renderTo: 'chart',
 		backgroundColor: '#f3f3f3',
@@ -117,116 +145,98 @@ window.chartConfig = {
 	series: []
 };
 
-window.getSensorData = function(type, interval) {
-	/* closure returning a unique callback for each getJSON invocation */
-	function createCb(sensorId) {
-		return function(data) {
-			var formatPoint = function(point) {
-				/* convert to ms timestamps */
-				point[0] = point[0] * 1000;
+Flukso.Sensor = Backbone.Model.extend({
+	defaults: {
+//		sensor: null,
+		id: null, /* sensor id doubling as backbone model id */
+		uid: null,
+		type: null,
+		function: null,
+		interval: null,
+//		resolution: null,
+		unit: null,
+		data: null,
 
-				if (point[1] == 'nan') {
-					point[1] = null
-				};
-
-				return point;
-			};
-
-			var series = {
-				name: sensorId,
-				data: _.map(data, formatPoint),
-				step: true,
-				tooltip: {
-					yDecimals: 0
-				}
-			};
- 
-			chartConfig.series.push(series);
-
-			/* AJAX callback synchronization through the semaphore
-			 * the last request to return will take care of chart rendering
-			 */
-			chartSemaphore--;
-
-			if (chartSemaphore == 0) {
-				window.chart = new Highcharts.StockChart(chartConfig);
-			}
-		};
-	};
-
-	var time = {
-		SECOND:		1000, /* ms */
-		MINUTE:		 60 * 1000,
-		QUARTER:	 15 *  60 * 1000,
-		HOUR:		 60 *  60 * 1000,
-		DAY:		 24 *  60 * 60 * 1000,
-		WEEK:		  7 *  24 * 60 * 60 * 1000,
-		MONTH:		 30 *  24 * 60 * 60 * 1000,
-		YEAR:		365 *  24 * 60 * 60 * 1000,
-		DECADE:		 10 * 365 * 24 * 60 * 60 * 1000
-	};
-
-	var timeParams = {
-		hour  : { interval : "day"	  , resolution : "minute", range : time.HOUR  },
-		day   : { interval : "week"   , resolution : "15min" , range : time.DAY   },
-		month : { interval : "year"   , resolution : "day"	 , range : time.MONTH },
-		year  : { interval : "decade" , resolution : "week"  , range : time.YEAR  },
-		night : { interval : "night"  , resolution : "day"	 , range : time.MONTH }
-	};
-
-	var unitParams = {
-		electricity : "watt",
-		water		: "lperday",
-		gas			: "lperday"
-	};
-
-	var baseUrl = 'https://www.flukso.net/api/sensor/';
-	var callback = '?callback=?';
-	var queryParams = {
+		baseUrl: 'https://www.flukso.net/api/sensor/',
+		callback: '?callback=?',
 		version: '1.0',
-		interval: timeParams[interval].interval,	/* we fetch a bigger interval than requested */
-		resolution: timeParams[interval].resolution,
-		unit: unitParams[type]
-	};
+	
+		fetching: false
+	},
 
-	chartConfig.series = [];
+	initialize: function() {
+		this.set({unit: Flukso.unitParams[this.get('type')]});
 
-	/* For some weird reason, the rendering of the chart changes the
-	 * original chartConfig object. So we're catching this case here.
-	 */
-	if (chart == null) {
-		chartConfig.xAxis.range = timeParams[interval].range;
-		chartConfig.yAxis.title.text = unitParams[type];
-	}
-	else {
-		chartConfig.xAxis[0].range = timeParams[interval].range;
-		chartConfig.yAxis[0].title.text = unitParams[type];
-	};
+		/* TODO do we filter on type here? */
+		this.GET();	
+	},
 
-	window.chartSemaphore = 0;
+	GET: function() {
+		this.set({fetching: true});
 
-	var uid = Drupal.settings.uid;
-
-	for (var i in flukso[uid].sensors) {
-		var sensorObj = flukso[uid].sensors[i];
-
-		/* debugging
-		console.log(sensorObj); */
-
-		if (sensorObj.type == type) {
-			chartSemaphore++;
-			$.getJSON(baseUrl + sensorObj.sensor + callback, queryParams, createCb(sensorObj['function']));
+		function process(data) {
+			this.set({
+				data: data,
+				fetching: false
+			});
 		};
-	};
+	
+		process = _.bind(process, this); 
 
-	/* TODO return to previous tab when no data for this type is present */
-	if (chartSemaphore == 0) {
-		location.reload();
-	};
-};
+		var queryParams = {
+			version: this.get('version'),
+			interval: Flukso.timeParams[this.get('interval')].interval,	/* we fetch a bigger interval than requested */
+			resolution: Flukso.timeParams[this.get('interval')].resolution,
+			unit: this.get('unit')
+		};
 
-/* Create namespace for the Flukso app */
-window.Flukso = {};
+		$.getJSON(this.get('baseUrl') + this.get('id') + this.get('callback'), queryParams, process);
+	
+		console.log(queryParams);
+	}
+});
+
+Flukso.SensorCollect = Backbone.Collection.extend({
+	model: Flukso.Sensor,
+
+	initialize: function() {
+		/* set the attributes here, in the absence of a defaults entry for a collection */
+		this.attributes = {
+			baseUrl: 'https://www.flukso.net/api/user/',
+			callback: '?callback=?',
+			version: '1.0'
+		};
+
+		/* fetch the user's own sensors */
+		this.GET(Drupal.settings.uid);
+	},
+
+	GET: function(uid) {
+		function process(sensors) {
+			for (var i in sensors) {
+				this.add({
+					id: sensors[i].sensor,
+					uid: Number(uid),
+					type: sensors[i].type,
+					function: sensors[i].function,
+					interval: 'day'
+				});
+			};
+		};
+
+		/* Bind the function to the object. So whenever the function is called, the value
+		 * of this will be the object it is bound to.
+		 */
+		process = _.bind(process, this);
+
+		var queryParams = {
+			version: this.attributes.version
+		};
+
+		/* GET /user/<uid>/sensor?version=1.0&callback=? */
+		$.getJSON(this.attributes.baseUrl + uid + '/sensor' + this.attributes.callback, queryParams, process);
+	},
+});
 
 Flukso.TabsView = Backbone.View.extend({
 	el: $("ul.tabs li"),
@@ -270,6 +280,70 @@ Flukso.TabsView = Backbone.View.extend({
 	}
 });
 
+Flukso.ChartView = Backbone.View.extend({
+//	el: $('#chart'),
+
+	initialize: function() {
+		this.collection.bind('change:fetching', this.render);
+	},
+
+	render: function() {
+		/* 'this' points to the collection! */
+		var fetching = this.map(function(sensor) {
+			return sensor.get('fetching') == true ? 1 : 0;
+		});
+
+		/* mapreduce to a single ready variable */
+		var notReady = _.reduce(fetching, function(sum, value) {
+			return sum + value; }, 0);
+
+		if (!notReady) { 
+			/* deep config object copy */
+			var config = $.extend(true, {}, Flukso.chartConfig);
+
+			/* TODO remove hardcoded params */
+			config.xAxis.range = Flukso.timeParams['day'].range;
+			config.yAxis.title.text = Flukso.unitParams['electricity'];
+
+			/* filter out the sensors we wish to display */
+			var sensors = this.filter(function(sensor) {
+				/* TODO remove hardcoded params */
+				return sensor.get('type') == 'electricity' && sensor.get('interval') == 'day';
+			});
+
+			var series = _.map(sensors, function(sensor) {
+				function formatPoint(point) {
+					/* convert to ms timestamps */
+					point[0] = point[0] * 1000;
+
+					if (point[1] == 'nan') {
+						point[1] = null;
+					};
+
+					return point;
+				
+				};
+
+				var entry = {
+					name: sensor.get('function'),
+					data: _.map(sensor.get('data'), formatPoint),
+					step: true,
+					tooltip: {
+						yDecimals: 0
+					}
+				};
+
+				return entry;
+			});
+
+			config.series = series;
+			Flukso.chart = new Highcharts.StockChart(config);
+		};
+
+		return this;
+	}
+});
+
 Flukso.Router = Backbone.Router.extend({
 	routes: {
 		":type/:interval" : "switchChart"
@@ -280,29 +354,12 @@ Flukso.Router = Backbone.Router.extend({
 	}
 });
 
-/* setup/glue code */
+/* setup & glue code */
 $(function() {
+	Flukso.sensorCollect = new Flukso.SensorCollect();
 	Flukso.tabsView = new Flukso.TabsView();
+	Flukso.chartView = new Flukso.ChartView({collection: Flukso.sensorCollect});
 	Flukso.router = new Flukso.Router();
 
 	Backbone.history.start({root: "/chart"});
-
-	function processSensors(uidSensorsObject) {
-		window.flukso = new Array();
-		flukso[uid] = { "sensors" : uidSensorsObject };
-
-		/* render the default chart */
-		Flukso.router.navigate("electricity/day", true);
-	};
-
-	var uid = Drupal.settings.uid;
-
-	var baseUrl = 'https://www.flukso.net/api/user/' + uid + '/sensor';
-	var callback = '?callback=?';
-	var queryParams = {
-		version: '1.0'
-	};
-
-	/* GET /user/<uid>/sensor?version=1.0&callback=? */
-	$.getJSON(baseUrl + callback, queryParams, processSensors);
 });
