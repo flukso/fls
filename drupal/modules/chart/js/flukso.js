@@ -145,6 +145,14 @@ Flukso.chartConfig = {
 	series: []
 };
 
+Flukso.Chart = Backbone.Model.extend({
+	defaults: {
+		type: 'electricity',
+		interval: 'hour',
+		unit: 'watt'
+	}
+});
+
 Flukso.Sensor = Backbone.Model.extend({
 	defaults: {
 //		sensor: null,
@@ -191,8 +199,6 @@ Flukso.Sensor = Backbone.Model.extend({
 		};
 
 		$.getJSON(this.get('baseUrl') + this.get('id') + this.get('callback'), queryParams, process);
-	
-		console.log(queryParams);
 	}
 });
 
@@ -238,14 +244,35 @@ Flukso.SensorCollect = Backbone.Collection.extend({
 	},
 });
 
-Flukso.TabsView = Backbone.View.extend({
-	el: $("ul.tabs li"),
+Flukso.TypeView = Backbone.View.extend({
+	el: 'ul.tabs.primary',
+
+	initialize: function() {
+		/* needed when render is called as a callback to the change event */
+		_.bindAll(this, 'render');
+		this.model.bind('change:type', this.render);
+		this.render();
+	},
+
+	render: function() {
+		var sel = $(this.el).children();
+
+		/* clear active tabs */
+		sel.removeClass('active');	
+		sel.children().removeClass('active');
+
+		/* activate tabs based on chart model */
+		var id = '#' + this.model.get('type');
+
+		sel.filter(id).addClass('active');
+		sel.filter(id).children().addClass('active');
+
+		return this;
+	},
 
 	events: {
 		"click": "clickTab"
 	},
-
-	/* initialize? */
 
 	clickTab: function(e) {
 		/* What isn't instantly obvious is that under the bonnet, Backbone
@@ -257,26 +284,60 @@ Flukso.TabsView = Backbone.View.extend({
 		 *
 		 * [1] https://github.com/addyosmani/backbone-fundamentals#views
 		 */
-		var _this = e.currentTarget;
+		var sel = e.target.parentElement;
+		this.model.set({type: $(sel).attr('id')});
 
 		/* this click event should not bubble up to the default handler */
 		e.preventDefault();
 		e.stopPropagation();
 
-		/* remove active class from former tab */
-		$(_this).siblings().removeClass('active');
-		$(_this).siblings().children().removeClass('active');
+		/* insert some magic here */
+		//Flukso.router.navigate(type + "/" + interval, true);
+	}
+});
 
-		/* activate newly clicked tab */
-		$(_this).addClass('active');
-		$(_this).children().addClass('active');
+Flukso.IntervalView = Backbone.View.extend({
+	el: 'ul.tabs.secondary',
 
-		/* determine the type and interval */
-		var type = $('ul.tabs.primary li.active').attr('id');
-		var interval = $('ul.tabs.secondary li.active').attr('id');
+	initialize: function() {
+		/* needed when render is called as a callback to the change event */
+		_.bindAll(this, 'render');
+		this.model.bind('change:interval', this.render);
+		this.render();
+	},
+
+	render: function() {
+		console.log('rendering');
+
+		var sel = $(this.el).children();
+
+		/* clear active tabs */
+		sel.removeClass('active');	
+		sel.children().removeClass('active');
+
+		/* activate tabs based on chart model */
+		var id = '#' + this.model.get('interval');
+
+		sel.filter(id).addClass('active');
+		sel.filter(id).children().addClass('active');
+
+		return this;
+	},
+
+	events: {
+		"click": "clickTab"
+	},
+
+	clickTab: function(e) {
+		var sel = e.target.parentElement;
+		this.model.set({interval: $(sel).attr('id')});
+
+		/* this click event should not bubble up to the default handler */
+		e.preventDefault();
+		e.stopPropagation();
 
 		/* insert some magic here */
-		Flukso.router.navigate(type + "/" + interval, true);
+		//Flukso.router.navigate(type + "/" + interval, true);
 	}
 });
 
@@ -337,7 +398,7 @@ Flukso.ChartView = Backbone.View.extend({
 			});
 
 			config.series = series;
-			Flukso.chart = new Highcharts.StockChart(config);
+			new Highcharts.StockChart(config);
 		};
 
 		return this;
@@ -350,15 +411,18 @@ Flukso.Router = Backbone.Router.extend({
 	},
 
 	switchChart: function(type, interval) {
-		getSensorData(type, interval);
 	}
-});
+})
 
 /* setup & glue code */
 $(function() {
+	Flukso.chart = new Flukso.Chart;
 	Flukso.sensorCollect = new Flukso.SensorCollect();
-	Flukso.tabsView = new Flukso.TabsView();
+
+	Flukso.typeView = new Flukso.TypeView({model: Flukso.chart});
+	Flukso.intervalView = new Flukso.IntervalView({model: Flukso.chart});
 	Flukso.chartView = new Flukso.ChartView({collection: Flukso.sensorCollect});
+
 	Flukso.router = new Flukso.Router();
 
 	Backbone.history.start({root: "/chart"});
