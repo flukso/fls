@@ -175,7 +175,9 @@ Flukso.Sensor = Backbone.Model.extend({
 	initialize: function() {
 		this.set({unit: Flukso.unitParams[this.get('type')]});
 
-		/* TODO do we filter on type here? */
+		this.GET = _.bind(this.GET, this);
+		Flukso.chart.bind('change', this.GET);
+
 		this.GET();	
 	},
 
