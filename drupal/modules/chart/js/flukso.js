@@ -298,9 +298,6 @@ Flukso.TypeView = Backbone.View.extend({
 		/* this click event should not bubble up to the default handler */
 		e.preventDefault();
 		e.stopPropagation();
-
-		/* insert some magic here */
-		//Flukso.router.navigate(type + "/" + interval, true);
 	}
 });
 
@@ -341,9 +338,6 @@ Flukso.IntervalView = Backbone.View.extend({
 		/* this click event should not bubble up to the default handler */
 		e.preventDefault();
 		e.stopPropagation();
-
-		/* insert some magic here */
-		//Flukso.router.navigate(type + "/" + interval, true);
 	}
 });
 
@@ -414,10 +408,26 @@ Flukso.ChartView = Backbone.View.extend({
 
 Flukso.Router = Backbone.Router.extend({
 	routes: {
-		":type/:interval" : "switchChart"
+		":type/:interval" : "gotoChart"
 	},
 
-	switchChart: function(type, interval) {
+	initialize: function() {
+		_.bindAll(this, 'updateRoute');
+		Flukso.chart.bind('change', this.updateRoute);
+	},
+
+	updateRoute: function() {
+		var type = Flukso.chart.get('type');
+		var interval = Flukso.chart.get('interval');
+
+		this.navigate(type + "/" + interval, true);
+	},
+
+	gotoChart: function(type, interval) {
+		Flukso.chart.set({
+			type: type,
+			interval: interval
+		});
 	}
 })
 
@@ -431,6 +441,6 @@ $(function() {
 	Flukso.chartView = new Flukso.ChartView({collection: Flukso.sensorCollect});
 
 	Flukso.router = new Flukso.Router();
-
 	Backbone.history.start({root: "/chart"});
+	Flukso.router.updateRoute();
 });
