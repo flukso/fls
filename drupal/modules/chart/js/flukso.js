@@ -148,7 +148,7 @@ Flukso.chartConfig = {
 Flukso.Chart = Backbone.Model.extend({
 	defaults: {
 		type: 'electricity',
-		interval: 'hour',
+		interval: 'day',
 		unit: 'watt'
 	}
 });
@@ -180,7 +180,14 @@ Flukso.Sensor = Backbone.Model.extend({
 	},
 
 	GET: function() {
-		this.set({fetching: true});
+		if (Flukso.chart.get('type') != this.get('type')) {
+			return;
+		};
+
+		this.set({
+			fetching: true,
+			interval: Flukso.chart.get('interval')
+		});
 
 		function process(data) {
 			this.set({
@@ -225,7 +232,6 @@ Flukso.SensorCollect = Backbone.Collection.extend({
 					uid: Number(uid),
 					type: sensors[i].type,
 					function: sensors[i].function,
-					interval: 'day'
 				});
 			};
 		};
@@ -307,8 +313,6 @@ Flukso.IntervalView = Backbone.View.extend({
 	},
 
 	render: function() {
-		console.log('rendering');
-
 		var sel = $(this.el).children();
 
 		/* clear active tabs */
@@ -362,14 +366,15 @@ Flukso.ChartView = Backbone.View.extend({
 			/* deep config object copy */
 			var config = $.extend(true, {}, Flukso.chartConfig);
 
-			/* TODO remove hardcoded params */
-			config.xAxis.range = Flukso.timeParams['day'].range;
-			config.yAxis.title.text = Flukso.unitParams['electricity'];
+			var type = Flukso.chart.get('type');
+			var interval = Flukso.chart.get('interval');
+
+			config.xAxis.range = Flukso.timeParams[interval].range;
+			config.yAxis.title.text = Flukso.unitParams[type];
 
 			/* filter out the sensors we wish to display */
 			var sensors = this.filter(function(sensor) {
-				/* TODO remove hardcoded params */
-				return sensor.get('type') == 'electricity' && sensor.get('interval') == 'day';
+				return sensor.get('type') == type && sensor.get('interval') == interval;
 			});
 
 			var series = _.map(sensors, function(sensor) {
