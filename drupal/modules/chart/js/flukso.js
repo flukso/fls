@@ -226,6 +226,11 @@ Flukso.SensorCollect = Backbone.Collection.extend({
 		this.GET(Drupal.settings.uid);
 	},
 
+	/* sort by function (=name) */
+	comparator: function(sensor) {
+		return sensor.get('function');
+	},
+
 	GET: function(uid) {
 		function process(sensors) {
 			for (var i in sensors) {
@@ -433,7 +438,7 @@ Flukso.Router = Backbone.Router.extend({
 
 /* setup & glue code */
 $(function() {
-	Flukso.chart = new Flukso.Chart;
+	Flukso.chart = new Flukso.Chart();
 	Flukso.sensorCollect = new Flukso.SensorCollect();
 
 	Flukso.typeView = new Flukso.TypeView({model: Flukso.chart});
