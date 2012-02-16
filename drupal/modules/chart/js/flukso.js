@@ -145,11 +145,17 @@ Flukso.chartConfig = {
 	series: []
 };
 
-Flukso.Chart = Backbone.Model.extend({
+Flukso.Chart = Backbone.NestedModel.extend({
 	defaults: {
 		type: 'electricity',
 		interval: 'day',
-		unit: 'watt'
+		unit: 'watt',
+
+		count: {
+			electricity: 0,
+			gas: 0,
+			water: 0 
+		}
 	}
 });
 
@@ -169,14 +175,18 @@ Flukso.Sensor = Backbone.Model.extend({
 		callback: '?callback=?',
 		version: '1.0',
 	
-		fetching: false
+		fetching: null
 	},
 
 	initialize: function() {
-		this.set({unit: Flukso.unitParams[this.get('type')]});
+		this.set({
+			unit: Flukso.unitParams[this.get('type')]
+		});
 
 		this.GET = _.bind(this.GET, this);
-		Flukso.chart.bind('change', this.GET);
+		Flukso.chart.bind('change:type', this.GET);
+		Flukso.chart.bind('change:interval', this.GET);
+		Flukso.chart.bind('change:unit', this.GET);
 
 		this.GET();	
 	},
@@ -188,8 +198,8 @@ Flukso.Sensor = Backbone.Model.extend({
 
 		this.set({
 			fetching: true,
-			interval: Flukso.chart.get('interval')
-		});
+			interval: Flukso.chart.get('interval')},
+		{silent: true});
 
 		function process(data) {
 			this.set({
@@ -233,14 +243,35 @@ Flukso.SensorCollect = Backbone.Collection.extend({
 
 	GET: function(uid) {
 		function process(sensors) {
+			/* We have to fetch each counter separately, not as an object.
+			 * If not, the count:change will not trigger properly
+			 */
+			var count = {
+				electricity: Flukso.chart.get('count.electricity'),
+				gas: Flukso.chart.get('count.gas'),
+				water: Flukso.chart.get('count.water'),
+			}
+
 			for (var i in sensors) {
+				/* add sensor entries to the collection */
 				this.add({
 					id: sensors[i].sensor,
 					uid: Number(uid),
 					type: sensors[i].type,
 					function: sensors[i].function,
 				});
+
+				count[sensors[i].type]++;
 			};
+
+			/* We've got to set the nested attributes directly for the change events to fire
+			 * see: http://afeld.github.com/backbone-nested
+			 */ 
+			Flukso.chart.set({count: {
+				electricity: count.electricity,
+				gas: count.gas,
+				water: count.water
+			}});
 		};
 
 		/* Bind the function to the object. So whenever the function is called, the value
@@ -261,18 +292,20 @@ Flukso.TypeView = Backbone.View.extend({
 	el: 'ul.tabs.primary',
 
 	initialize: function() {
-		/* needed when render is called as a callback to the change event */
+		this.template = _.template('<% _.each(count, function(cnt, type) { if (cnt != 0) { %> <li id= <%= type %> ><a href="/chart"><%= type %></a></li> <% } }); %>');
+
 		_.bindAll(this, 'render');
 		this.model.bind('change:type', this.render);
-		this.render();
+		this.model.bind('change:count', this.render);
 	},
 
 	render: function() {
-		var sel = $(this.el).children();
+		var types = this.model.get('count', {silent: true});
 
-		/* clear active tabs */
-		sel.removeClass('active');	
-		sel.children().removeClass('active');
+        /* only render the types containing sensors */
+		$(this.el).html(this.template(this.model.toJSON()));
+
+		var sel = $(this.el).children();
 
 		/* activate tabs based on chart model */
 		var id = '#' + this.model.get('type');
@@ -361,7 +394,8 @@ Flukso.ChartView = Backbone.View.extend({
 
 		/* mapreduce to a single ready variable */
 		var notReady = _.reduce(fetching, function(sum, value) {
-			return sum + value; }, 0);
+			return sum + value;
+        }, 0);
 
 		if (!notReady) { 
 			/* deep config object copy */
@@ -440,7 +474,7 @@ Flukso.Router = Backbone.Router.extend({
 $(function() {
 	Flukso.chart = new Flukso.Chart();
 	Flukso.sensorCollect = new Flukso.SensorCollect();
-
+	
 	Flukso.typeView = new Flukso.TypeView({model: Flukso.chart});
 	Flukso.intervalView = new Flukso.IntervalView({model: Flukso.chart});
 	Flukso.chartView = new Flukso.ChartView({collection: Flukso.sensorCollect});

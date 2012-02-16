@@ -44,16 +44,13 @@ function _chart_render() {
 
   drupal_add_js(CHART_PATH . '/js/underscore-min.js');
   drupal_add_js(CHART_PATH . '/js/backbone-min.js');
+  drupal_add_js(CHART_PATH . '/js/backbone-nested-v1.0.3.min.js');
   drupal_add_js(CHART_PATH . '/js/highstock.src.js');
   drupal_add_js(CHART_PATH . '/js/flukso.js');
 
   drupal_add_js(array('uid' => $user->uid) , 'setting');
 
-  $output .= '<ul class="tabs primary">';
-  $output .= '<li id="electricity"><a href="/chart">electricity</a></li>';
-  $output .= '<li id="gas"><a href="/chart">gas</a></li>';
-  $output .= '<li id="water"><a href="/chart">water</a></li>';
-  $output .= '</ul>';
+  $output .= '<ul class="tabs primary"></ul>';
 
   $output .= '<ul class="tabs secondary">';
   $output .= '<li id="hour"><a href="/chart">hour</a></li>';
