@@ -53,6 +53,7 @@ function _chart_render() {
   $output .= '<ul class="tabs primary"></ul>';
 
   $output .= '<ul class="tabs secondary">';
+  $output .= '<li id="minute"><a href="/chart">minute</a></li>';
   $output .= '<li id="hour"><a href="/chart">hour</a></li>';
   $output .= '<li id="day"><a href="/chart">day</a></li>';
   $output .= '<li id="month"><a href="/chart">month</a></li>';

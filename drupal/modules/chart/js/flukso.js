@@ -24,11 +24,12 @@ window.Flukso = {
 };
 
 Flukso.timeParams = {
-	hour  : { interval : "day"	  , resolution : "minute", range : Flukso.time.HOUR  },
-	day   : { interval : "week"   , resolution : "15min" , range : Flukso.time.DAY   },
-	month : { interval : "year"   , resolution : "day"	 , range : Flukso.time.MONTH },
-	year  : { interval : "decade" , resolution : "week"  , range : Flukso.time.YEAR  },
-	night : { interval : "night"  , resolution : "day"	 , range : Flukso.time.MONTH }
+	minute : { interval : "minute" , resolution : "second", range : Flukso.time.MINUTE },
+	hour   : { interval : "day"	   , resolution : "minute", range : Flukso.time.HOUR   },
+	day    : { interval : "week"   , resolution : "15min" , range : Flukso.time.DAY    },
+	month  : { interval : "year"   , resolution : "day"	  , range : Flukso.time.MONTH  },
+	year   : { interval : "decade" , resolution : "week"  , range : Flukso.time.YEAR   },
+	night  : { interval : "night"  , resolution : "day"	  , range : Flukso.time.MONTH  }
 };
 
 Flukso.unitParams = {
@@ -37,7 +38,7 @@ Flukso.unitParams = {
 	gas			: "lperday"
 };
 
-Flukso.chartConfig = {
+Flukso.chartDefaults = {
 	chart: {
 		renderTo: 'chart',
 		backgroundColor: '#f3f3f3',
@@ -145,8 +146,9 @@ Flukso.chartConfig = {
 	series: []
 };
 
-Flukso.Chart = Backbone.NestedModel.extend({
+Flukso.ChartState = Backbone.NestedModel.extend({
 	defaults: {
+		reload: true,
 		type: 'electricity',
 		interval: 'day',
 		unit: 'watt',
@@ -184,21 +186,21 @@ Flukso.Sensor = Backbone.Model.extend({
 		});
 
 		this.GET = _.bind(this.GET, this);
-		Flukso.chart.bind('change:type', this.GET);
-		Flukso.chart.bind('change:interval', this.GET);
-		Flukso.chart.bind('change:unit', this.GET);
+		Flukso.chartState.bind('change:type', this.GET);
+		Flukso.chartState.bind('change:interval', this.GET);
+		Flukso.chartState.bind('change:unit', this.GET);
 
 		this.GET();	
 	},
 
 	GET: function() {
-		if (Flukso.chart.get('type') != this.get('type')) {
+		if (Flukso.chartState.get('type') != this.get('type')) {
 			return;
 		};
 
 		this.set({
 			fetching: true,
-			interval: Flukso.chart.get('interval')},
+			interval: Flukso.chartState.get('interval')},
 		{silent: true});
 
 		function process(data) {
@@ -217,7 +219,13 @@ Flukso.Sensor = Backbone.Model.extend({
 			unit: this.get('unit')
 		};
 
-		$.getJSON(this.get('baseUrl') + this.get('id') + this.get('callback'), queryParams, process);
+		if (this.get('interval') == 'minute') {
+			/* TODO remove hardcoded parts */
+			$.getJSON('http://192.168.1.48:8080/sensor/' + 'c58f52e058c5edc7ea2a497b6239f510' + '?callback=?', queryParams, process);
+			setTimeout(this.GET, 1000);
+		} else {
+			$.getJSON(this.get('baseUrl') + this.get('id') + this.get('callback'), queryParams, process);
+		}
 	}
 });
 
@@ -247,9 +255,9 @@ Flukso.SensorCollect = Backbone.Collection.extend({
 			 * If not, the count:change will not trigger properly
 			 */
 			var count = {
-				electricity: Flukso.chart.get('count.electricity'),
-				gas: Flukso.chart.get('count.gas'),
-				water: Flukso.chart.get('count.water'),
+				electricity: Flukso.chartState.get('count.electricity'),
+				gas: Flukso.chartState.get('count.gas'),
+				water: Flukso.chartState.get('count.water'),
 			}
 
 			for (var i in sensors) {
@@ -267,7 +275,7 @@ Flukso.SensorCollect = Backbone.Collection.extend({
 			/* We've got to set the nested attributes directly for the change events to fire
 			 * see: http://afeld.github.com/backbone-nested
 			 */ 
-			Flukso.chart.set({count: {
+			Flukso.chartState.set({count: {
 				electricity: count.electricity,
 				gas: count.gas,
 				water: count.water
@@ -332,6 +340,7 @@ Flukso.TypeView = Backbone.View.extend({
 		 */
 		var sel = e.target.parentElement;
 		this.model.set({type: $(sel).attr('id')});
+		this.model.set({reload: true});
 
 		/* this click event should not bubble up to the default handler */
 		e.preventDefault();
@@ -372,6 +381,7 @@ Flukso.IntervalView = Backbone.View.extend({
 	clickTab: function(e) {
 		var sel = e.target.parentElement;
 		this.model.set({interval: $(sel).attr('id')});
+		this.model.set({reload: true});
 
 		/* this click event should not bubble up to the default handler */
 		e.preventDefault();
@@ -397,48 +407,58 @@ Flukso.ChartView = Backbone.View.extend({
 			return sum + value;
         }, 0);
 
-		if (!notReady) { 
-			/* deep config object copy */
-			var config = $.extend(true, {}, Flukso.chartConfig);
+		if (notReady) { 
+			return this;
+		};
 
-			var type = Flukso.chart.get('type');
-			var interval = Flukso.chart.get('interval');
+		var type = Flukso.chartState.get('type');
+		var interval = Flukso.chartState.get('interval');
+
+		/* filter out the sensors we wish to display */
+		var sensors = this.filter(function(sensor) {
+			return sensor.get('type') == type && sensor.get('interval') == interval;
+		});
+
+		var series = _.map(sensors, function(sensor) {
+			function formatPoint(point) {
+				/* convert to ms timestamps */
+				point[0] = point[0] * 1000;
+
+				if (point[1] == 'nan') {
+					point[1] = null;
+				};
+
+				return point;
+			
+			};
+
+			var entry = {
+				name: sensor.get('function'),
+				data: _.map(sensor.get('data'), formatPoint),
+				step: true,
+				tooltip: {
+					yDecimals: 0
+				}
+			};
+
+			return entry;
+		});
+
+		if (Flukso.chartState.get('reload')) {
+			Flukso.chartState.set({reload: false});
+
+			/* deep config object copy */
+			var config = $.extend(true, {}, Flukso.chartDefaults);
 
 			config.xAxis.range = Flukso.timeParams[interval].range;
 			config.yAxis.title.text = Flukso.unitParams[type];
-
-			/* filter out the sensors we wish to display */
-			var sensors = this.filter(function(sensor) {
-				return sensor.get('type') == type && sensor.get('interval') == interval;
-			});
-
-			var series = _.map(sensors, function(sensor) {
-				function formatPoint(point) {
-					/* convert to ms timestamps */
-					point[0] = point[0] * 1000;
-
-					if (point[1] == 'nan') {
-						point[1] = null;
-					};
-
-					return point;
-				
-				};
-
-				var entry = {
-					name: sensor.get('function'),
-					data: _.map(sensor.get('data'), formatPoint),
-					step: true,
-					tooltip: {
-						yDecimals: 0
-					}
-				};
-
-				return entry;
-			});
-
 			config.series = series;
-			new Highcharts.StockChart(config);
+
+			Flukso.chart = new Highcharts.StockChart(config);
+		} else {
+			_.each(series, function(entry, i) {
+				Flukso.chart.series[i].setData(entry.data);
+			});
 		};
 
 		return this;
@@ -452,31 +472,32 @@ Flukso.Router = Backbone.Router.extend({
 
 	initialize: function() {
 		_.bindAll(this, 'updateRoute');
-		Flukso.chart.bind('change', this.updateRoute);
+		Flukso.chartState.bind('change', this.updateRoute);
 	},
 
 	updateRoute: function() {
-		var type = Flukso.chart.get('type');
-		var interval = Flukso.chart.get('interval');
+		var type = Flukso.chartState.get('type');
+		var interval = Flukso.chartState.get('interval');
 
 		this.navigate(type + "/" + interval, true);
 	},
 
 	gotoChart: function(type, interval) {
-		Flukso.chart.set({
+		Flukso.chartState.set({
 			type: type,
-			interval: interval
+			interval: interval,
+			reload: true
 		});
 	}
 })
 
 /* setup & glue code */
 $(function() {
-	Flukso.chart = new Flukso.Chart();
+	Flukso.chartState = new Flukso.ChartState();
 	Flukso.sensorCollect = new Flukso.SensorCollect();
 	
-	Flukso.typeView = new Flukso.TypeView({model: Flukso.chart});
-	Flukso.intervalView = new Flukso.IntervalView({model: Flukso.chart});
+	Flukso.typeView = new Flukso.TypeView({model: Flukso.chartState});
+	Flukso.intervalView = new Flukso.IntervalView({model: Flukso.chartState});
 	Flukso.chartView = new Flukso.ChartView({collection: Flukso.sensorCollect});
 
 	Flukso.router = new Flukso.Router();
