@@ -174,6 +174,7 @@ Flukso.Sensor = Backbone.Model.extend({
 		data: null,
 
 		baseUrl: 'https://www.flukso.net/api/sensor/',
+		localUrl: null,
 		callback: '?callback=?',
 		version: '1.0',
 	
@@ -221,7 +222,7 @@ Flukso.Sensor = Backbone.Model.extend({
 
 		if (this.get('interval') == 'minute') {
 			/* TODO remove hardcoded parts */
-			$.getJSON('http://192.168.1.48:8080/sensor/' + 'c58f52e058c5edc7ea2a497b6239f510' + '?callback=?', queryParams, process);
+			$.getJSON(this.get('localUrl') + this.get('id') + this.get('callback'), queryParams, process);
 			setTimeout(this.GET, 1000);
 		} else {
 			$.getJSON(this.get('baseUrl') + this.get('id') + this.get('callback'), queryParams, process);
@@ -267,6 +268,7 @@ Flukso.SensorCollect = Backbone.Collection.extend({
 					uid: Number(uid),
 					type: sensors[i].type,
 					function: sensors[i].function,
+					localUrl: 'http://' + sensors[i].ip + ':' + sensors[i].port + '/sensor/'
 				});
 
 				count[sensors[i].type]++;
