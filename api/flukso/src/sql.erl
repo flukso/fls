@@ -123,11 +123,13 @@
     <<"SELECT
            meter,
            type,
-           function
+           function,
+           ip,
+           port
        FROM
-           logger_meters
+           (logger_meters lm INNER JOIN logger_devices ld ON lm.device = ld.device)
        WHERE
-           uid = ? AND enabled = 1">>).
+           lm.uid = ? AND enabled = 1">>).
 
 -define(SQL_TIMEZONE,
     <<"SELECT
@@ -167,7 +169,9 @@
            memtotal = ?,
            memfree = ?,
            memcached = ?,
-           membuffers = ?
+           membuffers = ?,
+           ip = ?,
+           port = ?
        WHERE
            device = ?">>).
 

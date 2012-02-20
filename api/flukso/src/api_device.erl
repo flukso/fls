@@ -109,6 +109,8 @@ process_post(ReqData, #state{device = Device} = State) ->
     Memcached  = proplists:get_value(<<"memcached">> , JsonData),
     Membuffers = proplists:get_value(<<"membuffers">>, JsonData),
     Memfree    = proplists:get_value(<<"memfree">>   , JsonData),
+    Ip         = proplists:get_value(<<"ip">>        , JsonData),
+    Port       = proplists:get_value(<<"port">>      , JsonData),
     SyslogB64  = proplists:get_value(<<"syslog">>    , JsonData),
 
     store_syslog(Device, SyslogB64),
@@ -116,7 +118,7 @@ process_post(ReqData, #state{device = Device} = State) ->
     NewResets = Resets + Reset,
 
     mysql:execute(pool, device_update,
-        [check:unix(), Version, 0, NewResets, Uptime, Memtotal, Memfree, Memcached, Membuffers, Device]),
+        [check:unix(), Version, 0, NewResets, Uptime, Memtotal, Memfree, Memcached, Membuffers, Ip, Port, Device]),
 
 
     JsonResponse = mochijson2:encode({struct, [{<<"upgrade">>,        Upgrade},

@@ -92,8 +92,10 @@ to_json(ReqData, #state{uid = Uid, jsonp = Jsonp} = State) ->
 
     Data = [{struct, [{<<"sensor">>, Sensor},
                       {<<"type">>, Type},
-                      {<<"function">>, Function}]}
-              || [Sensor, Type, Function] <- mysql:get_result_rows(Result)],
+                      {<<"function">>, Function},
+                      {<<"ip">>, Ip},
+                      {<<"port">>, Port}]}
+              || [Sensor, Type, Function, Ip, Port] <- mysql:get_result_rows(Result)],
 
     Reply = mochijson2:encode(Data),
 
