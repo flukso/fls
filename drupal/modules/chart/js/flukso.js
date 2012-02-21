@@ -340,7 +340,7 @@ Flukso.TypeView = Backbone.View.extend({
 		 *
 		 * [1] https://github.com/addyosmani/backbone-fundamentals#views
 		 */
-		var sel = e.target.parentElement;
+		var sel = e.target.parentNode;
 		this.model.set({type: $(sel).attr('id')});
 		this.model.set({reload: true});
 
