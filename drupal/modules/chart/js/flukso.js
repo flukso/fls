@@ -167,7 +167,7 @@ Flukso.Sensor = Backbone.Model.extend({
 		id: null, /* sensor id doubling as backbone model id */
 		uid: null,
 		type: null,
-		function: null,
+		'function': null,
 		interval: null,
 //		resolution: null,
 		unit: null,
@@ -258,7 +258,7 @@ Flukso.SensorCollect = Backbone.Collection.extend({
 			var count = {
 				electricity: Flukso.chartState.get('count.electricity'),
 				gas: Flukso.chartState.get('count.gas'),
-				water: Flukso.chartState.get('count.water'),
+				water: Flukso.chartState.get('count.water')
 			}
 
 			for (var i in sensors) {
@@ -267,7 +267,7 @@ Flukso.SensorCollect = Backbone.Collection.extend({
 					id: sensors[i].sensor,
 					uid: Number(uid),
 					type: sensors[i].type,
-					function: sensors[i].function,
+					'function': sensors[i]['function'],
 					localUrl: 'http://' + sensors[i].ip + ':' + sensors[i].port + '/sensor/'
 				});
 
@@ -295,7 +295,7 @@ Flukso.SensorCollect = Backbone.Collection.extend({
 
 		/* GET /user/<uid>/sensor?version=1.0&callback=? */
 		$.getJSON(this.attributes.baseUrl + uid + '/sensor' + this.attributes.callback, queryParams, process);
-	},
+	}
 });
 
 Flukso.TypeView = Backbone.View.extend({
@@ -381,7 +381,7 @@ Flukso.IntervalView = Backbone.View.extend({
 	},
 
 	clickTab: function(e) {
-		var sel = e.target.parentElement;
+		var sel = e.target.parentNode;
 		this.model.set({interval: $(sel).attr('id')});
 		this.model.set({reload: true});
 
