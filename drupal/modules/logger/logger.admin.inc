@@ -21,6 +21,8 @@
 // $Id$
 //
 
+define(FLM02_UPGRADE_TARGET, 215);
+
 /**
  * Callback function for the user/x/devices page's drupal_get_form
  * 
@@ -77,7 +79,7 @@ function _logger_account_devices_submit($form, &$form_state) {
     db_query("INSERT INTO {logger_users} (uid, token, private) VALUES (%d, '%s', %d)", $user->uid, $master_token, 0);
   }
 
-  drupal_set_message(sprintf("The device with serial FL%s is now associated with your account.", sprintf('%08s', $serial)));
+  drupal_set_message(sprintf("The FLM with serial FL%08s is now associated with your account.", $serial));
 }
 
 /**
@@ -94,7 +96,37 @@ function _logger_account_device_remove($did) {
   db_query("UPDATE {logger_meters} SET uid = 0 WHERE device = '%s' AND uid = %d", $did, $user->uid);
 
   $serial = db_result(db_query("SELECT serial FROM {logger_devices} WHERE device = '%s'", $did));
-  drupal_set_message(sprintf("The device with serial FL%s has been removed from your account.", sprintf('%08s', $serial)));
+  drupal_set_message(sprintf("The FLM with serial FL%08s has been removed from your account.", $serial));
+
+  // return to the user/x/devices page
+  $destination = sprintf("/user/%d/devices", $user->uid);
+  drupal_goto($destination);
+}
+
+/**
+ * Callback function for the user/x/device/y/upgrade path
+ * 
+ * @param $did
+ *   ID of the device that needs upgrading
+ */
+function _logger_account_device_upgrade($did) {
+  global $user;
+
+  // built-in check so that user is only able to upgrade own devices
+  $device = db_fetch_object(db_query("SELECT serial, version, upgrade
+                                      FROM {logger_devices}
+                                      WHERE device = '%s' AND uid = %d", $did, $user->uid));
+ 
+  if ($device->version >= 200
+      && $device->version < FLM02_UPGRADE_TARGET
+      && $device->upgrade == 0) {
+    db_query("UPDATE {logger_devices}
+              SET upgrade = %d
+              WHERE device = '%s'", FLM02_UPGRADE_TARGET, $did);
+
+    $msg = "The FLM with serial FL%08s will be upgraded to firmware version %d at the next FLM heartbeat.";
+    drupal_set_message(sprintf($msg, $device->serial, FLM02_UPGRADE_TARGET));
+  };
 
   // return to the user/x/devices page
   $destination = sprintf("/user/%d/devices", $user->uid);
@@ -113,7 +145,7 @@ function theme_logger_account_devices($form) {
   global $user;
   $rows = array();
 
-  $result = db_query("SELECT device, serial, access, resets, uptime
+  $result = db_query("SELECT device, serial, access, version, upgrade, resets, uptime
                       FROM {logger_devices}
                       WHERE uid = %d
                       ORDER BY serial", $user->uid);
@@ -133,17 +165,30 @@ function theme_logger_account_devices($form) {
   while ($device = db_fetch_object($result)) {
     $row = array();
     $row[] = 'FL' . sprintf('%08s', $device->serial);
+    $row[] = $device->upgrade == 0 ? $device->version : $device->upgrade . '**'; 
     $row[] = $device->resets;
     $row[] = unix_to_userlocaltime($device->access);
     $row[] = seconds_to_dayshours($device->uptime);
 
-    $path = sprintf('user/%d/device/%s/remove', $user->uid, $device->device);
-    $row[] = l(t('remove'), $path);
+    $remove = sprintf('user/%d/device/%s/remove', $user->uid, $device->device);
+ 
+    if ($device->version >= 200
+        && $device->version < FLM02_UPGRADE_TARGET
+        && $device->upgrade == 0) {
+      $upgrade = sprintf('user/%d/device/%s/upgrade', $user->uid, $device->device);
+      $attributes = array('title' => 'Upgrade the firmware of this FLM02 to version ' . FLM02_UPGRADE_TARGET);
+
+      $row[] = l(t('remove'), $remove) . ' ' .
+               l(t('upgrade'), $upgrade, array('attributes' => $attributes));
+    }
+    else {
+      $row[] = l(t('remove'), $remove);
+    }
 
     $rows[] = $row;
   }
 
-  $rows[] = array(drupal_render($form['serial']), array('data' => drupal_render($form['submit']), 'colspan' => 4));
+  $rows[] = array(drupal_render($form['serial']), array('data' => drupal_render($form['submit']), 'colspan' => 5));
 
   $output = drupal_render($form);
   $output .= theme('logger_account_devices_list', $rows);
@@ -161,7 +206,7 @@ function theme_logger_account_devices($form) {
  */
 function theme_logger_account_devices_list($items) {
   if (count($items) > 0) {
-    $headers = array(t('Serial'), t('Resets'), t('Last heartbeat'), t('Uptime'), t('Operations'));
+    $headers = array(t('Serial'), t('Version'), t('Resets'), t('Last heartbeat'), t('Uptime'), t('Operations'));
     $output  = theme('table', $headers, $items);
   }
   else {

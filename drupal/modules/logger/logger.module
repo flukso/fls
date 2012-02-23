@@ -275,6 +275,13 @@ function logger_menu() {
     'type'                => MENU_CALLBACK,
     'file'                => 'logger.admin.inc',
   );
+  $items['user/%/device/%/upgrade'] = array(
+    'page callback'       => '_logger_account_device_upgrade',
+    'page arguments'      => array(3),
+    'access arguments'    => array('logger'),
+    'type'                => MENU_CALLBACK,
+    'file'                => 'logger.admin.inc',
+  );
 
   return $items;
 }
