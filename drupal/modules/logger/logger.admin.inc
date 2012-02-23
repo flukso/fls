@@ -77,7 +77,7 @@ function _logger_account_devices_submit($form, &$form_state) {
     db_query("INSERT INTO {logger_users} (uid, token, private) VALUES (%d, '%s', %d)", $user->uid, $master_token, 0);
   }
 
-  drupal_set_message(sprintf("The device with serial FL%s is now associated with your account.", $serial));
+  drupal_set_message(sprintf("The device with serial FL%s is now associated with your account.", sprintf('%08s', $serial)));
 }
 
 /**
@@ -94,7 +94,7 @@ function _logger_account_device_remove($did) {
   db_query("UPDATE {logger_meters} SET uid = 0 WHERE device = '%s' AND uid = %d", $did, $user->uid);
 
   $serial = db_result(db_query("SELECT serial FROM {logger_devices} WHERE device = '%s'", $did));
-  drupal_set_message(sprintf("The device with serial FL%s has been removed from your account.", $serial));
+  drupal_set_message(sprintf("The device with serial FL%s has been removed from your account.", sprintf('%08s', $serial)));
 
   // return to the user/x/devices page
   $destination = sprintf("/user/%d/devices", $user->uid);
@@ -121,18 +121,18 @@ function theme_logger_account_devices($form) {
   function unix_to_userlocaltime($unix) {
     global $user;
     $unix_local = gmdate('r', $unix + $user->timezone);
-    return substr($unix_local, 0, strlen($unix_local) - 6);
+    return substr($unix_local, 4, strlen($unix_local) - 10);
   }
 
   function seconds_to_dayshours($seconds) {
     $days    = intval($seconds / 86400);
     $hours   = intval(($seconds % 86400) / 3600);
-    return sprintf('%d days %d hours', $days, $hours);
+    return sprintf('%dd %dh', $days, $hours);
   }
 
   while ($device = db_fetch_object($result)) {
     $row = array();
-    $row[] = 'FL' . $device->serial;
+    $row[] = 'FL' . sprintf('%08s', $device->serial);
     $row[] = $device->resets;
     $row[] = unix_to_userlocaltime($device->access);
     $row[] = seconds_to_dayshours($device->uptime);
