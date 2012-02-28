@@ -2,7 +2,11 @@ name = Framework
 description = Framework is a blank canvas for theme developers. Use Framework as a starting point to facilitate your theme development.
 core = 6.x
 engine = phptemplate
+
 stylesheets[all][] = style.css
+
+scripts[] = lib/underscore-min.js
+scripts[] = lib/bootstrap.min.js
 
 regions[left] = Left sidebar
 regions[right] = Right sidebar

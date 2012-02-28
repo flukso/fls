@@ -9,7 +9,6 @@
   <meta name="viewport" content="width=device-width" />
   <title><?php print $head_title; ?></title>
   <?php print $styles; ?>
-  <?php print $scripts; ?>
   <!-- IE Fix for HTML5 Tags -->
   <!--[if lt IE 9]>
     <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -18,75 +17,43 @@
 
 <body class="<?php print $body_classes; ?>">
 
-  <div id="container" class="clearfix">
+  <div id="header">
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
 
-    <div id="skip-link">
-      <a href="#main-content" class="element-invisible element-focusable"><?php print t('Skip to main content'); ?></a>
-      <?php if ($primary_links): ?>
-        <a href="#navigation" class="element-invisible element-focusable"><?php print t('Skip to navigation'); ?></a>
-      <?php endif; ?>
+          <a class="brand" href="/">
+            <img alt="Flukso" src="/sites/all/themes/framework/img/flukso.logo.png">
+          </a>
+
+          <div class="nav-collapse">
+            <ul class="nav">
+              <li><a href="/about">About</a></li>
+              <li><a href="/installation">Install</a></li>
+              <li><a href="/blog">Blog</a></li>
+              <li><a href="/forum">Forum</a></li>
+              <li><a href="https://github.com/flukso">Dev</a></li>
+              <li><a href="/dash">Dash</a></li>
+              <li><a href="/contact">Contact</a></li>
+              <li><a href="/shop">Shop</a></li>
+            </ul>
+
+            <form id="searchForm" class="navbar-search pull-right dropdown">
+              <input id="searchText" type="text" class="search-query dropdown-toggle" placeholder="Search">
+            </form>
+          </div>
+          <!--/.nav-collapse -->
+        </div>
+      </div>
     </div>
+  </div> <!-- header -->
 
-    <header id="header" role="banner" class="clearfix">
-      <?php if ($logo): ?>
-        <a href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>" id="logo">
-          <img src="<?php print $logo; ?>" alt="<?php print t('Home'); ?>" />
-        </a>
-      <?php endif; ?>
-      <?php if ($site_name || $site_slogan): ?>
-        <hgroup id="site-name-slogan">
-          <?php if ($site_name): ?>
-            <h1 id="site-name">
-              <a href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>"><span><?php print $site_name; ?></span></a>
-            </h1>
-          <?php endif; ?>
-          <?php if ($site_slogan): ?>
-            <h2 id="site-slogan"><?php print $site_slogan; ?></h2>
-          <?php endif; ?>
-        </hgroup>
-      <?php endif; ?>
-      
-      <?php print $header; ?>
-      
-      <?php if ($search_box): ?><?php print $search_box ?><?php endif; ?>
-      
-	  <?php if ($primary_links || $secondary_links || !empty($navigation)): ?>
-        <nav id="navigation" role="navigation" class="clearfix ">
-          <?php if (!empty($navigation)): ?> <!--if block in $navigation region, override $primary_links and $secondary_links-->
-            <?php print $navigation ?>
-          <?php endif; ?>
-          <?php if (empty($navigation)): ?> 
-            <?php if (isset($primary_links)) : ?>
-			  <?php print theme(array('links__system_main_menu', 'links'), $primary_links,
-                array(
-                  'id' => 'main-menu',
-                  'class' => 'links clearfix',
-                ),
-                array(
-                  'text' => t('Main menu'),
-                  'level' => 'h2',
-                  'class' => 'element-invisible',
-                ));
-              ?>
-            <?php endif; ?>
-            <?php if (isset($secondary_links)) : ?>
-			  <?php print theme(array('links__system_secondary_menu', 'links'), $secondary_links,
-                array(
-                  'id' => 'secondary-menu',
-                  'class' => 'links clearfix',
-                ),
-                array(
-                  'text' => t('Secondary menu'),
-                  'level' => 'h2',
-                  'class' => 'element-invisible',
-                ));
-              ?>
-            <?php endif; ?>
-          <?php endif; ?>
-        </nav> <!-- /#navigation -->
-      <?php endif; ?>
-      <?php if (!empty($breadcrumb)): print $breadcrumb; endif; ?>
-    </header> <!-- /#header -->
+  <div id="container" class="clearfix">
 
     <section id="main" role="main" class="clearfix">
       <?php if (!empty($messages)): print $messages; endif; ?>
@@ -116,6 +83,7 @@
       <?php print $feed_icons ?>
     </footer> <!-- /#footer -->
 
+    <?php print $scripts ?>
     <?php print $closure ?>
 
   </div> <!-- /#container -->

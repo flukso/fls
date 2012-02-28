@@ -34,87 +34,23 @@ Equation for font sizing:
 ------------------------------------------------*/
 
 /**
- * 0.RESET 
+ * 0.BOOTSTRAP
  */
 
-@import "reset.css";
+@import "css/bootstrap.css";
 
 /**
  * 1.GLOBAL
  */
 
 body {
-  background: #fff;
-  color: #222;
-  font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif;
-  font-size: 100%;
-  line-height: 1.5;
-  margin: 0;
-  padding: 0;
+  background-color: #f3f3f3;
+  padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
 }
 
-h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-style: normal;
-  font-weight: normal;
-}
-
-h1, .h1 {
-  font-size: 2em;
-  line-height: 1.5;
-  margin-top: 0.75em;
-}
-
-h2, .h2 {
-  font-size: 1.5em;
-  line-height: 1;
-  margin-top: 1em;
-}
-
-h3, .h3 {
-  font-size: 1.25em;
-  line-height: 1.2;
-  margin-top: 1.2em;
-}
-
-h4, h5, h6, .h4, .h5, .h6 {
-  font-size: 1em;
-  font-weight: bold;
-  line-height: 1.5;
-  margin-top: 1.5em;
-}
-
-p {
-  font-size: 1em;
-  line-height: 1.5;
-  margin: 0 0 1.5em 0;
-}
-
-a { color: #069; text-decoration: none; }
-
-a:visited { color: #309; }
-
-a:hover, a:active, li a.active  { color: #39f; }
-
-a:focus { outline: thin dotted; }
-
-a:hover, a:active { outline: 0; }
 
 /* apply common styling after reset.css */
-
-li ul, li ol {  margin: 0; }
-ul, ol {  margin: 0 1.5em 1.5em 0;  padding-left: 1.5em; }
-ul {  list-style-type: disc; }
-ol {  list-style-type: decimal; }
-dl {  margin: 0 0 1.5em 0; }
-dl dt {  font-weight: bold; }
-dd {  margin-left: 1.5em; }
-hr {  background: #666;  border: none;  clear: both;  float: none;  height: 1px;  margin: 0 0 1.4375em;  width: 100%; }
-fieldset {  border: 1px solid #ccc;  margin: 0 0 1.4375em;  padding: 1.5em; }
 table {  margin-bottom: 1.5em;  width: 100%; }
-th, tr, td {  vertical-align: middle; }
-th { padding-right: 1em; }
-.sticky-header th, .sticky-table th {  border-bottom: 3px solid #ccc;  padding-right: 1em;  text-align: left; }
 
 /**
  * 2.LAYOUT
