@@ -3,8 +3,6 @@
   <header>
     <?php print $picture ?>
 
-    <h3><?php print $title ?></h3>
-
     <span class="submitted"><?php print $submitted; ?></span>
 
     <?php if ($comment->new) : ?>
