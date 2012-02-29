@@ -53,9 +53,12 @@
     </div>
   </div> <!-- header -->
 
-  <div id="container" class="clearfix">
+    <section role="main" class="clearfix">
+      <div class="container clearfix">
+ 
+      <div class="row">
+      <div class="span10 offset1">
 
-    <section id="main" role="main" class="clearfix">
       <?php if (!empty($messages)): print $messages; endif; ?>
       <?php if (!empty($mission)): ?><div id="mission"><?php print $mission; ?></div><?php endif; ?>
       <a id="main-content"></a>
@@ -63,26 +66,27 @@
       <?php if (!empty($tabs)): ?><div class="tabs-wrapper clearfix"><?php print $tabs; ?></div><?php endif; ?>
       <?php if (!empty($help)): print $help; endif; ?>
       <?php print $content; ?>
+
+      </div>
+      </div>
+
+      </div>
     </section> <!-- /#main -->
 
-    <?php if (!empty($left)): ?>
-      <aside id="sidebar-left" role="complementary" class="sidebar clearfix">
-        <?php print $left; ?>
-      </aside> <!-- /sidebar-left -->
-    <?php endif; ?>
-
-    <?php if (!empty($right)): ?>
-      <aside id="sidebar-right" role="complementary" class="sidebar clearfix">
-        <?php print $right; ?>
-      </aside> <!-- /sidebar-right -->
-    <?php endif; ?>
-
     <footer id="footer" role="contentinfo" class="clearfix">
+      <div class="container clearfix">
+
+      <div class="row">
+      <div class="span3">
+
       <?php if ($footer_1): ?>
         <div class="column">
           <?php print $footer_1 ?>
         </div>
       <?php endif; ?>
+
+      </div>
+      <div class="span3 offset1">
 
       <?php if ($footer_2): ?>
         <div class="column">
@@ -90,19 +94,25 @@
         </div>
       <?php endif; ?>
 
+      </div>
+      <div class="span3 offset1">
+
       <?php if ($footer_3): ?>
-        <div id="last" class="column">
+        <div class="column">
           <?php print $footer_3 ?>
         </div>
       <?php endif; ?>
 
+      </div>
+      </div>
+
       <?php print $feed_icons ?>
+
+      </div>
     </footer> <!-- /#footer -->
 
     <?php print $scripts ?>
     <?php print $closure ?>
-
-  </div> <!-- /#container -->
 
 </body>
 </html>
