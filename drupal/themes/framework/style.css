@@ -333,6 +333,19 @@ ul.secondary a.active {
   margin-left: 1em;
 }
 
+.comment span.author {
+  background-color: #e0e0e0;
+  padding: 0.5em;
+}
+
+.comment header {
+  margin-bottom: 1em;
+}
+
+.comment .content {
+ margin: 0 2em 0 2em;
+}
+
 /**
  * 9.BLOCKS
  */
