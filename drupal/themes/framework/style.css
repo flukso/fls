@@ -72,6 +72,15 @@ input.form-autocomplete {
   background-image: none !important;
 }
 
+li a.active {
+  color: #0088cc;
+}
+
+footer {
+  background-color: #e0e0e0;
+  padding: 0.5em;
+}
+
 /**
  * 2.LAYOUT
  */
