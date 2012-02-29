@@ -5,7 +5,7 @@ engine = phptemplate
 
 stylesheets[all][] = style.css
 
-scripts[] = lib/bootstrap.min.js
+scripts[] = lib/bootstrap.js
 
 regions[left] = Left sidebar
 regions[right] = Right sidebar
