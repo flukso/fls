@@ -78,8 +78,24 @@
     <?php endif; ?>
 
     <footer id="footer" role="contentinfo" class="clearfix">
-      <?php print $footer_message; ?>
-      <?php if (!empty($footer)): print $footer; endif; ?>
+      <?php if ($footer_1): ?>
+        <div class="column">
+          <?php print $footer_1 ?>
+        </div>
+      <?php endif; ?>
+
+      <?php if ($footer_2): ?>
+        <div class="column">
+          <?php print $footer_2 ?>
+        </div>
+      <?php endif; ?>
+
+      <?php if ($footer_3): ?>
+        <div id="last" class="column">
+          <?php print $footer_3 ?>
+        </div>
+      <?php endif; ?>
+
       <?php print $feed_icons ?>
     </footer> <!-- /#footer -->
 
