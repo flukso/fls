@@ -93,72 +93,11 @@ input.form-autocomplete {
   margin: 0;
 }
 
-/* 3 columns */
-
-body.two-sidebars #main {
-  float: left;
-  margin: 0 0 0 240px;
-  padding: 0;
-  width: 460px;
-}
-
-/* 2 columns: sidebar-left */
-
-body.sidebar-left #main {
-  float: right;
-  margin: 0;
-  padding: 0;
-  width: 700px;
-}
-
-/* 2 columns: sidebar-right */
-
-body.sidebar-right #main {
-  float: left;
-  margin: 0;
-  padding: 0;
-  width: 700px;
-}
-
 /**
  * 4.SIDEBARS
  */
 
-/* 3 columns: sidebar-left */
-
-body.two-sidebars #sidebar-left {
-  float: left;
-  margin: 0 0 0 -700px;
-  padding: 0;
-  width: 220px;
-}
-
-/* 3 columns: sidebar-right */
-
-body.two-sidebars #sidebar-right {
-  float: right;
-  margin: 0;
-  padding: 0;
-  width: 220px;
-}
-
-/* 2 columns: sidebar-left */
-
-body.sidebar-left #sidebar-left {
-  float: left;
-  margin: 0;
-  padding: 0;
-  width: 220px;
-}
-
-/* 2 columns: sidebar-right */
-
-body.sidebar-right #sidebar-right {
-  float: right;
-  margin: 0;
-  padding: 0;
-  width: 220px;
-}
+/* we're not using sidebars in this theme */
 
 /**
  * 5.HEADER
