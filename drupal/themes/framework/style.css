@@ -79,6 +79,7 @@ li a.active {
 footer {
   background-color: #e0e0e0;
   padding: 0.5em;
+  text-align: right;
 }
 
 /**
@@ -424,6 +425,7 @@ div.view div.views-admin-links li a {
   margin-top: 5em;
   padding: 1.5em 0 0 70px;
   position: relative;
+  text-align: left;
 }
 
 #footer a.feed-icon {
