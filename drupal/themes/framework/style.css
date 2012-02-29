@@ -40,7 +40,7 @@ Equation for font sizing:
 @import "css/bootstrap.css";
 
 /**
- * 1.GLOBAL
+ * 1.OVERRIDES
  */
 
 body {
@@ -48,9 +48,29 @@ body {
   padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
 }
 
+fieldset {
+  border: 1px solid #ccc;
+  margin: .5em 0;
+  padding: 1em;
+}
 
-/* apply common styling after reset.css */
-table {  margin-bottom: 1.5em;  width: 100%; }
+table {
+  margin-bottom: 1.5em;
+  width: 100%;
+}
+
+legend {
+  margin-bottom: 0;
+  width: auto;
+}
+
+input.form-radio, input.form-checkbox {
+  display: inline;
+}
+
+input.form-autocomplete {
+  background-image: none !important;
+}
 
 /**
  * 2.LAYOUT
@@ -340,14 +360,18 @@ ul.secondary a.active {
  * 7.NODES
  */
 
-.node {
+.node header {
   margin-bottom: 1.5em;
+}
+
+.node {
+  margin-bottom: 2em;
 }
 
 /* tags */
 
 .terms {
-  margin: 0 0 1.5em;
+  margin: 0 0 0.5em;
 }
 
 .terms span {
