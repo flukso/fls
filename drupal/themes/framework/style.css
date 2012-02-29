@@ -164,41 +164,10 @@ body.sidebar-right #sidebar-right {
  * 5.HEADER
  */
 
-#header {
+header {
   margin: 0;
   padding: 2.5em 0 0;
   position: relative;
-}
-
-#header #logo {
-  float: left;
-  margin: 0 1em 1.5em 0;
-}
-
-#header #site-name-slogan {
-  float: left;
-  margin: 0 0 1.5em;
-}
-
-#header #site-name {
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 2.5em;
-  font-weight: 700;
-  line-height: 1.2;
-  margin: 0;
-}
-
-#header #site-name a:hover {
-  text-decoration: none;
-}
-
-#header #site-slogan {
-  margin: 0;
-}
-
-#search-theme-form {
-  float: right;
-  margin: .7em 0 0;
 }
 
 /* hides "Search this site:" label from search forms */

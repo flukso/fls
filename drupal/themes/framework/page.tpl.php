@@ -17,7 +17,7 @@
 
 <body class="<?php print $body_classes; ?>">
 
-  <div id="header">
+  <header>
     <div class="navbar navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container">
@@ -51,7 +51,7 @@
         </div>
       </div>
     </div>
-  </div> <!-- header -->
+  </header>
 
     <section role="main" class="clearfix">
       <div class="container clearfix">
