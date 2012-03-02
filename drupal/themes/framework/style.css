@@ -104,6 +104,10 @@ td.active {
     background-color: #f5f5f5;
 }
 
+div.category-grid-products .table tbody tr:hover td, .table tbody tr:hover th {
+  background-color: #ffffff;
+}
+
 /**
  * 2.LAYOUT
  */
