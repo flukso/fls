@@ -94,6 +94,10 @@ td.uc-discounts-cart-pane-table-cell,
   margin-bottom: 0px;
 }
 
+fieldset#payment-pane .table {
+  width: 75%;
+}
+
 tr.even, tr.odd {
     background-color: #f5f5f5;
     border-bottom: 0 none;
