@@ -30,4 +30,12 @@ $(function() {
     $("div.messages.error")
         .removeClass("messages error")
         .addClass("alert alert-error");
+
+    /* bootstrap input/textarea/select errors */
+    $(".form-item input.error, " +
+      ".form-item textarea.error, " +
+      ".form-item select.error")
+        .removeClass("error")
+        .parent()
+        .addClass("control-group error");
 });

@@ -120,6 +120,15 @@ div.category-grid-products .table tbody tr:hover td, .table tbody tr:hover th {
   text-align: right;
 }
 
+/* override system.css settings to properly display form errors */
+div.error, tr.error {
+  padding: 0px;
+}
+
+div.error {
+  border: 0px none;
+}
+
 /**
  * 2.LAYOUT
  */
