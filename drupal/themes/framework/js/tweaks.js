@@ -10,10 +10,11 @@ $(function() {
     /* bootstrap submit buttons */
     $("input.form-submit").addClass("btn");
 
-    $("input.form-submit.node-add-to-cart").addClass("btn-primary");
-    $("input.form-submit#edit-checkout").addClass("btn-primary");
-    $("input.form-submit#edit-continue").addClass("btn-primary");
-    $("input.form-submit#edit-submit").addClass("btn-primary");
+    $("input.form-submit.node-add-to-cart, " +
+      "input.form-submit#edit-checkout, "    +
+      "input.form-submit#edit-continue, "    +
+      "input.form-submit#edit-submit")
+        .addClass("btn-primary");
 
     /* substitute drupal messages for bootstrap alerts
      * since bootstrap.js require jquery 1.7.1, we cannot
@@ -32,7 +33,7 @@ $(function() {
         .addClass("alert alert-error");
 
     /* bootstrap input/textarea/select errors */
-    $(".form-item input.error, " +
+    $(".form-item input.error, "    +
       ".form-item textarea.error, " +
       ".form-item select.error")
         .removeClass("error")
