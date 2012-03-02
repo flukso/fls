@@ -95,10 +95,15 @@ td.uc-discounts-cart-pane-table-cell,
 }
 
 tr.even, tr.odd {
-    background-color: #f3f3f3;
+    background-color: #f5f5f5;
     border-bottom: 0 none;
     padding: 0;
 }
+
+td.active {
+    background-color: #f5f5f5;
+}
+
 /**
  * 2.LAYOUT
  */
