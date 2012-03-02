@@ -7,6 +7,14 @@ $(function() {
         .children("table"))
         .addClass("table");
 
+    /* bootstrap submit buttons */
+    $("input.form-submit").addClass("btn");
+
+    $("input.form-submit.node-add-to-cart").addClass("btn-primary");
+    $("input.form-submit#edit-checkout").addClass("btn-primary");
+    $("input.form-submit#edit-continue").addClass("btn-primary");
+    $("input.form-submit#edit-submit").addClass("btn-primary");
+
     /* substitute drupal messages for bootstrap alerts
      * since bootstrap.js require jquery 1.7.1, we cannot
      * use bootstrap's alert dismissal feature
