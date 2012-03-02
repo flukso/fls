@@ -13,7 +13,8 @@ $(function() {
     $("input.form-submit.node-add-to-cart, " +
       "input.form-submit#edit-checkout, "    +
       "input.form-submit#edit-continue, "    +
-      "input.form-submit#edit-submit")
+      "input.form-submit#edit-submit, "      +
+      "input.form-submit#edit-save")
         .addClass("btn-primary");
 
     /* substitute drupal messages for bootstrap alerts
@@ -39,4 +40,9 @@ $(function() {
         .removeClass("error")
         .parent()
         .addClass("control-group error");
+
+    $("ul.tabs.primary, " +
+      "ul.tabs.secondary")
+        .removeClass("tabs primary secondary")
+        .addClass("nav nav-pills");
 });
