@@ -129,6 +129,11 @@ div.error {
   border: 0px none;
 }
 
+/* fix buttons on /user/x/subscriptions page */
+#subscriptions-user-settings-form input.btn {
+  margin: 0.4em;
+}
+
 /**
  * 2.LAYOUT
  */
