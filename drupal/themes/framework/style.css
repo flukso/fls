@@ -134,6 +134,11 @@ div.error {
   margin: 0.4em;
 }
 
+/* alter default bootstrap nav-pills */
+.nav-pills > li > a {
+    background-color: #ffffff;
+}
+
 /**
  * 2.LAYOUT
  */
