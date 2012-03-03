@@ -14,7 +14,7 @@
       <?php endif; ?>
 
 	  <?php if ($submitted): ?>
-        <span class="submitted"><?php print $submitted; ?></span>
+        <h6 class="submitted"><?php print $submitted; ?></h6>
       <?php endif; ?>
 
     <?php if (!$page): ?>
@@ -25,21 +25,6 @@
   <div class="content">
     <?php print $content ?>
   </div>
-
-  <?php if (!empty($terms) || !empty($links)): ?>
-    <footer>
-      <?php if ($terms): ?>
-        <div class="terms">
-          <span><?php print t('Tags: ') ?></span><?php print $terms ?>
-        </div>
-      <?php endif;?>
-      <?php if ($links): ?>
-        <div class="links">
-          <?php print $links; ?>
-        </div>
-      <?php endif; ?>
-    </footer>
-  <?php endif;?>
 
 <?php if (!$page): ?>
   </article> <!-- /.node -->

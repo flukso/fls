@@ -72,6 +72,7 @@ li a.active {
 }
 
 footer {
+  min-height: 18px;
   background-color: #e0e0e0;
   padding: 0.5em;
   text-align: right;
@@ -144,12 +145,18 @@ div.error {
   margin-left: 0px
 }
 
+/* the more-or-less sticky footer */
 html, body {
   height: 100%
 }
 
 section[role=main] {
   min-height: 50%
+}
+
+/* give the submitted info a bith of breathing space */
+h6.submitted {
+  margin-bottom: 1em;
 }
 
 /**
