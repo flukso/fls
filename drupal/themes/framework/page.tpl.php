@@ -37,7 +37,7 @@
               <li><a href="/installation">Install</a></li>
               <li><a href="/blog">Blog</a></li>
               <li><a href="/forum">Forum</a></li>
-              <li><a href="https://github.com/flukso">Dev</a></li>
+              <li><a href="https://github.com/flukso">Source</a></li>
               <li><a href="/dash">Dash</a></li>
               <li><a href="/contact">Contact</a></li>
               <li><a href="/shop">Shop</a></li>
@@ -57,7 +57,15 @@
       <div class="container clearfix">
  
       <div class="row">
-      <div class="span10 offset1">
+      <?php if (strpos($_GET['q'],  "catalog") === 0
+                || strpos($_GET['q'],  "user") === 0 /* includes users */ 
+                || strpos($_GET['q'], "admin") === 0
+                || strpos($_GET['q'], "forum") === 0
+                || strpos($_GET['q'],  "dash") === 0) { ?>
+        <div class="span10 offset1">
+      <?php } else { ?>
+        <div class="span8 offset2">
+      <?php }; ?>
 
       <?php if (!empty($messages)): print $messages; endif; ?>
       <?php if (!empty($mission)): ?><div id="mission"><?php print $mission; ?></div><?php endif; ?>
