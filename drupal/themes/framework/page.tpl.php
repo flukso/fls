@@ -70,7 +70,10 @@
       <?php if (!empty($messages)): print $messages; endif; ?>
       <?php if (!empty($mission)): ?><div id="mission"><?php print $mission; ?></div><?php endif; ?>
       <a id="main-content"></a>
-      <?php if (!empty($title)): ?><h1 class="title" id="page-title"><?php print $title ?></h1><?php endif; ?>
+      <?php if (!empty($title) && strpos($_GET['q'],  "user") !== 0) { ?>
+        <h1 class="title" id="page-title"><?php print $title ?></h1>
+      <?php }; ?>
+
       <?php if (!empty($tabs)): ?><div class="tabs-wrapper clearfix"><?php print $tabs; ?></div><?php endif; ?>
       <?php if (!empty($help)): print $help; endif; ?>
       <?php print $content; ?>
