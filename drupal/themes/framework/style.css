@@ -144,6 +144,14 @@ div.error {
   margin-left: 0px
 }
 
+html, body {
+  height: 100%
+}
+
+section[role=main] {
+  min-height: 50%
+}
+
 /**
  * 2.LAYOUT
  */
@@ -430,7 +438,7 @@ div.view div.views-admin-links li a {
  */
 
 #footer {
-  background-color: #222222;
+  background-color: #f5f5f5;
   clear: both;
   margin-top: 5em;
   padding: 1.5em 0 0 70px;
