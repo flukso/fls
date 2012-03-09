@@ -5,6 +5,7 @@ engine = phptemplate
 
 stylesheets[all][] = style.css
 
+scripts[] = lib/bootstrap-dropdown.js
 scripts[] = js/tweaks.js
 
 regions[left] = Left sidebar
