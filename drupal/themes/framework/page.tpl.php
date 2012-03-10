@@ -56,6 +56,7 @@
                 </ul>
               </li>
               <?php } else { ?>
+              <li><a href="/user/register"><i class="icon-key"></i> Create account</a></li>
               <li><a href="/user"><i class="icon-signin"></i> Log in</a></li>
               <?php } ?>
             </ul>
