@@ -40,12 +40,25 @@
               <li><a href="https://github.com/flukso">Source</a></li>
               <li><a href="/dash">Dash</a></li>
               <li><a href="/contact">Contact</a></li>
-              <li><a href="/shop">Shop</a></li>
+              <li><a href="/shop" rel="tooltip" title="let's go shopping">Shop</a></li>
             </ul>
 
-            <form id="searchForm" class="navbar-search pull-right dropdown">
-              <input id="searchText" type="text" class="search-query dropdown-toggle" placeholder="Search">
-            </form>
+            <ul class="nav pull-right">
+              <?php if ($logged_in) { ?>
+              <li class="dropdown" id="menu1">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#menu1">
+                  <?php print $user->name ?>
+                  <b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu">
+                  <li><a href="/user"><i class="icon-cogs"></i> account settings</a></li>
+                  <li><a href="/logout"><i class="icon-signout"></i> log out</a></li>
+                </ul>
+              </li>
+              <?php } else { ?>
+              <li><a href="/user"><i class="icon-signin"></i> Log in</a></li>
+              <?php } ?>
+            </ul>
           </div>
           <!--/.nav-collapse -->
         </div>
