@@ -4,6 +4,7 @@ core = 6.x
 engine = phptemplate
 
 stylesheets[all][] = style.css
+stylesheets[all][] = font-awesome/css/font-awesome.css
 
 scripts[] = lib/bootstrap-dropdown.js
 scripts[] = js/tweaks.js
