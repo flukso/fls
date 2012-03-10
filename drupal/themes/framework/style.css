@@ -159,6 +159,12 @@ h6.submitted {
   margin-bottom: 1em;
 }
 
+/* align the user picture accompanying the comment */
+article.comment .picture {
+  float: left;
+  margin: -4px 0.5em 0 0;
+}
+
 /**
  * 2.LAYOUT
  */
