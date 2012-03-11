@@ -44,8 +44,12 @@
            </ul>
 
             <ul class="nav pull-right icon">
-              <?php if ($cart) { ?>
-              <li><a href="/cart" id="cart" title="your shopping cart"><i class="icon-shopping-cart"></i></a></li>
+              <?php if ($show_cart_icon) { ?>
+              <li><a href="/cart" id="cart" title="my shopping cart"><i class="icon-shopping-cart"></i></a></li>
+              <?php } ?>
+
+              <?php if ($show_feed_icon) { ?>
+              <li><a href="<?php print $feed; ?>" title="rss feed"><i class="icon-pushpin"></i></a></li>
               <?php } ?>
  
               <?php if ($logged_in) { ?>
@@ -126,8 +130,6 @@
 
       </div>
       </div>
-
-      <?php print $feed_icons ?>
 
       </div>
     </footer> <!-- /#footer -->

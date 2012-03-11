@@ -200,5 +200,8 @@ function framework_preprocess_block(&$vars, $hook) {
  * Override or insert variables into the page templates.
  */
 function framework_preprocess_page(&$vars) {
-  $vars['cart'] = count(uc_cart_get_contents());
+  $vars['show_cart_icon'] = count(uc_cart_get_contents());
+
+  $vars['show_feed_icon'] = preg_match('/href\="(.*?)"/', drupal_get_feeds(), &$matches);
+  $vars['feed'] = $matches[1];
 }
