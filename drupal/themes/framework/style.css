@@ -162,7 +162,7 @@ h6.submitted {
 /* align the user picture accompanying the comment */
 article.comment .picture {
   float: left;
-  margin: -4px 0.5em 0 0;
+  margin: 3px 0.5em 0 0;
 }
 
 /* theme icons in the nav-bar */
@@ -365,17 +365,12 @@ ul.inline li {
   margin-left: 1em;
 }
 
-.comment span.author {
-  background-color: #e0e0e0;
-  padding: 0.5em;
-}
-
 .comment header {
-  margin-bottom: 1em;
+  margin-bottom: 1.6em;
 }
 
 .comment .content {
- margin: 0 2em 0 2em;
+ margin-left: 6em;
 }
 
 /**
