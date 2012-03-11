@@ -195,3 +195,10 @@ function framework_preprocess_block(&$vars, $hook) {
   }
   $vars['edit_links'] = !empty($vars['edit_links_array']) ? '<div class="edit">' . implode(' ', $vars['edit_links_array']) . '</div>' : '';
 }
+
+/**
+ * Override or insert variables into the page templates.
+ */
+function framework_preprocess_page(&$vars) {
+  $vars['cart'] = count(uc_cart_get_contents());
+}
