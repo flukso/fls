@@ -40,24 +40,20 @@
               <li><a href="https://github.com/flukso">Source</a></li>
               <li><a href="/dash">Dash</a></li>
               <li><a href="/contact">Contact</a></li>
-              <li><a href="/shop" rel="tooltip" title="let's go shopping">Shop</a></li>
-            </ul>
+              <li><a href="/shop">Shop</a></li>
+           </ul>
 
-            <ul class="nav pull-right">
+            <ul class="nav pull-right icon">
+              <?php if ($cart) { ?>
+              <li><a href="/cart" id="cart" title="your shopping cart"><i class="icon-shopping-cart"></i></a></li>
+              <?php } ?>
+ 
               <?php if ($logged_in) { ?>
-              <li class="dropdown" id="menu1">
-                <a class="dropdown-toggle" data-toggle="dropdown" href="#menu1">
-                  <?php print $user->name ?>
-                  <b class="caret"></b>
-                </a>
-                <ul class="dropdown-menu">
-                  <li><a href="/user"><i class="icon-cogs"></i> account settings</a></li>
-                  <li><a href="/logout"><i class="icon-signout"></i> log out</a></li>
-                </ul>
-              </li>
+              <li><a href="/users/<?php print $user->name ?>" title="account settings"><i class="icon-cogs"></i></a></li>
+              <li><a href="/logout" title="log out"><i class="icon-signout"></i></a></li>
               <?php } else { ?>
-              <li><a href="/user/register"><i class="icon-key"></i> Create account</a></li>
-              <li><a href="/user"><i class="icon-signin"></i> Log in</a></li>
+              <li><a href="/user/register" title="create account"><i class="icon-key"></i></a></li>
+              <li><a href="/user" title="log in"><i class="icon-signin"></i></a></li>
               <?php } ?>
             </ul>
           </div>
