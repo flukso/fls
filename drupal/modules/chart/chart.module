@@ -20,6 +20,7 @@
  */
 
 define('CHART_PATH', drupal_get_path('module', 'chart'));
+define('CHART_HTML', CHART_PATH . '/tpl/dash.html');
 
 /**
  * hook_menu() callback 
@@ -27,11 +28,9 @@ define('CHART_PATH', drupal_get_path('module', 'chart'));
 function chart_menu() {
   $items = array();
 
-  $items['chart'] = array(
-    'title'               => 'your charts',
+  $items['dash'] = array(
     'description'         => 'Render Flukso time series charts.',
     'page callback'       => '_chart_render',
-    'page arguments'      => array('electricity', 'day'),
     'access callback'     => TRUE,
     'type'                => MENU_CALLBACK,
   );
@@ -50,18 +49,9 @@ function _chart_render() {
 
   drupal_add_js(array('uid' => $user->uid) , 'setting');
 
-  $output .= '<ul class="tabs primary"></ul>';
+  $fd = fopen(CHART_HTML, 'r');
+  $content = fread($fd, filesize(CHART_HTML));
+  fclose($fd);
 
-  $output .= '<ul class="tabs secondary">';
-  $output .= '<li id="minute"><a href="/chart">minute</a></li>';
-  $output .= '<li id="hour"><a href="/chart">hour</a></li>';
-  $output .= '<li id="day"><a href="/chart">day</a></li>';
-  $output .= '<li id="month"><a href="/chart">month</a></li>';
-  $output .= '<li id="year"><a href="/chart">year</a></li>';
-  $output .= '<li id="night"><a href="/chart">night</a></li>';
-  $output .= '</ul>';
-
-  $output .= '<div id="chart" style="height: 500px; width: 600px; margin: 1.5em 0 0 0;"></div>';
-
-  return $output;
+  return $content;
 }

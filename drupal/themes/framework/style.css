@@ -179,6 +179,13 @@ article.comment .picture {
   color: #ffffff;
 }
 
+/* theme the chart */
+#chart {
+  height: 500px;
+  margin-top: 20px;
+  margin-left: -15px;
+}
+
 /**
  * 2.LAYOUT
  */
