@@ -41,7 +41,7 @@ Flukso.unitParams = {
 Flukso.chartDefaults = {
 	chart: {
 		renderTo: 'chart',
-		backgroundColor: '#f3f3f3',
+		backgroundColor: '#f5f5f5',
 		animation: {
 			duration : 400,
 			easing : 'swing'
@@ -102,7 +102,7 @@ Flukso.chartDefaults = {
 		labels: {
 			style: {
 				color: '#000',
-				font: '11px Trebuchet MS, Verdana, sans-serif'
+				font: '13px "Helvetica Neue", Helvetica, Arial, sans-serif'
 			}
 		},
 
@@ -110,8 +110,8 @@ Flukso.chartDefaults = {
 			style: {
 				color: '#333',
 				fontWeight: 'bold',
-				fontSize: '12px',
-				fontFamily: 'Trebuchet MS, Verdana, sans-serif'
+				fontSize: '14px',
+				fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'
 			}
 		}
 	},
@@ -129,7 +129,7 @@ Flukso.chartDefaults = {
 		labels: {
 			style: {
 				color: '#000',
-				font: '11px Trebuchet MS, Verdana, sans-serif'
+				font: '13px "Helvetica Neue", Helvetica, Arial, sans-serif'
 			}
 		},
 
@@ -137,8 +137,8 @@ Flukso.chartDefaults = {
 			style: {
 				color: '#333',
 				fontWeight: 'bold',
-				fontSize: '12px',
-				fontFamily: 'Trebuchet MS, Verdana, sans-serif'
+				fontSize: '14px',
+				fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'
 			}
 		}
 	},
@@ -498,8 +498,8 @@ $(function() {
 	Flukso.chartState = new Flukso.ChartState();
 	Flukso.sensorCollect = new Flukso.SensorCollect();
 	
-	Flukso.typeView = new Flukso.TypeView({model: Flukso.chartState});
-	Flukso.intervalView = new Flukso.IntervalView({model: Flukso.chartState});
+//	Flukso.typeView = new Flukso.TypeView({model: Flukso.chartState});
+//	Flukso.intervalView = new Flukso.IntervalView({model: Flukso.chartState});
 	Flukso.chartView = new Flukso.ChartView({collection: Flukso.sensorCollect});
 
 	Flukso.router = new Flukso.Router();

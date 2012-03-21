@@ -1,7 +1,7 @@
 <?php
 
 /**
- * chart.module : Flukso chart rendering using the Highstock js charting lib
+ * dash.module : The Flukso dashboard
  * 
  * Copyright (c) 2011 Bart Van Der Meerssche <bart.vandermeerssche@flukso.net>
  *
@@ -19,18 +19,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-define('CHART_PATH', drupal_get_path('module', 'chart'));
-define('CHART_HTML', CHART_PATH . '/tpl/dash.html');
+define('DASH_PATH', drupal_get_path('module', 'dash'));
+define('DASH_HTML', DASH_PATH . '/tpl/dash.html');
 
 /**
  * hook_menu() callback 
  */
-function chart_menu() {
+function dash_menu() {
   $items = array();
 
   $items['dash'] = array(
-    'description'         => 'Render Flukso time series charts.',
-    'page callback'       => '_chart_render',
+    'description'         => 'The Flukso dashboard',
+    'page callback'       => '_dash_render',
     'access callback'     => TRUE,
     'type'                => MENU_CALLBACK,
   );
@@ -38,19 +38,19 @@ function chart_menu() {
   return $items;
 } 
 
-function _chart_render() {
+function _dash_render() {
   global $user;
 
-  drupal_add_js(CHART_PATH . '/js/underscore-min.js');
-  drupal_add_js(CHART_PATH . '/js/backbone-min.js');
-  drupal_add_js(CHART_PATH . '/js/backbone-nested-v1.0.3.min.js');
-  drupal_add_js(CHART_PATH . '/js/highstock.src.js');
-  drupal_add_js(CHART_PATH . '/js/flukso.js');
+  drupal_add_js(DASH_PATH . '/js/underscore-min.js');
+  drupal_add_js(DASH_PATH . '/js/backbone-min.js');
+  drupal_add_js(DASH_PATH . '/js/backbone-nested-v1.0.3.min.js');
+  drupal_add_js(DASH_PATH . '/js/highstock.src.js');
+  drupal_add_js(DASH_PATH . '/js/flukso.js');
 
   drupal_add_js(array('uid' => $user->uid) , 'setting');
 
-  $fd = fopen(CHART_HTML, 'r');
-  $content = fread($fd, filesize(CHART_HTML));
+  $fd = fopen(DASH_HTML, 'r');
+  $content = fread($fd, filesize(DASH_HTML));
   fclose($fd);
 
   return $content;

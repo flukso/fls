@@ -1,5 +1,5 @@
-name = Chart
-description = Render Flukso time series charts
+name = Dash
+description = The Flukso dashboard
 package = Flukso
 core = 6.x
 version = 6.x-0.1
