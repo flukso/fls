@@ -299,38 +299,27 @@ Flukso.SensorCollect = Backbone.Collection.extend({
 });
 
 Flukso.TypeView = Backbone.View.extend({
-	el: 'ul.tabs.primary',
+	el: '#type',
 
 	initialize: function() {
-		this.template = _.template('<% _.each(count, function(cnt, type) { if (cnt != 0) { %> <li id= <%= type %> ><a href="/chart"><%= type %></a></li> <% } }); %>');
-
 		_.bindAll(this, 'render');
 		this.model.bind('change:type', this.render);
-		this.model.bind('change:count', this.render);
+		this.render();
 	},
 
 	render: function() {
-		var types = this.model.get('count', {silent: true});
-
-        /* only render the types containing sensors */
-		$(this.el).html(this.template(this.model.toJSON()));
-
-		var sel = $(this.el).children();
-
-		/* activate tabs based on chart model */
+		/* activate button based on chart model */
 		var id = '#' + this.model.get('type');
-
-		sel.filter(id).addClass('active');
-		sel.filter(id).children().addClass('active');
+		$(id).button("toggle");
 
 		return this;
 	},
 
 	events: {
-		"click": "clickTab"
+		"click": "clickButton"
 	},
 
-	clickTab: function(e) {
+	clickButton: function(e) {
 		/* What isn't instantly obvious is that under the bonnet, Backbone
 		 * uses jQuery's .delegate() to provide instant support for event
 		 * delegation but goes a little further, extending it so that this
@@ -340,18 +329,14 @@ Flukso.TypeView = Backbone.View.extend({
 		 *
 		 * [1] https://github.com/addyosmani/backbone-fundamentals#views
 		 */
-		var sel = e.target.parentNode;
+		var sel = e.target;
 		this.model.set({type: $(sel).attr('id')});
 		this.model.set({reload: true});
-
-		/* this click event should not bubble up to the default handler */
-		e.preventDefault();
-		e.stopPropagation();
 	}
 });
 
 Flukso.IntervalView = Backbone.View.extend({
-	el: 'ul.tabs.secondary',
+	el: '#interval',
 
 	initialize: function() {
 		/* needed when render is called as a callback to the change event */
@@ -361,33 +346,21 @@ Flukso.IntervalView = Backbone.View.extend({
 	},
 
 	render: function() {
-		var sel = $(this.el).children();
-
-		/* clear active tabs */
-		sel.removeClass('active');	
-		sel.children().removeClass('active');
-
 		/* activate tabs based on chart model */
 		var id = '#' + this.model.get('interval');
-
-		sel.filter(id).addClass('active');
-		sel.filter(id).children().addClass('active');
+		$(id).button("toggle");
 
 		return this;
 	},
 
 	events: {
-		"click": "clickTab"
+		"click": "clickButton"
 	},
 
-	clickTab: function(e) {
-		var sel = e.target.parentNode;
+	clickButton: function(e) {
+		var sel = e.target;
 		this.model.set({interval: $(sel).attr('id')});
 		this.model.set({reload: true});
-
-		/* this click event should not bubble up to the default handler */
-		e.preventDefault();
-		e.stopPropagation();
 	}
 });
 
@@ -498,8 +471,8 @@ $(function() {
 	Flukso.chartState = new Flukso.ChartState();
 	Flukso.sensorCollect = new Flukso.SensorCollect();
 	
-//	Flukso.typeView = new Flukso.TypeView({model: Flukso.chartState});
-//	Flukso.intervalView = new Flukso.IntervalView({model: Flukso.chartState});
+	Flukso.typeView = new Flukso.TypeView({model: Flukso.chartState});
+	Flukso.intervalView = new Flukso.IntervalView({model: Flukso.chartState});
 	Flukso.chartView = new Flukso.ChartView({collection: Flukso.sensorCollect});
 
 	Flukso.router = new Flukso.Router();
