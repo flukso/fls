@@ -21,6 +21,7 @@
 
 define('DASH_PATH', drupal_get_path('module', 'dash'));
 define('DASH_HTML', DASH_PATH . '/tpl/dash.html');
+define('FRAMEWORK_PATH', drupal_get_path('theme', 'framework'));
 
 /**
  * hook_menu() callback 
@@ -41,6 +42,8 @@ function dash_menu() {
 function _dash_render() {
   global $user;
 
+  drupal_add_js(FRAMEWORK_PATH . '/lib/bootstrap.min.js');
+
   drupal_add_js(DASH_PATH . '/js/underscore-min.js');
   drupal_add_js(DASH_PATH . '/js/backbone-min.js');
   drupal_add_js(DASH_PATH . '/js/backbone-nested-v1.0.3.min.js');
@@ -50,8 +53,8 @@ function _dash_render() {
   drupal_add_js(array('uid' => $user->uid) , 'setting');
 
   $fd = fopen(DASH_HTML, 'r');
-  $content = fread($fd, filesize(DASH_HTML));
+  $body = fread($fd, filesize(DASH_HTML));
   fclose($fd);
 
-  return $content;
+  return $body;
 }
