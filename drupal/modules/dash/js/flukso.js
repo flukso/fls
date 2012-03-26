@@ -39,10 +39,45 @@ Flukso.unitParams = {
 	water       : "lperday"
 };
 
-Flukso.unitFactor = {
+Flukso.unitPowerFactor = {
 	electricity: { watt: 1.142e-1, kwhperyear: 1, eurperyear: 999 },
 	gas: { lpermin: 6.944e-4, lperday: 1, m3peryear: 0.365, eurperyear: 999 },
 	water: { lpermin: 6.944e-4, lperday: 1, m3peryear: 0.365, eurperyear: 999 }
+};
+
+Flukso.unitEnergyFactor = {
+	electricity: {
+		wh: {
+			minute: 1000 * Flukso.time.SECOND / Flukso.time.YEAR,
+			hour:   1000 * Flukso.time.MINUTE / Flukso.time.YEAR,
+			day:    1000 * Flukso.time.QUARTER / Flukso.time.YEAR,
+			month:  1000 * Flukso.time.DAY / Flukso.time.YEAR,
+			year:   1000 * Flukso.time.WEEK / Flukso.time.YEAR,
+			night:  1000 * Flukso.time.DAY / Flukso.time.YEAR
+		}
+	},
+
+	gas: {
+		liter: {
+			minute: Flukso.time.SECOND / Flukso.time.DAY,
+			hour:   Flukso.time.MINUTE / Flukso.time.DAY,
+			day:    Flukso.time.QUARTER / Flukso.time.DAY,
+			month:  Flukso.time.DAY / Flukso.time.DAY,
+			year:   Flukso.time.WEEK / Flukso.time.DAY,
+			night:  Flukso.time.DAY / Flukso.time.DAY
+		}
+	},
+
+	water: {
+		liter: {
+			minute: Flukso.time.SECOND / Flukso.time.DAY,
+			hour:   Flukso.time.MINUTE / Flukso.time.DAY,
+			day:    Flukso.time.QUARTER / Flukso.time.DAY,
+			month:  Flukso.time.DAY / Flukso.time.DAY,
+			year:   Flukso.time.WEEK / Flukso.time.DAY,
+			night:  Flukso.time.DAY / Flukso.time.DAY
+		}
+	}
 };
 
 Flukso.chartDefaults = {
@@ -165,6 +200,8 @@ Flukso.ChartState = Backbone.NestedModel.extend({
 			water: 'lperday'
 		},
 
+		cumul: false,
+
 		count: {
 			electricity: 0,
 			gas: 0,
@@ -202,6 +239,7 @@ Flukso.Sensor = Backbone.Model.extend({
 		Flukso.chartState.bind('change:type', this.GET);
 		Flukso.chartState.bind('change:interval', this.GET);
 		Flukso.chartState.bind('change:unit', this.GET);
+		Flukso.chartState.bind('change:cumul', this.GET);
 
 		this.GET();	
 	},
@@ -343,6 +381,7 @@ Flukso.TypeView = Backbone.View.extend({
 		 */
 		var sel = e.target;
 		this.model.set({type: $(sel).attr('id')});
+		this.model.set({cumul: false}); /* making sure we don't trigger cumul on a power unit */
 		this.model.set({reload: true});
 	}
 });
@@ -416,6 +455,7 @@ Flukso.UnitView = Backbone.View.extend({
 			water: unit.water
 		}});
 
+        this.model.set({cumul: $(sel).hasClass('cumul')});
 		this.model.set({reload: true});
 	}
 });
@@ -444,8 +484,11 @@ Flukso.ChartView = Backbone.View.extend({
 
 		var type = Flukso.chartState.get('type');
 		var unit = Flukso.chartState.get('unit.' + type);
+		var cumul = Flukso.chartState.get('cumul');
 		var interval = Flukso.chartState.get('interval');
-		var factor = Flukso.unitFactor[type][unit];;
+
+		var factor = Flukso.unitPowerFactor[type][unit] ?
+			Flukso.unitPowerFactor[type][unit] : Flukso.unitEnergyFactor[type][unit][interval];
 
 		/* filter out the sensors we wish to display */
 		var sensors = this.filter(function(sensor) {
@@ -453,7 +496,7 @@ Flukso.ChartView = Backbone.View.extend({
 		});
 
 		var series = _.map(sensors, function(sensor) {
-			function formatPoint(point) {
+			function formatPoint(point, idx, list) {
 				/* convert to ms timestamps */
 				point[0] = point[0] * 1000;
 
@@ -461,6 +504,10 @@ Flukso.ChartView = Backbone.View.extend({
 					point[1] = null;
 				} else {
 					point[1] = point[1] * factor;
+
+					if (cumul && idx != 0) {
+						point[1] = point[1] + list[idx - 1][1];
+					};
 				};
 
 				return point;
@@ -485,6 +532,7 @@ Flukso.ChartView = Backbone.View.extend({
 			var config = $.extend(true, {}, Flukso.chartDefaults);
 
 			config.xAxis.range = Flukso.timeParams[interval].range;
+			config.yAxis.min = cumul ? null : 0;
 			config.yAxis.title.text = unit;
 			config.series = series;
 
