@@ -271,7 +271,6 @@ Flukso.Sensor = Backbone.Model.extend({
 		};
 
 		if (this.get('interval') == 'minute') {
-			/* TODO remove hardcoded parts */
 			$.getJSON(this.get('localUrl') + this.get('id') + this.get('callback'), queryParams, process);
 			setTimeout(this.GET, 1000);
 		} else {
@@ -496,6 +495,8 @@ Flukso.ChartView = Backbone.View.extend({
 		});
 
 		var series = _.map(sensors, function(sensor) {
+			var start = _.last(sensor.get('data'))[0] - Flukso.timeParams[interval].range / 1000;
+
 			function formatPoint(point, idx, list) {
 				/* convert to ms timestamps */
 				point[0] = point[0] * 1000;
@@ -513,9 +514,13 @@ Flukso.ChartView = Backbone.View.extend({
 				return point;
 			};
 
+			function truncatePoint(point) {
+				return point[0] < start ? false : true;
+			};
+
 			var entry = {
 				name: sensor.get('function'),
-				data: _.map(sensor.get('data'), formatPoint),
+				data: _.map(cumul ? _.filter(sensor.get('data'), truncatePoint) : sensor.get('data'), formatPoint),
 				step: true,
 				tooltip: {
 					yDecimals: 0
@@ -532,7 +537,6 @@ Flukso.ChartView = Backbone.View.extend({
 			var config = $.extend(true, {}, Flukso.chartDefaults);
 
 			config.xAxis.range = Flukso.timeParams[interval].range;
-			config.yAxis.min = cumul ? null : 0;
 			config.yAxis.title.text = unit;
 			config.series = series;
 
