@@ -39,6 +39,12 @@ Flukso.unitParams = {
 	water       : "lperday"
 };
 
+Flukso.unitRtParams = {
+	electricity : "watt",
+	gas         : "lperday",
+	water       : "lperday"
+};
+
 Flukso.unitPowerFactor = {
 	electricity: { watt: 1.142e-1, kwhperyear: 1, eurperyear: 999 },
 	gas: { lpermin: 6.944e-4, lperday: 1, m3peryear: 0.365, eurperyear: 999 },
@@ -200,6 +206,12 @@ Flukso.ChartState = Backbone.NestedModel.extend({
 			water: 'lperday'
 		},
 
+		unitRt: {
+			electricity: 'watt',
+			gas: 'lperday',
+			water: 'lperday'
+		},
+
 		cumul: false,
 
 		count: {
@@ -220,6 +232,7 @@ Flukso.Sensor = Backbone.Model.extend({
 		interval: null,
 //		resolution: null,
 		unit: null,
+		unitRt: null,
 		data: null,
 
 		baseUrl: 'https://www.flukso.net/api/sensor/',
@@ -232,7 +245,8 @@ Flukso.Sensor = Backbone.Model.extend({
 
 	initialize: function() {
 		this.set({
-			unit: Flukso.unitParams[this.get('type')]
+			unit: Flukso.unitParams[this.get('type')],
+			unitRt: Flukso.unitRtParams[this.get('type')]
 		});
 
 		this.GET = _.bind(this.GET, this);
@@ -275,7 +289,7 @@ Flukso.Sensor = Backbone.Model.extend({
 			version: this.get('version'),
 			interval: Flukso.timeParams[this.get('interval')].interval,	/* we fetch a bigger interval than requested */
 			resolution: Flukso.timeParams[this.get('interval')].resolution,
-			unit: this.get('unit')
+			unit: this.get('interval') == 'minute' ? this.get('unitRt') : this.get('unit')
 		};
 
 		if (this.get('interval') == 'minute') {
@@ -435,6 +449,7 @@ Flukso.UnitView = Backbone.View.extend({
 		/* needed when render is called as a callback to the change event */
 		_.bindAll(this, 'render');
 		this.model.bind('change:type', this.render);
+		this.model.bind('change:interval', this.render);
 		this.render();
 	},
 
@@ -443,6 +458,11 @@ Flukso.UnitView = Backbone.View.extend({
 
 		/* show only relevant units in dropdown */
 		var cls = '#unit.dropdown-menu a.' + this.model.get('type');
+
+		if (this.model.get('interval') == 'minute') {
+			cls += '.rt';
+		};
+
 		$(cls).show();
 
 		return this;
@@ -522,12 +542,18 @@ Flukso.ChartView = Backbone.View.extend({
 		};
 
 		var type = Flukso.chartState.get('type');
-		var unit = Flukso.chartState.get('unit.' + type);
-		var cumul = Flukso.chartState.get('cumul');
 		var interval = Flukso.chartState.get('interval');
 
-		var factor = Flukso.unitPowerFactor[type][unit] ?
-			Flukso.unitPowerFactor[type][unit] : Flukso.unitEnergyFactor[type][unit][interval];
+		if (interval == 'minute') {
+			var unit = Flukso.chartState.get('unitRt.' + type);
+			var cumul = false;
+			var factor = 1;
+		} else {
+			var unit = Flukso.chartState.get('unit.' + type);
+			var cumul = Flukso.chartState.get('cumul');
+			var factor = Flukso.unitPowerFactor[type][unit] ?
+				Flukso.unitPowerFactor[type][unit] : Flukso.unitEnergyFactor[type][unit][interval];
+		};
 
 		/* filter out the sensors we wish to display */
 		var sensors = this.filter(function(sensor) {
@@ -535,7 +561,7 @@ Flukso.ChartView = Backbone.View.extend({
 		});
 
 		var series = _.map(sensors, function(sensor) {
-			var start = _.last(sensor.get('data'))[0] - Flukso.timeParams[interval].range / 1000;
+			var start = _.last(sensor.get('data'))[0] - Flukso.timeParams[interval].range;
 
 			function formatPoint(point, idx, list) {
 				if (point[1] == 'nan') {
@@ -567,6 +593,7 @@ Flukso.ChartView = Backbone.View.extend({
 			return entry;
 		});
 
+		/* real-time chart should not reload the second time */
 		if (Flukso.chartState.get('reload')) {
 			Flukso.chartState.set({reload: false});
 
