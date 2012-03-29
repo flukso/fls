@@ -120,10 +120,8 @@ times(Interval, undefined, undefined, Resolution) ->
         {_, false} ->
             {false, false, false, false};
         {IntervalSec, ResolutionSec} -> 
-            % since the current interval will always return NaN
-            % we exclude it by subtracting ResolutionSec from Now
             AlignedEnd =
-                align(up, Now - ResolutionSec, ResolutionSec),
+                align(up, Now, ResolutionSec),
 
             % make sure we return IntervalSec/ResolutionSec entries
             % so we add ResolutionSec to AlignedEnd - IntervalSec
