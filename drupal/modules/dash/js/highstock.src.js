@@ -11262,8 +11262,8 @@ Series.prototype = {
 					if (i && options.step) {
 						var lastPoint = segment[i - 1];
 						segmentPath.push(
-							lastPoint.plotX,
-							point.plotY
+							point.plotX,
+							lastPoint.plotY
 						);
 					}
 
@@ -11272,6 +11272,14 @@ Series.prototype = {
 						point.plotX,
 						point.plotY
 					);
+
+					// finish the segment with a horizontal bar
+					if (i == segment.length - 1 && options.step) {
+						segmentPath.push(
+							point.plotX + (point.plotX - segment[i - 1].plotX),
+							point.plotY
+						);
+					}
 				}
 			});
 
