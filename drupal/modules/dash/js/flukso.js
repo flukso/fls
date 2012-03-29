@@ -24,12 +24,12 @@ window.Flukso = {
 };
 
 Flukso.timeParams = {
-	minute : { interval : "minute" , resolution : "second", range : Flukso.time.MINUTE },
-	hour   : { interval : "day"	   , resolution : "minute", range : Flukso.time.HOUR   },
-	day    : { interval : "week"   , resolution : "15min" , range : Flukso.time.DAY    },
-	month  : { interval : "year"   , resolution : "day"	  , range : Flukso.time.MONTH  },
-	year   : { interval : "decade" , resolution : "week"  , range : Flukso.time.YEAR   },
-	night  : { interval : "night"  , resolution : "day"	  , range : Flukso.time.MONTH  }
+	minute : { interval : "minute" , resolution : "second", resSec : Flukso.time.SECOND , range : Flukso.time.MINUTE },
+	hour   : { interval : "day"	   , resolution : "minute", resSec : Flukso.time.MINUTE , range : Flukso.time.HOUR   },
+	day    : { interval : "week"   , resolution : "15min" , resSec : Flukso.time.QUARTER, range : Flukso.time.DAY    },
+	month  : { interval : "year"   , resolution : "day"	  , resSec : Flukso.time.DAY    , range : Flukso.time.MONTH  },
+	year   : { interval : "decade" , resolution : "week"  , resSec : Flukso.time.WEEK   , range : Flukso.time.YEAR   },
+	night  : { interval : "night"  , resolution : "day"	  , resSec : Flukso.time.DAY    , range : Flukso.time.MONTH  }
 };
 
 /* default unit params used in API calls */
@@ -255,8 +255,16 @@ Flukso.Sensor = Backbone.Model.extend({
 		{silent: true});
 
 		function process(data) {
+			var shift = Flukso.timeParams[this.get('interval')].resSec;
+
+			function shiftStamp(point) {
+				/* convert to ms timestamps and shift left one resolution interval */
+				point[0] = point[0] * 1000 - shift;
+				return point;
+			};
+
 			this.set({
-				data: data,
+				data: _.map(data, shiftStamp),
 				fetching: false
 			});
 		};
@@ -498,9 +506,6 @@ Flukso.ChartView = Backbone.View.extend({
 			var start = _.last(sensor.get('data'))[0] - Flukso.timeParams[interval].range / 1000;
 
 			function formatPoint(point, idx, list) {
-				/* convert to ms timestamps */
-				point[0] = point[0] * 1000;
-
 				if (point[1] == 'nan') {
 					point[1] = null;
 				} else {
