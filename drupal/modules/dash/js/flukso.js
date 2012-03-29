@@ -254,7 +254,7 @@ Flukso.Sensor = Backbone.Model.extend({
 			interval: Flukso.chartState.get('interval')},
 		{silent: true});
 
-		function process(data) {
+		function process(data, stat, req) {
 			var shift = Flukso.timeParams[this.get('interval')].resSec;
 
 			function shiftStamp(point) {
@@ -279,6 +279,11 @@ Flukso.Sensor = Backbone.Model.extend({
 		};
 
 		if (this.get('interval') == 'minute') {
+			if (this.get('localUrl') == null) {
+				Flukso.alertView.noRealtime();
+				return;
+			}
+
 			$.getJSON(this.get('localUrl') + this.get('id') + this.get('callback'), queryParams, process);
 			setTimeout(this.GET, 1000);
 		} else {
@@ -325,7 +330,8 @@ Flukso.SensorCollect = Backbone.Collection.extend({
 					uid: Number(uid),
 					type: sensors[i].type,
 					'function': sensors[i]['function'],
-					localUrl: 'http://' + sensors[i].ip + ':' + sensors[i].port + '/sensor/'
+					localUrl: sensors[i].ip == 'undefined' ?
+						null : 'http://' + sensors[i].ip + ':' + sensors[i].port + '/sensor/'
 				});
 
 				count[sensors[i].type]++;
@@ -472,6 +478,7 @@ Flukso.AlertView = Backbone.View.extend({
 
 	initialize: function() {
 		_.bindAll(this, 'verifyNumSensors');
+		_.bindAll(this, 'noRealtime');
 		this.model.bind('change:type', this.verifyNumSensors);
 	},
 
@@ -481,11 +488,14 @@ Flukso.AlertView = Backbone.View.extend({
 		if (this.model.get('count.' + type) == 0) {
 			var tpl = _.template($('#alert-no-sensor').html());
 			$(this.el).html(tpl({type: type}));
-
-			Flukso.chartView.render();
 		}
 
 		return this;
+	},
+
+	noRealtime: function() {
+		var tpl = _.template($('#alert-no-realtime').html());
+		$(this.el).html(tpl());
 	}
 });
 

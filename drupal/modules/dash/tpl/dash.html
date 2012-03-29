@@ -55,6 +55,13 @@
 <script type="text/template" id="alert-no-sensor">
     <div class="alert alert-error">
         <a class="close" data-dismiss="alert">×</a>
-        <strong>Warning!</strong> No <%= type %> sensors to display. Please select another type.
+        <strong>Error - </strong> No <%= type %> sensors to display. Please select another type.
+    </div>
+</script>
+
+<script type="text/template" id="alert-no-realtime">
+    <div class="alert alert-error">
+        <a class="close" data-dismiss="alert">×</a>
+        <strong>Error - </strong> Real-time charting is not available on this Fluksometer. If you have an FLM02, then please upgrade to the latest firmware release on the my account -> devices page.
     </div>
 </script>
