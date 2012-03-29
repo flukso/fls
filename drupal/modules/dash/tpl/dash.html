@@ -1,4 +1,9 @@
 <div class="row">
+    <div id="alert" class="span10">
+    </div>
+</div>
+
+<div class="row">
     <div class="span3">
         <div id="type" class="btn-group" data-toggle="buttons-radio">
             <button class="btn" id="electricity">Electricity</button>
@@ -46,3 +51,10 @@
         <div id="chart"></div>
     </div>
 </div>
+
+<script type="text/template" id="alert-no-sensor">
+    <div class="alert alert-error">
+        <a class="close" data-dismiss="alert">×</a>
+        <strong>Warning!</strong> No <%= type %> sensors to display. Please select another type.
+    </div>
+</script>

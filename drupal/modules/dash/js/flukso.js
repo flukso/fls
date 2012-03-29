@@ -467,6 +467,28 @@ Flukso.UnitView = Backbone.View.extend({
 	}
 });
 
+Flukso.AlertView = Backbone.View.extend({
+	el: '#alert',
+
+	initialize: function() {
+		_.bindAll(this, 'verifyNumSensors');
+		this.model.bind('change:type', this.verifyNumSensors);
+	},
+
+	verifyNumSensors: function() {
+		var type = this.model.get('type');
+
+		if (this.model.get('count.' + type) == 0) {
+			var tpl = _.template($('#alert-no-sensor').html());
+			$(this.el).html(tpl({type: type}));
+
+			Flukso.chartView.render();
+		}
+
+		return this;
+	}
+});
+
 Flukso.ChartView = Backbone.View.extend({
 //	el: $('#chart'),
 
@@ -590,6 +612,7 @@ $(function() {
 	Flukso.typeView = new Flukso.TypeView({model: Flukso.chartState});
 	Flukso.intervalView = new Flukso.IntervalView({model: Flukso.chartState});
 	Flukso.unitView = new Flukso.UnitView({model: Flukso.chartState});
+	Flukso.alertView = new Flukso.AlertView({model: Flukso.chartState});
 	Flukso.chartView = new Flukso.ChartView({collection: Flukso.sensorCollect});
 
 	Flukso.router = new Flukso.Router();
