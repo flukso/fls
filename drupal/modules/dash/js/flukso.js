@@ -397,6 +397,8 @@ Flukso.TypeView = Backbone.View.extend({
 	},
 
 	clickButton: function(e) {
+		Flukso.alertView.clear();
+
 		/* What isn't instantly obvious is that under the bonnet, Backbone
 		 * uses jQuery's .delegate() to provide instant support for event
 		 * delegation but goes a little further, extending it so that this
@@ -436,6 +438,8 @@ Flukso.IntervalView = Backbone.View.extend({
 	},
 
 	clickButton: function(e) {
+		Flukso.alertView.clear();
+
 		var sel = e.target;
 		this.model.set({interval: $(sel).attr('id')});
 		this.model.set({reload: true});
@@ -473,6 +477,8 @@ Flukso.UnitView = Backbone.View.extend({
 	},
 
 	clickDropdown: function(e) {
+		Flukso.alertView.clear();
+
 		var unit = {
 			electricity: this.model.get('unit.electricity'),
 			gas: this.model.get('unit.gas'),
@@ -499,6 +505,7 @@ Flukso.AlertView = Backbone.View.extend({
 	initialize: function() {
 		_.bindAll(this, 'verifyNumSensors');
 		_.bindAll(this, 'noRealtime');
+		_.bindAll(this, 'clear');
 		this.model.bind('change:type', this.verifyNumSensors);
 	},
 
@@ -516,6 +523,10 @@ Flukso.AlertView = Backbone.View.extend({
 	noRealtime: function() {
 		var tpl = _.template($('#alert-no-realtime').html());
 		$(this.el).html(tpl());
+	},
+
+	clear: function() {
+		$(this.el).empty();
 	}
 });
 
