@@ -354,7 +354,7 @@ Flukso.SensorCollect = Backbone.Collection.extend({
 				electricity: Flukso.chartState.get('count.electricity'),
 				gas: Flukso.chartState.get('count.gas'),
 				water: Flukso.chartState.get('count.water')
-			}
+			};
 
 			for (var i in sensors) {
 				/* add sensor entries to the collection */
