@@ -1,6 +1,11 @@
 /* ES5 directive to switch to strict mode */
 "use strict";
 
+/* set AJAX call defaults */
+$.ajaxSetup({
+	timeout: 4000
+});
+
 /* Highcharts general options tweaking */
 Highcharts.setOptions({
 	global: {
@@ -240,7 +245,8 @@ Flukso.Sensor = Backbone.Model.extend({
 		callback: '?callback=?',
 		version: '1.0',
 	
-		fetching: null
+		fetching: null,
+		timeoutId: null
 	},
 
 	initialize: function() {
@@ -268,7 +274,7 @@ Flukso.Sensor = Backbone.Model.extend({
 			interval: Flukso.chartState.get('interval')},
 		{silent: true});
 
-		function process(data, stat, req) {
+		function process(data) {
 			var shift = Flukso.timeParams[this.get('interval')].resSec;
 
 			function shiftStamp(point) {
@@ -285,6 +291,16 @@ Flukso.Sensor = Backbone.Model.extend({
 	
 		process = _.bind(process, this); 
 
+		function errorRt(data, stat, req) {
+			clearTimeout(this.get('timeoutId'));
+
+			if (stat == 'timeout') {
+				Flukso.alertView.timeoutRt(this.get('function'));
+			}
+		};
+
+		errorRt = _.bind(errorRt, this);
+
 		var queryParams = {
 			version: this.get('version'),
 			interval: Flukso.timeParams[this.get('interval')].interval,	/* we fetch a bigger interval than requested */
@@ -298,10 +314,13 @@ Flukso.Sensor = Backbone.Model.extend({
 				return;
 			}
 
-			$.getJSON(this.get('localUrl') + this.get('id') + this.get('callback'), queryParams, process);
-			setTimeout(this.GET, 1000);
+			$.getJSON(this.get('localUrl') + this.get('id') + this.get('callback'), queryParams)
+				.success(process)
+				.error(errorRt);
+			this.set({timeoutId: setTimeout(this.GET, 1000)});
 		} else {
-			$.getJSON(this.get('baseUrl') + this.get('id') + this.get('callback'), queryParams, process);
+			$.getJSON(this.get('baseUrl') + this.get('id') + this.get('callback'), queryParams)
+				.success(process);
 		}
 	}
 });
@@ -505,6 +524,7 @@ Flukso.AlertView = Backbone.View.extend({
 	initialize: function() {
 		_.bindAll(this, 'verifyNumSensors');
 		_.bindAll(this, 'noRealtime');
+		_.bindAll(this, 'timeoutRt');
 		_.bindAll(this, 'clear');
 		this.model.bind('change:type', this.verifyNumSensors);
 	},
@@ -523,6 +543,11 @@ Flukso.AlertView = Backbone.View.extend({
 	noRealtime: function() {
 		var tpl = _.template($('#alert-no-realtime').html());
 		$(this.el).html(tpl());
+	},
+
+	timeoutRt: function(func) {
+		var tpl = _.template($('#alert-timeout-rt').html());
+		$(this.el).html(tpl({func: func}));
 	},
 
 	clear: function() {
