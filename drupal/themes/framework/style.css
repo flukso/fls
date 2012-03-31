@@ -182,8 +182,7 @@ article.comment .picture {
 /* theme the chart */
 #chart {
   height: 500px;
-  margin-top: 20px;
-  margin-left: -15px;
+  margin: 25px 0 25px -15px;
 }
 
 /**
