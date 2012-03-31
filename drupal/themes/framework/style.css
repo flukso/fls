@@ -185,6 +185,18 @@ article.comment .picture {
   margin: 25px 0 25px -15px;
 }
 
+/* install page */
+#install-step img {
+  float: left;
+  padding-right: 19px
+}
+
+#install-download a {
+  width: 770px;
+  font-size: 18px;
+  margin-bottom: 20px
+}
+
 /**
  * 2.LAYOUT
  */

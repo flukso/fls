@@ -71,12 +71,15 @@
       <div class="container clearfix">
  
       <div class="row">
-      <?php if (strpos($_GET['q'],  "catalog") === 0
-                || strpos($_GET['q'],  "user") === 0 /* includes users */ 
-                || strpos($_GET['q'], "admin") === 0
-                || strpos($_GET['q'], "forum") === 0
-                || strpos($_GET['q'],  "dash") === 0) { ?>
+      <?php if (strpos($_GET['q'],    "catalog") === 0
+                || strpos($_GET['q'],    "user") === 0 /* includes users */ 
+                || strpos($_GET['q'],   "admin") === 0
+                || strpos($_GET['q'],   "forum") === 0
+                || strpos($_GET['q'], "install") === 0
+                || strpos($_GET['q'],    "dash") === 0) { ?>
         <div class="span10 offset1">
+      <?php } elseif (strpos($_GET['q'],  "splash") === 0) { ?>
+        <div class="span12">
       <?php } else { ?>
         <div class="span8 offset2">
       <?php }; ?>
