@@ -58,3 +58,16 @@ function _dash_render() {
 
   return $body;
 }
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function dash_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'user_login') {
+    $form['#redirect'] = 'dash';
+    $form['name']['#size'] = 20;
+    $form['pass']['#size'] = 20;
+  }
+}
+
+
