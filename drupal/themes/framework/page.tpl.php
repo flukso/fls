@@ -32,15 +32,15 @@
           </a>
 
           <div class="nav-collapse">
-            <ul class="nav">
-              <li><a href="/about">About</a></li>
-              <li><a href="/installation">Install</a></li>
-              <li><a href="/blog">Blog</a></li>
-              <li><a href="/forum">Forum</a></li>
-              <li><a href="https://github.com/flukso">Source</a></li>
-              <li><a href="/dash">Dash</a></li>
-              <li><a href="/contact">Contact</a></li>
-              <li><a href="/shop">Shop</a></li>
+            <ul class="nav main">
+              <li class="about"><a href="/about">About</a></li>
+              <li class="installation"><a href="/installation">Install</a></li>
+              <li class="blog"><a href="/blog">Blog</a></li>
+              <li class="forum"><a href="/forum">Forum</a></li>
+              <li class="source"><a href="https://github.com/flukso">Source</a></li>
+              <li class="dash"><a href="/dash">Dash</a></li>
+              <li class="contact"><a href="/contact">Contact</a></li>
+              <li class="shop cart checkout"><a href="/shop">Shop</a></li>
            </ul>
 
             <ul class="nav pull-right icon">

@@ -45,4 +45,12 @@ $(function() {
       "ul.tabs.secondary")
         .removeClass("tabs primary secondary")
         .addClass("nav nav-pills");
+
+    /* highlight active link in navbar */
+    var result = location.pathname.match(/^\/(\w*)/);
+
+    if (result != null) {
+        var sel = "ul.nav.main li." + result[1];
+        $(sel).addClass("active");
+    } 
 });
