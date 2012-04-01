@@ -185,8 +185,8 @@ article.comment .picture {
   margin: 25px 0 25px -15px;
 }
 
-/* install page */
-#install-step .well {
+/* about & install page */
+.well {
   border: 1px solid rgba(0, 0, 0, 0.15);
 }
 

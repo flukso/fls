@@ -20,8 +20,9 @@
  */
 
 define('STATIC_PATH', drupal_get_path('module', 'static'));
-define('INSTALL_HTML', STATIC_PATH . '/tpl/install.html');
 define('SPLASH_HTML', STATIC_PATH . '/tpl/splash.html');
+define('ABOUT_HTML', STATIC_PATH . '/tpl/about.html');
+define('INSTALL_HTML', STATIC_PATH . '/tpl/install.html');
 define('FRAMEWORK_PATH', drupal_get_path('theme', 'framework'));
 
 /**
@@ -33,7 +34,17 @@ function static_menu() {
   $items['splash'] = array(
     'title'               => '',
     'description'         => 'Flukso splash page',
-    'page callback'       => '_static_splash',
+    'page callback'       => '_static_render',
+    'page arguments'      => array(SPLASH_HTML),
+    'access callback'     => TRUE,
+    'type'                => MENU_CALLBACK,
+  );
+
+  $items['about'] = array(
+    'title'               => '',
+    'description'         => 'Flukso about page',
+    'page callback'       => '_static_render',
+    'page arguments'      => array(ABOUT_HTML),
     'access callback'     => TRUE,
     'type'                => MENU_CALLBACK,
   );
@@ -41,7 +52,8 @@ function static_menu() {
   $items['installation'] = array(
     'title'               => '',
     'description'         => 'Fluksometer installation overview',
-    'page callback'       => '_static_install',
+    'page callback'       => '_static_render',
+    'page arguments'      => array(INSTALL_HTML),
     'access callback'     => TRUE,
     'type'                => MENU_CALLBACK,
   );
@@ -49,17 +61,9 @@ function static_menu() {
   return $items;
 } 
 
-function _static_splash() {
-  $fd = fopen(SPLASH_HTML, 'r');
-  $body = fread($fd, filesize(SPLASH_HTML));
-  fclose($fd);
-
-  return $body;
-}
-
-function _static_install() {
-  $fd = fopen(INSTALL_HTML, 'r');
-  $body = fread($fd, filesize(INSTALL_HTML));
+function _static_render($tpl) {
+  $fd = fopen($tpl, 'r');
+  $body = fread($fd, filesize($tpl));
   fclose($fd);
 
   return $body;
