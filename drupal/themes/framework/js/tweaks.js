@@ -49,8 +49,13 @@ $(function() {
     /* highlight active link in navbar */
     var result = location.pathname.match(/^\/(\w*)/);
 
-    if (result != null) {
+    if (result != null && result[1] != "") {
         var sel = "ul.nav.main li." + result[1];
         $(sel).addClass("active");
     } 
+
+    /* some client sniffing to fix splash page icon positioning in webkit */
+    if (($.browser.safari || $.browser.webkit) && location.pathname == "/") {
+        $(".hero-unit .icon-home").css("margin-top", "20px");
+    }
 });
