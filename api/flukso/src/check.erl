@@ -24,8 +24,12 @@
 
          sensor/1,
          device/1,
+         uid/1,
+ 
          token/2,
          digest/1,
+         session/1,
+         session_name/0,
 
          times/4,
 
@@ -60,6 +64,10 @@ sensor(Sensor) ->
 device(Device) ->
     hex(Device, 32).
 
+uid(Uid) ->
+    UidInt = (catch list_to_integer(Uid)),
+    {UidInt, is_number(UidInt)}.
+
 token(undefined, undefined) ->
     {false, false};
 token(Token, undefined) ->
@@ -72,9 +80,25 @@ token(_, _) ->
 digest(Digest) ->
     hex(Digest, 40).
 
+session(undefined) ->
+    {false, false};
+session(Session) ->
+    alphanum(Session, 26).
+
+session_name() ->
+    {ok, Cookie_domain} = application:get_env(flukso, cookie_domain),
+    <<X:128/big-unsigned-integer>> = erlang:md5(Cookie_domain),
+    "SESS" ++ lists:flatten(io_lib:format("~32.16.0b", [X])).
+
 % local
 hex(String, Length) ->
     case re:run(String, "[0-9a-f]+", []) of 
+        {match, [{0, Length}]} -> {String, true};
+        _ -> {false, false}
+    end.
+
+alphanum(String, Length) ->
+    case re:run(String, "[0-9a-z]+", []) of 
         {match, [{0, Length}]} -> {String, true};
         _ -> {false, false}
     end.
@@ -96,10 +120,8 @@ times(Interval, undefined, undefined, Resolution) ->
         {_, false} ->
             {false, false, false, false};
         {IntervalSec, ResolutionSec} -> 
-            % since the current interval will always return NaN
-            % we exclude it by subtracting ResolutionSec from Now
             AlignedEnd =
-                align(up, Now - ResolutionSec, ResolutionSec),
+                align(up, Now, ResolutionSec),
 
             % make sure we return IntervalSec/ResolutionSec entries
             % so we add ResolutionSec to AlignedEnd - IntervalSec
@@ -137,7 +159,10 @@ unit(Unit) ->
     Units = [{"watt", 3600},
              {"kwhperyear", 31536},
              {"eurperyear", 5676},
-             {"audperyear", 5991}],
+             {"audperyear", 5991},
+             {"lpermin", 60},
+             {"lperday", 24 * 60 * 60},
+             {"m3peryear", 365 * 24 * 3600 / 1000}],
 
     case lists:keyfind(Unit, 1, Units) of
         false -> {false, false};
@@ -188,6 +213,7 @@ default_resolution(Interval) ->
                       {"week", "day"},
                       {"month", "day"},
                       {"year", "week"},
+                      {"decade", "week"},
                       {"night", "day"}],
 
     case lists:keyfind(Interval, 1, DefResolutions) of
@@ -203,6 +229,7 @@ time_to_seconds(Time) ->
              {"week", ?WEEK},
              {"month", ?MONTH},
              {"year", ?YEAR},
+             {"decade", ?DECADE},
              {"night", ?MONTH}],
 
     case lists:keyfind(Time, 1, Times) of

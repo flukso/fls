@@ -1,0 +1,74 @@
+<div class="row">
+    <div id="alert" class="span10">
+    </div>
+</div>
+
+<div class="row">
+    <div class="span3">
+        <div id="type" class="btn-group" data-toggle="buttons-radio">
+            <button class="btn" id="electricity">Electricity</button>
+            <button class="btn" id="gas">Gas</button>
+            <button class="btn" id="water">Water</button>
+        </div> 
+    </div>
+
+    <div class="span5">
+        <div id="interval" class="btn-group" data-toggle="buttons-radio">
+            <button class="btn" id="minute">Minute</button>
+            <button class="btn" id="hour">Hour</button>
+            <button class="btn" id="day">Day</button>
+            <button class="btn" id="month">Month</button>
+            <button class="btn" id="year">Year</button>
+            <button class="btn" id="night">Night</button>
+        </div> 
+    </div>
+
+    <div class="span2">
+        <div class="btn-group" style="float:right">
+            <button class="btn">Unit</button>
+                <button class="btn dropdown-toggle" data-toggle="dropdown">
+                    <span class="caret"></span>
+                </button>
+                <ul id="unit" class="dropdown-menu pull-right">
+                    <li><a href="#" class="electricity rt" id="watt">watt</a></li>
+                    <li><a href="#" class="electricity" id="kwhperyear">kWh/year</a></li>
+                    <li><a href="#" class="gas water" id="lpermin">l/min</a></li>
+                    <li><a href="#" class="gas water rt" id="lperday">l/day</a></li>
+                    <li><a href="#" class="gas water" id="m3peryear">m3/year</a></li>
+                    <li class="divider"></li>
+                    <li><a href="#" class="electricity" id="wh">Wh</a></li>
+                    <li><a href="#" class="electricity cumul" id="wh">Wh [cumulative]</a></li>
+                    <li><a href="#" class="gas water" id="liter">liter</a></li>
+                    <li><a href="#" class="gas water cumul" id="liter">liter [cumulative]</a></li>
+                    <!--li><a href="#" class="electricity gas water" id="eurperyear">eur/year</a></li-->
+                </ul>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="span10">
+        <div id="chart"></div>
+    </div>
+</div>
+
+<script type="text/template" id="alert-no-sensor">
+    <div class="alert alert-error">
+        <a class="close" data-dismiss="alert">×</a>
+        <strong>Error - </strong> No <%= type %> sensors to display. Please select another sensor type.
+    </div>
+</script>
+
+<script type="text/template" id="alert-no-realtime">
+    <div class="alert alert-error">
+        <a class="close" data-dismiss="alert">×</a>
+        <strong>Error - </strong> Real-time charting is not available on this Fluksometer. If you have an FLM02, then please upgrade to the latest firmware release on the my account -> devices page.
+    </div>
+</script>
+
+<script type="text/template" id="alert-timeout-rt">
+    <div class="alert alert-error">
+        <a class="close" data-dismiss="alert">×</a>
+        <strong>Error - </strong> The call for sensor <%= func %> experienced a timeout. You are probably not in the same local network as the FLM.
+    </div>
+</script>

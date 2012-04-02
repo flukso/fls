@@ -241,14 +241,6 @@ function logger_menu() {
     'type'                => MENU_CALLBACK,
   );
 
-  $items['installation'] = array(
-    'title'               => '',
-    'description'         => 'Howto install a Fluksometer',
-    'page callback'       => '_logger_installation',
-    'access callback'     => TRUE,
-    'type'                => MENU_CALLBACK,
-  );
-
   $items['user/%user_uid_optional/privacy'] = array(
     'title'               => 'Privacy',
     'page callback'       => '_logger_account_privacy',
@@ -284,23 +276,6 @@ function logger_menu() {
   );
 
   return $items;
-}
-
-function _logger_installation(){
-  $output = '<div class="install">';
-  $output .= "<a class='img' href = 'http://www.flukso.net/files/flm02/manual.pdf'><img src='https://www.flukso.net/sites/default/files/images/step1.png' height='120' width='150' alt='step 1'/></a>";
-  $output .= "<p><b>STEP 1: CONFIGURING WIFI & SENSORS</b><br/>Power up the Fluksometer. Connect your computer to the Fluksometer's ethernet port. Surf to <a href = 'http://192.168.255.1'>http://192.168.255.1</a>. Configure the wireless interface with the proper name and security key. The <a href = 'https://www.flukso.net/content/fluksometer-v2'>globe LED</a> should light up. Proceed to the sensor page and configure each of the ports you wish to use on the Fluksometer.</p>";
-  $output .= "<a class='img' href = 'http://www.flukso.net/files/flm02/manual.pdf'><img src='https://www.flukso.net/sites/default/files/images/step2.png' height='120' width='150' alt='step 2'/></a>";
-  $output .= "<p><b>STEP 2: SECURING THE FLUKSOMETER</b><br/>Disconnect all cables from the Fluksometer. Find a suitable location near the fuse box to install the Fluksometer. Secure the Fluksometer with a plastic cable tie or by using the rear mounting holes.</p>";
-  $output .= "<a class='img' href = 'http://www.flukso.net/files/flm02/manual.pdf'><img src='https://www.flukso.net/sites/default/files/images/step3.png' height='120' width='150' alt='step 3'/></a>";
-  $output .= "<p><b>STEP 3: ATTACHING THE CURRENT CLAMP</b><br/>For safety reasons, switch off the main electricity supply. Attach a current clamp to each of the live wires running from the electricity meter to the fuse box. Close the clamp firmly. You should hear a double click. The lip should lie flush with the clamp's body.</p>";
-  $output .= "<a class='img' href = 'http://www.flukso.net/files/flm02/manual.pdf'><img src='https://www.flukso.net/sites/default/files/images/step4.png' height='120' width='150' alt='step 4'/></a>";
-  $output .= "<p><b>STEP 4: CONNECTING THE CLAMP'S SENSOR CABLE</b><br/>Connect the cable from the current clamp to one of the Fluksometer's analog input ports. Take care of connecting the black and red cable as shown in the drawing on the left.</p>";
-  $output .= "<a class='img' 'http://www.flukso.net/files/flm02/manual.pdf'><img src='https://www.flukso.net/sites/default/files/images/step5.png' height='120' width='150' alt='step 4'/></a>";
-  $output .= "<p><b>STEP 5: POWERING UP</b><br/>Switch the main electricity supply back on. Activate your Fluksometer by connecting the power plug. Visit <a href = 'https://www.flukso.net/user/register'>https://www.flukso.net/user/register</a> to create an account. Then click the My account -> devices tab to assign the Fluksometer's serial to your account. A first reading will be visible on the hour chart within five minutes from powering up.</p>";
-  $output .= "</div>";
-
-  return $output;
 }
 
 /**
@@ -1056,17 +1031,6 @@ function _logger_sensors_list_save($type) {
   fclose($fd);
 
   return $path; 
-}
-
-/**
- * Implementation of hook_form_alter().
- */
-function logger_form_alter(&$form, &$form_state, $form_id) {
-  if ($form_id == 'user_login') {
-    $form['#redirect'] = 'logger';
-    $form['name']['#size'] = 20;
-    $form['pass']['#size'] = 20;
-  }
 }
 
 /**

@@ -1,0 +1,70 @@
+<?php
+
+/**
+ * static.module : Render the Flukso static pages
+ * 
+ * Copyright (c) 2012 Bart Van Der Meerssche <bart.vandermeerssche@flukso.net>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+define('STATIC_PATH', drupal_get_path('module', 'static'));
+define('SPLASH_HTML', STATIC_PATH . '/tpl/splash.html');
+define('ABOUT_HTML', STATIC_PATH . '/tpl/about.html');
+define('INSTALL_HTML', STATIC_PATH . '/tpl/install.html');
+define('FRAMEWORK_PATH', drupal_get_path('theme', 'framework'));
+
+/**
+ * hook_menu() callback 
+ */
+function static_menu() {
+  $items = array();
+
+  $items['splash'] = array(
+    'title'               => '',
+    'description'         => 'Flukso splash page',
+    'page callback'       => '_static_render',
+    'page arguments'      => array(SPLASH_HTML),
+    'access callback'     => TRUE,
+    'type'                => MENU_CALLBACK,
+  );
+
+  $items['about'] = array(
+    'title'               => '',
+    'description'         => 'Flukso about page',
+    'page callback'       => '_static_render',
+    'page arguments'      => array(ABOUT_HTML),
+    'access callback'     => TRUE,
+    'type'                => MENU_CALLBACK,
+  );
+
+  $items['installation'] = array(
+    'title'               => '',
+    'description'         => 'Fluksometer installation overview',
+    'page callback'       => '_static_render',
+    'page arguments'      => array(INSTALL_HTML),
+    'access callback'     => TRUE,
+    'type'                => MENU_CALLBACK,
+  );
+
+  return $items;
+} 
+
+function _static_render($tpl) {
+  $fd = fopen($tpl, 'r');
+  $body = fread($fd, filesize($tpl));
+  fclose($fd);
+
+  return $body;
+}

@@ -36,6 +36,14 @@
        VALUES
            (?, ?, ?, ?, ?, ?, ?, ?)">>).
 
+-define(SQL_SESSION,
+    <<"SELECT
+           uid
+       FROM
+           sessions
+       WHERE
+           sid = ?">>).
+
 -define(SQL_PERMISSIONS,
     <<"SELECT 
            permissions
@@ -111,6 +119,18 @@
        WHERE
            meter = ?">>).
 
+-define(SQL_USER_SENSOR,
+    <<"SELECT
+           meter,
+           type,
+           function,
+           ip,
+           port
+       FROM
+           (logger_meters lm INNER JOIN logger_devices ld ON lm.device = ld.device)
+       WHERE
+           lm.uid = ? AND enabled = 1">>).
+
 -define(SQL_TIMEZONE,
     <<"SELECT
            timezone
@@ -149,7 +169,9 @@
            memtotal = ?,
            memfree = ?,
            memcached = ?,
-           membuffers = ?
+           membuffers = ?,
+           ip = ?,
+           port = ?
        WHERE
            device = ?">>).
 
@@ -186,6 +208,7 @@
 
 -define(STATEMENTS,
     [{watchdog, ?SQL_WATCHDOG},
+     {session, ?SQL_SESSION},
      {permissions, ?SQL_PERMISSIONS},
      {master_token, ?SQL_MASTER_TOKEN},
      {sensor_key, ?SQL_SENSOR_KEY},
@@ -193,6 +216,7 @@
      {sensor_param, ?SQL_SENSOR_PARAM},
      {sensor_update, ?SQL_SENSOR_UPDATE},
      {sensor_config, ?SQL_SENSOR_CONFIG},
+     {user_sensor, ?SQL_USER_SENSOR},
      {timezone, ?SQL_TIMEZONE},
      {device_key, ?SQL_DEVICE_KEY},
      {device_props, ?SQL_DEVICE_PROPS},
