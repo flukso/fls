@@ -53,7 +53,7 @@
               <?php } ?>
  
               <?php if ($logged_in) { ?>
-              <li><a href="/users/<?php print $user->name ?>" title="account settings"><i class="icon-cogs"></i></a></li>
+              <li><a href="/user/<?php print $user->uid ?>" title="settings for <?php print $user->name ?>"><i class="icon-cogs"></i></a></li>
               <li><a href="/logout" title="log out"><i class="icon-signout"></i></a></li>
               <?php } else { ?>
               <li><a href="/user/register" title="create account"><i class="icon-key"></i></a></li>
