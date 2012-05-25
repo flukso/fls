@@ -6,7 +6,7 @@
 <head>
   <?php print $head; ?>
   <!-- Set the viewport width to device width for mobile -->
-  <meta name="viewport" content="width=device-width" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><?php print $head_title; ?></title>
   <?php print $styles; ?>
   <!-- IE Fix for HTML5 Tags -->
@@ -17,7 +17,6 @@
 
 <body class="<?php print $body_classes; ?>">
 
-  <header>
     <div class="navbar navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container">
@@ -65,11 +64,9 @@
         </div>
       </div>
     </div>
-  </header>
 
+    <div class="container clearfix">
     <section role="main" class="clearfix">
-      <div class="container clearfix">
- 
       <div class="row">
       <?php if (strpos($_GET['q'],    "catalog") === 0
                 || strpos($_GET['q'],    "user") === 0 /* includes users */ 
@@ -96,12 +93,9 @@
 
       </div>
       </div>
-
-      </div>
     </section> <!-- /#main -->
 
     <footer id="footer" role="contentinfo" class="clearfix">
-      <div class="container clearfix">
 
       <div class="row">
       <div class="span3">
@@ -133,8 +127,8 @@
       </div>
       </div>
 
-      </div>
     </footer> <!-- /#footer -->
+    </div>
 
     <?php print $scripts ?>
     <?php print $closure ?>

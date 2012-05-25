@@ -14,6 +14,7 @@
  9.Blocks
 10.Footer
 11.CSS Support
+12.Responsive design
 
 Font sizes: 16px base font with 24px line-height
 ------------------------------------------------
@@ -38,6 +39,7 @@ Equation for font sizing:
  */
 
 @import "css/bootstrap.min.css";
+@import "css/bootstrap-responsive.min.css";
 
 /**
  * 1.OVERRIDES
@@ -45,7 +47,7 @@ Equation for font sizing:
 
 body {
   background-color: #f5f5f5;
-  padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+  padding-top: 90px; /* 60px to make the container go all the way to the bottom of the topbar */
 }
 
 fieldset {
@@ -239,7 +241,7 @@ article.comment .picture {
 
 header {
   margin: 0;
-  padding: 2.5em 0 0;
+/*  padding: 2.5em 0 0; */
   position: relative;
 }
 
@@ -567,3 +569,17 @@ div.view div.views-admin-links li a {
 
 /* display block */
 .display-block { display: block; }
+
+
+/**
+ * 12. Responsive design
+ */
+@media (max-width: 979px) {
+  body {
+    padding-top: 0px;
+  }
+
+  footer {
+    padding: 0px;
+  }
+}
