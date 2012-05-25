@@ -47,7 +47,7 @@ function _dash_render() {
   drupal_add_js(DASH_PATH . '/js/underscore-min.js');
   drupal_add_js(DASH_PATH . '/js/backbone-min.js');
   drupal_add_js(DASH_PATH . '/js/backbone-nested-v1.0.3.min.js');
-  drupal_add_js(DASH_PATH . '/js/highstock.src.js');
+  drupal_add_js(DASH_PATH . '/js/highstock.js');
   drupal_add_js(DASH_PATH . '/js/flukso.js');
 
   drupal_add_js(array('uid' => $user->uid) , 'setting');
