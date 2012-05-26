@@ -58,4 +58,7 @@ $(function() {
     if (($.browser.safari || $.browser.webkit) && location.pathname == "/") {
         $(".hero-unit .icon-home").css("margin-top", "20px");
     }
+
+    /* make blog images scale proportionately for mobile rendering */
+    $("img.image-_original").removeAttr("width").removeAttr("height");
 });
