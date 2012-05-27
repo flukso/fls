@@ -11861,6 +11861,14 @@ Series.prototype = {
 						point.plotX,
 						point.plotY
 					);
+
+					// finish the segment with a horizontal bar
+					if (i == segment.length - 1 && options.step) {
+						segmentPath.push(
+							point.plotX + (point.plotX - segment[i - 1].plotX),
+							point.plotY
+						);
+					}
 				}
 			});
 
