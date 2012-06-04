@@ -48,7 +48,7 @@
               <?php } ?>
 
               <?php if ($show_feed_icon) { ?>
-              <li><a href="<?php print $feed; ?>" title="rss feed"><i class="icon-pushpin"></i></a></li>
+              <li><a href="<?php print $feed; ?>" title="rss feed"><i class="icon-rss"></i></a></li>
               <?php } ?>
  
               <?php if ($logged_in) { ?>
