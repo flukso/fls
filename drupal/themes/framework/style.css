@@ -192,6 +192,11 @@ article.comment .picture {
   margin: 25px 0 25px -15px;
 }
 
+/* home page */
+.hero-unit {
+  padding: 30px;
+}
+
 /* about & install page */
 .well {
   border: 1px solid rgba(0, 0, 0, 0.15);
