@@ -473,6 +473,10 @@ section.block div.edit:hover a {
   color: #000;
 }
 
+section.block div.more-link {
+  text-align: left;
+}
+
 /* views configuration links */
 
 div.view {

@@ -18,7 +18,7 @@ $(function() {
         .addClass("btn-primary");
 
     /* more-link buttons */
-    $(".more-link").addClass("btn");
+    $(".more-link a").addClass("btn");
 
     /* substitute drupal messages for bootstrap alerts
      * since bootstrap.js require jquery 1.7.1, we cannot
