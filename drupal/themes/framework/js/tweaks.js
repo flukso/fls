@@ -17,6 +17,9 @@ $(function() {
       "input.form-submit#edit-save")
         .addClass("btn-primary");
 
+    /* more-link buttons */
+    $(".more-link").addClass("btn");
+
     /* substitute drupal messages for bootstrap alerts
      * since bootstrap.js require jquery 1.7.1, we cannot
      * use bootstrap's alert dismissal feature

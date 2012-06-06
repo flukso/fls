@@ -98,7 +98,7 @@
     <footer id="footer" role="contentinfo" class="clearfix">
 
       <div class="row">
-      <div class="span3">
+      <div class="span4">
 
       <?php if ($footer_1): ?>
         <div class="column">
@@ -107,7 +107,7 @@
       <?php endif; ?>
 
       </div>
-      <div class="span3 offset1">
+      <div class="span4">
 
       <?php if ($footer_2): ?>
         <div class="column">
@@ -116,7 +116,7 @@
       <?php endif; ?>
 
       </div>
-      <div class="span3 offset1">
+      <div class="span4">
 
       <?php if ($footer_3): ?>
         <div class="column">
