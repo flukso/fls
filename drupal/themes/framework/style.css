@@ -214,6 +214,17 @@ article.comment .picture {
   margin-bottom: 20px;
 }
 
+/* shop page */
+.category-grid-products .row .span4 {
+  margin-bottom: 40px;
+}
+
+.category-grid-products .add-to-cart .form-item input,
+#cart-form-products .form-item input {
+  width: auto;
+  text-align: right;
+}
+
 /**
  * 2.LAYOUT
  */
