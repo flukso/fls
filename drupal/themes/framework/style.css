@@ -199,11 +199,12 @@ article.comment .picture {
 
 #install-step img {
   float: left;
-  padding-right: 19px;
+  padding-right: 8px;
 }
 
 #install-download a {
-  width: 610px;
+  display: block;
+  width: auto;
   font-size: 18px;
   margin-bottom: 20px;
 }
