@@ -21,7 +21,6 @@
 
 define('DASH_PATH', drupal_get_path('module', 'dash'));
 define('DASH_HTML', DASH_PATH . '/tpl/dash.html');
-define('FRAMEWORK_PATH', drupal_get_path('theme', 'framework'));
 
 /**
  * hook_menu() callback 
@@ -41,8 +40,6 @@ function dash_menu() {
 
 function _dash_render() {
   global $user;
-
-  drupal_add_js(FRAMEWORK_PATH . '/lib/bootstrap.min.js');
 
   drupal_add_js(DASH_PATH . '/js/underscore-min.js');
   drupal_add_js(DASH_PATH . '/js/backbone-min.js');
