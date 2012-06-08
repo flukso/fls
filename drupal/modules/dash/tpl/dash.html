@@ -3,7 +3,7 @@
     </div>
 </div>
 
-<div class="row">
+<!--div class="row visible-desktop">
     <div class="span3">
         <div id="type" class="btn-group" data-toggle="buttons-radio">
             <button class="btn" id="electricity">Electricity</button>
@@ -26,22 +26,73 @@
     <div class="span2">
         <div class="btn-group" style="float:right">
             <button class="btn">Unit</button>
-                <button class="btn dropdown-toggle" data-toggle="dropdown">
-                    <span class="caret"></span>
-                </button>
-                <ul id="unit" class="dropdown-menu pull-right">
-                    <li><a href="#" class="electricity rt" id="watt">watt</a></li>
-                    <li><a href="#" class="electricity" id="kwhperyear">kWh/year</a></li>
-                    <li><a href="#" class="gas water" id="lpermin">l/min</a></li>
-                    <li><a href="#" class="gas water rt" id="lperday">l/day</a></li>
-                    <li><a href="#" class="gas water" id="m3peryear">m3/year</a></li>
-                    <li class="divider"></li>
-                    <li><a href="#" class="electricity" id="wh">Wh</a></li>
-                    <li><a href="#" class="electricity cumul" id="wh">Wh [cumulative]</a></li>
-                    <li><a href="#" class="gas water" id="liter">liter</a></li>
-                    <li><a href="#" class="gas water cumul" id="liter">liter [cumulative]</a></li>
-                    <!--li><a href="#" class="electricity gas water" id="eurperyear">eur/year</a></li-->
-                </ul>
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+                <span class="caret"></span>
+            </button>
+            <ul id="unit" class="dropdown-menu pull-right">
+                <li><a href="#" class="electricity rt" id="watt">watt</a></li>
+                <li><a href="#" class="electricity" id="kwhperyear">kWh/year</a></li>
+                <li><a href="#" class="gas water" id="lpermin">l/min</a></li>
+                <li><a href="#" class="gas water rt" id="lperday">l/day</a></li>
+                <li><a href="#" class="gas water" id="m3peryear">m3/year</a></li>
+                <li class="divider"></li>
+                <li><a href="#" class="electricity" id="wh">Wh</a></li>
+                <li><a href="#" class="electricity cumul" id="wh">Wh [cumulative]</a></li>
+                <li><a href="#" class="gas water" id="liter">liter</a></li>
+                <li><a href="#" class="gas water cumul" id="liter">liter [cumulative]</a></li>
+                <li><a href="#" class="electricity gas water" id="eurperyear">eur/year</a></li>
+            </ul>
+        </div>
+    </div>
+</div-->
+
+<div class="row">
+    <div class="btn-toolbar">
+        <div class="btn-group">
+            <button class="btn btn-large dropdown-toggle" data-toggle="dropdown">
+                Type
+                <span class="caret"></span>
+            </button>
+            <ul id="type" class="dropdown-menu">
+                <li><a href="#" id="electricity">electricity</a></li>
+                <li><a href="#" id="gas">gas</a></li>
+                <li><a href="#" id="water">water</a></li>
+           </ul>
+        </div> 
+
+        <div class="btn-group">
+            <button class="btn btn-large dropdown-toggle" data-toggle="dropdown">
+                Interval
+                <span class="caret"></span>
+            </button>
+            <ul id="interval" class="dropdown-menu">
+                <li><a href="#" id="minute">minute</a></li>
+                <li><a href="#" id="hour">hour</a></li>
+                <li><a href="#" id="dayr">day</a></li>
+                <li><a href="#" id="month">month</a></li>
+                <li><a href="#" id="year">year</a></li>
+                <li><a href="#" id="nught">night</a></li>
+           </ul>
+        </div> 
+
+        <div class="btn-group">
+            <button class="btn btn-large dropdown-toggle" data-toggle="dropdown">
+                Unit
+                <span class="caret"></span>
+            </button>
+            <ul id="unit" class="dropdown-menu pull-right">
+                <li><a href="#" class="electricity rt" id="watt">watt</a></li>
+                <li><a href="#" class="electricity" id="kwhperyear">kWh/year</a></li>
+                <li><a href="#" class="gas water" id="lpermin">l/min</a></li>
+                <li><a href="#" class="gas water rt" id="lperday">l/day</a></li>
+                <li><a href="#" class="gas water" id="m3peryear">m3/year</a></li>
+                <li class="divider"></li>
+                <li><a href="#" class="electricity" id="wh">Wh</a></li>
+                <li><a href="#" class="electricity cumul" id="wh">Wh [cumulative]</a></li>
+                <li><a href="#" class="gas water" id="liter">liter</a></li>
+                <li><a href="#" class="gas water cumul" id="liter">liter [cumulative]</a></li>
+                <!--li><a href="#" class="electricity gas water" id="eurperyear">eur/year</a></li-->
+            </ul>
         </div>
     </div>
 </div>
