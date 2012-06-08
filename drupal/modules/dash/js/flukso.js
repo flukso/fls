@@ -28,7 +28,8 @@ $.ajaxSetup({
 /* Highcharts general options tweaking */
 Highcharts.setOptions({
 	global: {
-		useUTC: false
+		useUTC: false,
+		canvasToolsURL: "sites/all/modules/dash/js/canvas-tools.js"
 	}
 });
 
