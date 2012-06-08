@@ -423,6 +423,8 @@ Flukso.TypeView = Backbone.View.extend({
 	},
 
 	render: function() {
+		/* no radio-style behaviour in drop-downs*/
+		$("#type li a").removeClass("active");
 		/* activate button based on chart model */
 		var id = '#' + this.model.get('type');
 		$(id).button("toggle");
@@ -464,6 +466,8 @@ Flukso.IntervalView = Backbone.View.extend({
 	},
 
 	render: function() {
+		/* no radio-style behaviour in drop-downs*/
+		$("#interval li a").removeClass("active");
 		/* activate tabs based on chart model */
 		var id = '#' + this.model.get('interval');
 		$(id).button("toggle");
@@ -708,6 +712,6 @@ $(function() {
 	Flukso.chartView = new Flukso.ChartView({collection: Flukso.sensorCollect});
 
 	Flukso.router = new Flukso.Router();
-	Backbone.history.start({root: "/chart"});
+	Backbone.history.start({root: "/dash"});
 	Flukso.router.updateRoute();
 });
