@@ -6,7 +6,7 @@ engine = phptemplate
 stylesheets[all][] = style.css
 stylesheets[all][] = font-awesome/css/font-awesome.css
 
-scripts[] = lib/bootstrap.min.js
+scripts[] = lib/bootstrap.js
 scripts[] = js/tweaks.js
 
 regions[left] = Left sidebar
