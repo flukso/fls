@@ -22,6 +22,9 @@
 define('DASH_PATH', drupal_get_path('module', 'dash'));
 define('DASH_HTML', DASH_PATH . '/tpl/dash.html');
 
+define('FLUKSONIAN', 3);
+define('NOT_PRIVATE', 0);
+
 /**
  * hook_menu() callback 
  */
@@ -29,10 +32,18 @@ function dash_menu() {
   $items = array();
 
   $items['dash'] = array(
-    'description'         => 'The Flukso dashboard',
-    'page callback'       => '_dash_render',
-    'access callback'     => TRUE,
-    'type'                => MENU_CALLBACK,
+    'description'       => 'The Flukso dashboard',
+    'page callback'     => '_dash_render',
+    'access callback'   => TRUE,
+    'type'              => MENU_CALLBACK,
+  );
+
+  $items['dash/user/autocomplete'] = array(
+    'title'             => 'User autocomplete',
+    'page callback'     => '_dash_user_autocomplete',
+    'access callback'   => 'user_access',
+    'access arguments'  => array('access user profiles'),
+    'type'              => MENU_CALLBACK,
   );
 
   return $items;
@@ -54,6 +65,43 @@ function _dash_render() {
   fclose($fd);
 
   return $body;
+}
+
+/**
+ * Callback function for the dash/user/autocomplete path
+ * 
+ * @param $string
+ *   user query string
+ */
+function _dash_user_autocomplete($string = '') {
+  $matches = array();
+
+  if ($string) {
+    $result = db_query_range("
+      SELECT u.uid, u.name
+      FROM {users} u
+      INNER JOIN {users_roles} ur ON u.uid = ur.uid
+      INNER JOIN {logger_users} lu ON u.uid = lu.uid
+      WHERE ur.rid = %d
+      AND lu.private = %d
+      AND LOWER(u.name) LIKE LOWER('%%s%')
+    ", FLUKSONIAN, NOT_PRIVATE, $string, 0, 10);
+
+    while ($user = db_fetch_object($result)) {
+      $account = user_load($user->uid);
+
+      $matches[] = array(
+        "uid" =>  $user->uid,
+        "name" => $user->name,
+        "avatar" => _gravatar_get_account_user_picture($account)
+      );
+    }
+  }
+
+  /* drupal_json doesn't properly escape url's,
+     so use PHP's built-in json_encode instead */
+  drupal_set_header('Content-Type: application/json');
+  echo json_encode($matches);
 }
 
 /**
