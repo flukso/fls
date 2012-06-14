@@ -156,7 +156,7 @@ section[role=main] {
   min-height: 50%
 }
 
-/* give the submitted info a bith of breathing space */
+/* give the submitted info a bit of breathing space */
 h6.submitted {
   margin-bottom: 1em;
 }
@@ -223,6 +223,13 @@ article.comment .picture {
 #cart-form-products .form-item input {
   width: auto;
   text-align: right;
+}
+
+#fluksonians div.avatar {
+  float: left;
+  width: 50px;
+  height: 50px;
+  margin: 0 6px 6px 0;
 }
 
 /**
