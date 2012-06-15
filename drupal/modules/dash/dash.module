@@ -98,9 +98,9 @@ function _dash_user_autocomplete($string = '') {
       $account = user_load($user->uid);
 
       $matches[] = array(
-        "uid" =>  $user->uid,
-        "name" => $user->name,
-        "avatar" => _gravatar_get_account_user_picture($account)
+        'uid' =>  (int)$user->uid,
+        'name' => $user->name,
+        'avatar' => _gravatar_get_account_user_picture($account)
       );
     }
   }
