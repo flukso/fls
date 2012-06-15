@@ -247,6 +247,74 @@ Flukso.ChartState = Backbone.NestedModel.extend({
 	}
 });
 
+Flukso.User = Backbone.Model.extend({
+	defaults: {
+		uid: null,
+		name: null,
+		avatar: null,
+		show: true
+	},
+
+	initialize: function() {
+		Flukso.chartState.set({reload: true});
+		Flukso.sensorCollect.GET(this.get('uid'));
+	}
+});
+
+Flukso.UserCollect = Backbone.Collection.extend({
+	model: Flukso.User,
+
+	initialize: function() {
+	}
+});
+
+Flukso.UserView = Backbone.View.extend({
+	el: '#fluksonians',
+	template: _.template($('#avatar-add').html()),
+
+	initialize: function() {
+		_.bindAll(this, 'add', 'remove');
+
+		/* bind this view to the add and remove events of the collection */
+		this.collection.bind('add', this.add);
+		this.collection.bind('remove', this.remove);
+
+		/* populate user entry for /me */
+		this.collection.add(Drupal.settings.me);
+	},
+
+	add: function(user) {
+		$(this.el).append(this.template(user.attributes));
+	},
+
+	remove: function(user) {
+	}
+});
+
+Flukso.UserAddView = Backbone.View.extend({
+	initialize: function() {
+		var that = this;
+
+		$("#fluksonian-add").typeahead({
+			source: function(typeahead, query) {
+				return $.getJSON("/dash/user/autocomplete/" + query)
+					.success(function(data) {
+						typeahead.process(data);
+					});
+			},
+
+			property: "name",
+
+			onselect: function (fluksonian) {
+				that.collection.add(fluksonian);
+
+				/* clear the typeahead's text input */
+				$("#fluksonian-add").val('');
+			}
+		});
+	}
+});
+
 Flukso.Sensor = Backbone.Model.extend({
 	defaults: {
 //		sensor: null,
@@ -355,9 +423,6 @@ Flukso.SensorCollect = Backbone.Collection.extend({
 			callback: '?callback=?',
 			version: '1.0'
 		};
-
-		/* fetch the user's own sensors */
-		this.GET(Drupal.settings.me.uid);
 	},
 
 	/* sort by function (=name) */
@@ -705,12 +770,15 @@ Flukso.Router = Backbone.Router.extend({
 $(function() {
 	Flukso.chartState = new Flukso.ChartState();
 	Flukso.sensorCollect = new Flukso.SensorCollect();
-	
+	Flukso.userCollect = new Flukso.UserCollect();
+
 	Flukso.typeView = new Flukso.TypeView({model: Flukso.chartState});
 	Flukso.intervalView = new Flukso.IntervalView({model: Flukso.chartState});
 	Flukso.unitView = new Flukso.UnitView({model: Flukso.chartState});
 	Flukso.alertView = new Flukso.AlertView({model: Flukso.chartState});
 	Flukso.chartView = new Flukso.ChartView({collection: Flukso.sensorCollect});
+	Flukso.userView = new Flukso.UserView({collection: Flukso.userCollect});
+	Flukso.userAddView = new Flukso.UserAddView({collection: Flukso.userCollect});
 
 	Flukso.router = new Flukso.Router();
 	Backbone.history.start({root: "/dash"});
