@@ -61,7 +61,7 @@ function _dash_render() {
   drupal_add_js(
     array( 'me' =>
       array(
-        'uid'    => $user->uid,
+        'uid'    => (int)$user->uid,
         'name'   => $user->name,
         'avatar' => _gravatar_get_account_user_picture($user)
       )
