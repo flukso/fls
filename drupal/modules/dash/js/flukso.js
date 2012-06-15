@@ -257,7 +257,7 @@ Flukso.User = Backbone.Model.extend({
 
 	initialize: function() {
 		Flukso.chartState.set({reload: true});
-		Flukso.sensorCollect.GET(this.get('uid'));
+		Flukso.sensorCollect.GET(this.get('uid'), this.get('name'));
 	}
 });
 
@@ -320,6 +320,7 @@ Flukso.Sensor = Backbone.Model.extend({
 //		sensor: null,
 		id: null, /* sensor id doubling as backbone model id */
 		uid: null,
+		userName: null,
 		type: null,
 		'function': null,
 		interval: null,
@@ -430,7 +431,7 @@ Flukso.SensorCollect = Backbone.Collection.extend({
 		return sensor.get('function');
 	},
 
-	GET: function(uid) {
+	GET: function(uid, name) {
 		function process(sensors) {
 			/* We have to fetch each counter separately, not as an object.
 			 * If not, the count:change will not trigger properly
@@ -446,6 +447,7 @@ Flukso.SensorCollect = Backbone.Collection.extend({
 				this.add({
 					id: sensors[i].sensor,
 					uid: Number(uid),
+					userName: name,
 					type: sensors[i].type,
 					'function': sensors[i]['function'],
 					localUrl: sensors[i].ip == 'undefined' ?
@@ -707,7 +709,7 @@ Flukso.ChartView = Backbone.View.extend({
 			};
 
 			var entry = {
-				name: sensor.get('function'),
+				name: sensor.get('userName') + '.' + sensor.get('function'),
 				data: _.map(cumul ? _.filter(sensor.get('data'), truncatePoint) : sensor.get('data'), formatPoint),
 				step: true,
 				tooltip: {
