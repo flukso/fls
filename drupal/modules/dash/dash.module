@@ -58,7 +58,14 @@ function _dash_render() {
   drupal_add_js(DASH_PATH . '/js/highstock.src.js');
   drupal_add_js(DASH_PATH . '/js/flukso.js');
 
-  drupal_add_js(array('uid' => $user->uid) , 'setting');
+  drupal_add_js(
+    array( 'me' =>
+      array(
+        'uid'    => $user->uid,
+        'name'   => $user->name,
+        'avatar' => _gravatar_get_account_user_picture($user)
+      )
+    ), 'setting');
 
   $fd = fopen(DASH_HTML, 'r');
   $body = fread($fd, filesize(DASH_HTML));

@@ -357,7 +357,7 @@ Flukso.SensorCollect = Backbone.Collection.extend({
 		};
 
 		/* fetch the user's own sensors */
-		this.GET(Drupal.settings.uid);
+		this.GET(Drupal.settings.me.uid);
 	},
 
 	/* sort by function (=name) */
