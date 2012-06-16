@@ -426,9 +426,15 @@ Flukso.SensorCollect = Backbone.Collection.extend({
 		};
 	},
 
-	/* sort by function (=name) */
 	comparator: function(sensor) {
-		return sensor.get('function');
+		var user = Flukso.userCollect.find(function(usr) {
+			return usr.get('uid') == sensor.get('uid');
+		});
+		/* truncate leading c and pad with zeros */
+		var userPosition = 1000 + Number(user.cid.substring(1));
+		/* primary sort on user insertion order, secondary on sensor name */
+		var sensorPosition = userPosition + sensor.get('function').toLowerCase();
+		return sensorPosition;
 	},
 
 	GET: function(uid, name) {
