@@ -697,6 +697,9 @@ Flukso.ChartView = Backbone.View.extend({
 			var start = _.last(sensor.get('data'))[0] - Flukso.timeParams[interval].range;
 
 			function formatPoint(point, idx, list) {
+				/* deep copy of point array */
+				point = $.extend(true, {}, point);
+
 				if (point[1] == 'nan') {
 					point[1] = null;
 				} else {
