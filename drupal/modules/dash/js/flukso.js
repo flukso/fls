@@ -374,7 +374,9 @@ Flukso.Sensor = Backbone.Model.extend({
 	},
 
 	GET: function() {
-		if (Flukso.chartState.get('type') != this.get('type')) {
+		if (Flukso.chartState.get('type') != this.get('type')
+			|| !Flukso.userCollect.getByUid(this.get('uid')).get('show'))
+		{
 			return;
 		};
 
