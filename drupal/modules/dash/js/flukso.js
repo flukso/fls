@@ -326,7 +326,10 @@ Flukso.UserAddView = Backbone.View.extend({
 			property: "name",
 
 			onselect: function (fluksonian) {
-				that.collection.add(fluksonian);
+				/*  reject duplicate entries */
+				if (!that.collection.getByUid(fluksonian.uid)) {
+					that.collection.add(fluksonian);
+				}
 
 				/* clear the typeahead's text input */
 				$("#fluksonian-add").val('');
