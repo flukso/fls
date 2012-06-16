@@ -221,7 +221,8 @@ Flukso.chartDefaults = {
 
 Flukso.ChartState = Backbone.NestedModel.extend({
 	defaults: {
-		reload: true,
+		reloadChart: true,
+		refreshData: false, /* toggle to refresh */
 		type: 'electricity',
 		interval: 'day',
 
@@ -256,7 +257,7 @@ Flukso.User = Backbone.Model.extend({
 	},
 
 	initialize: function() {
-		Flukso.chartState.set({reload: true});
+		Flukso.chartState.set({reloadChart: true});
 		Flukso.sensorCollect.GET(this.get('uid'), this.get('name'));
 	}
 });
@@ -306,7 +307,7 @@ Flukso.UserView = Backbone.View.extend({
 		var user = this.collection.getByUid(uid);
 
 		user.set({show: !user.get('show')});
-		Flukso.chartState.set({reload: true});
+		Flukso.chartState.set({reloadChart: true});
 	}
 });
 
@@ -364,13 +365,12 @@ Flukso.Sensor = Backbone.Model.extend({
 		});
 
 		this.GET = _.bind(this.GET, this);
+		Flukso.chartState.bind('change:refreshData', this.GET);
 		Flukso.chartState.bind('change:type', this.GET);
 		Flukso.chartState.bind('change:interval', this.GET);
 		Flukso.chartState.bind('change:unit', this.GET);
 		Flukso.chartState.bind('change:cumul', this.GET);
 		Flukso.userCollect.bind('change:show', this.GET);
-
-		this.GET();	
 	},
 
 	GET: function() {
@@ -489,6 +489,8 @@ Flukso.SensorCollect = Backbone.Collection.extend({
 				gas: count.gas,
 				water: count.water
 			}});
+
+			Flukso.chartState.set({refreshData: !Flukso.chartState.get('refreshData')});
 		};
 
 		/* Bind the function to the object. So whenever the function is called, the value
@@ -543,7 +545,7 @@ Flukso.TypeView = Backbone.View.extend({
 		var sel = e.target;
 		this.model.set({type: $(sel).attr('id')});
 		this.model.set({cumul: false}); /* making sure we don't trigger cumul on a power unit */
-		this.model.set({reload: true});
+		this.model.set({reloadChart: true});
 	}
 });
 
@@ -576,7 +578,7 @@ Flukso.IntervalView = Backbone.View.extend({
 
 		var sel = e.target;
 		this.model.set({interval: $(sel).attr('id')});
-		this.model.set({reload: true});
+		this.model.set({reloadChart: true});
 	}
 });
 
@@ -629,7 +631,7 @@ Flukso.UnitView = Backbone.View.extend({
 		}});
 
         this.model.set({cumul: $(sel).hasClass('cumul')});
-		this.model.set({reload: true});
+		this.model.set({reloadChart: true});
 	}
 });
 
@@ -717,9 +719,6 @@ Flukso.ChartView = Backbone.View.extend({
 			var start = _.last(sensor.get('data'))[0] - Flukso.timeParams[interval].range;
 
 			function formatPoint(point, idx, list) {
-				/* deep copy of point array */
-				point = $.extend(true, {}, point);
-
 				if (point[1] == 'nan') {
 					point[1] = null;
 				} else {
@@ -750,8 +749,8 @@ Flukso.ChartView = Backbone.View.extend({
 		});
 
 		/* real-time chart should not reload the second time */
-		if (Flukso.chartState.get('reload')) {
-			Flukso.chartState.set({reload: false});
+		if (Flukso.chartState.get('reloadChart')) {
+			Flukso.chartState.set({reloadChart: false});
 
 			/* deep config object copy */
 			var config = $.extend(true, {}, Flukso.chartDefaults);
@@ -792,7 +791,7 @@ Flukso.Router = Backbone.Router.extend({
 		Flukso.chartState.set({
 			type: type,
 			interval: interval,
-			reload: true
+			reloadChart: true
 		});
 	}
 })
