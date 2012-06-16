@@ -714,7 +714,9 @@ Flukso.ChartView = Backbone.View.extend({
 		var sensors = this.filter(function(sensor) {
 			return sensor.get('type') == type
 				&& sensor.get('interval') == interval
-				&& Flukso.userCollect.getByUid(sensor.get('uid')).get('show');
+				&& Flukso.userCollect.getByUid(sensor.get('uid')).get('show')
+				&& _.find(sensor.get('data'), function(point) {
+					return point[1] != 'nan'});
 		});
 
 		var series = _.map(sensors, function(sensor) {
