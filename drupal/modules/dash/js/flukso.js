@@ -307,6 +307,8 @@ Flukso.UserView = Backbone.View.extend({
 		var user = this.collection.getByUid(uid);
 
 		user.set({show: !user.get('show')});
+		$(sel).parent().toggleClass('grey-out');
+
 		Flukso.chartState.set({reloadChart: true});
 	}
 });

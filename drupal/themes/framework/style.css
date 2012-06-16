@@ -232,6 +232,12 @@ article.comment .picture {
   margin: 0 6px 6px 0;
 }
 
+#fluksonians div.avatar.grey-out {
+  opacity: 0.4;
+  filter: alpha(opacity=40); /* msie */
+  background-color: #000;
+}
+
 /**
  * 2.LAYOUT
  */
