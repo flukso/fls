@@ -265,6 +265,12 @@ Flukso.UserCollect = Backbone.Collection.extend({
 	model: Flukso.User,
 
 	initialize: function() {
+	},
+
+	getByUid: function(uid) {
+		return this.find(function(user) {
+			return user.get('uid') == uid;
+		});
 	}
 });
 
@@ -273,7 +279,7 @@ Flukso.UserView = Backbone.View.extend({
 	template: _.template($('#avatar-add').html()),
 
 	initialize: function() {
-		_.bindAll(this, 'add', 'remove');
+		_.bindAll(this, 'add', 'remove', 'show');
 
 		/* bind this view to the add and remove events of the collection */
 		this.collection.bind('add', this.add);
@@ -283,11 +289,24 @@ Flukso.UserView = Backbone.View.extend({
 		this.collection.add(Drupal.settings.me);
 	},
 
+	events: {
+		'click': 'show',
+	},
+
 	add: function(user) {
 		$(this.el).append(this.template(user.attributes));
 	},
 
-	remove: function(user) {
+	remove: function(e) {
+	},
+
+	show: function(e) {
+		var sel = e.target;
+		var uid = Number($(sel).attr('uid'));
+		var user = this.collection.getByUid(uid);
+
+		user.set({show: !user.get('show')});
+		Flukso.chartState.set({reload: true});
 	}
 });
 
@@ -349,6 +368,7 @@ Flukso.Sensor = Backbone.Model.extend({
 		Flukso.chartState.bind('change:interval', this.GET);
 		Flukso.chartState.bind('change:unit', this.GET);
 		Flukso.chartState.bind('change:cumul', this.GET);
+		Flukso.userCollect.bind('change:show', this.GET);
 
 		this.GET();	
 	},
@@ -427,9 +447,7 @@ Flukso.SensorCollect = Backbone.Collection.extend({
 	},
 
 	comparator: function(sensor) {
-		var user = Flukso.userCollect.find(function(usr) {
-			return usr.get('uid') == sensor.get('uid');
-		});
+		var user = Flukso.userCollect.getByUid(sensor.get('uid'));
 		/* truncate leading c and pad with zeros */
 		var userPosition = 1000 + Number(user.cid.substring(1));
 		/* primary sort on user insertion order, secondary on sensor name */
@@ -690,7 +708,9 @@ Flukso.ChartView = Backbone.View.extend({
 
 		/* filter out the sensors we wish to display */
 		var sensors = this.filter(function(sensor) {
-			return sensor.get('type') == type && sensor.get('interval') == interval;
+			return sensor.get('type') == type
+				&& sensor.get('interval') == interval
+				&& Flukso.userCollect.getByUid(sensor.get('uid')).get('show');
 		});
 
 		var series = _.map(sensors, function(sensor) {
