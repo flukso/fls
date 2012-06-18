@@ -259,6 +259,10 @@ Flukso.User = Backbone.Model.extend({
 	initialize: function() {
 		Flukso.chartState.set({reloadChart: true});
 		Flukso.sensorCollect.GET(this.get('uid'), this.get('name'));
+
+		this.bind('remove', function() {
+			Flukso.sensorCollect.removeByUid(this.get('uid'));
+		});
 	}
 });
 
@@ -280,7 +284,7 @@ Flukso.UserView = Backbone.View.extend({
 	template: _.template($('#avatar-add').html()),
 
 	initialize: function() {
-		_.bindAll(this, 'add', 'remove', 'show');
+		_.bindAll(this, 'action', 'add', 'remove', 'show');
 
 		/* bind this view to the add and remove events of the collection */
 		this.collection.bind('add', this.add);
@@ -291,7 +295,14 @@ Flukso.UserView = Backbone.View.extend({
 	},
 
 	events: {
-		'click': 'show',
+		'click': 'action',
+	},
+
+	action: function(e) {
+		if ($('#fluksonian-show').hasClass('active'))
+			this.show(e)
+		else
+			this.remove(e);
 	},
 
 	add: function(user) {
@@ -299,6 +310,24 @@ Flukso.UserView = Backbone.View.extend({
 	},
 
 	remove: function(e) {
+		var sel = e.target;
+		var uid = Number($(sel).attr('uid'));
+		var user = this.collection.getByUid(uid);
+
+		/* /me cannot be removed from the chart */
+		if (Drupal.settings.me.uid == uid) {
+			return
+		};
+
+		$(sel).parent().remove();
+		/* triggers a chain of actions that removes the
+		   entries in userCollect and sensorCollect */
+		this.collection.remove(user);
+		
+		Flukso.chartState.set({
+			reloadChart: true,
+			refreshData: !Flukso.chartState.get('refreshData')
+		});
 	},
 
 	show: function(e) {
@@ -313,19 +342,30 @@ Flukso.UserView = Backbone.View.extend({
 	}
 });
 
-Flukso.UserAddView = Backbone.View.extend({
+Flukso.UserCtrlView = Backbone.View.extend({
+	el: '#fluksonian-ctrl',
+
 	initialize: function() {
+		_.bindAll(this, 'add');
+
+		/* show is the default ctrl action */
+		$('#fluksonian-show').addClass('active');
+		/* init typeahead */
+		this.add();
+	},
+
+	add: function() {
 		var that = this;
 
-		$("#fluksonian-add").typeahead({
+		$('#fluksonian-add').typeahead({
 			source: function(typeahead, query) {
-				return $.getJSON("/dash/user/autocomplete/" + query)
+				return $.getJSON('/dash/user/autocomplete/' + query)
 					.success(function(data) {
 						typeahead.process(data);
 					});
 			},
 
-			property: "name",
+			property: 'name',
 
 			onselect: function (fluksonian) {
 				/*  reject duplicate entries */
@@ -334,7 +374,7 @@ Flukso.UserAddView = Backbone.View.extend({
 				}
 
 				/* clear the typeahead's text input */
-				$("#fluksonian-add").val('');
+				$('#fluksonian-add').val('');
 			}
 		});
 	}
@@ -376,6 +416,15 @@ Flukso.Sensor = Backbone.Model.extend({
 		Flukso.chartState.bind('change:unit', this.GET);
 		Flukso.chartState.bind('change:cumul', this.GET);
 		Flukso.userCollect.bind('change:show', this.GET);
+	},
+
+	decouple: function() {
+		Flukso.chartState.unbind('change:refreshData', this.GET);
+		Flukso.chartState.unbind('change:type', this.GET);
+		Flukso.chartState.unbind('change:interval', this.GET);
+		Flukso.chartState.unbind('change:unit', this.GET);
+		Flukso.chartState.unbind('change:cumul', this.GET);
+		Flukso.userCollect.unbind('change:show', this.GET);
 	},
 
 	GET: function() {
@@ -460,6 +509,21 @@ Flukso.SensorCollect = Backbone.Collection.extend({
 		/* primary sort on user insertion order, secondary on sensor name */
 		var sensorPosition = userPosition + sensor.get('function').toLowerCase();
 		return sensorPosition;
+	},
+
+	getByUid: function(uid) {
+		return this.filter(function(sensor) {
+			return sensor.get('uid') == uid;
+		});
+	},
+
+	removeByUid: function(uid) {
+		var that = this;
+
+		_.each(this.getByUid(uid), function(sensor) {
+			that.remove(sensor);
+			sensor.decouple();
+		});
 	},
 
 	GET: function(uid, name) {
@@ -817,7 +881,7 @@ $(function() {
 	Flukso.alertView = new Flukso.AlertView({model: Flukso.chartState});
 	Flukso.chartView = new Flukso.ChartView({collection: Flukso.sensorCollect});
 	Flukso.userView = new Flukso.UserView({collection: Flukso.userCollect});
-	Flukso.userAddView = new Flukso.UserAddView({collection: Flukso.userCollect});
+	Flukso.userCtrlView = new Flukso.UserCtrlView({collection: Flukso.userCollect});
 
 	Flukso.router = new Flukso.Router();
 	Backbone.history.start({root: "/dash"});
