@@ -290,8 +290,14 @@ Flukso.UserView = Backbone.View.extend({
 		this.collection.bind('add', this.add);
 		this.collection.bind('remove', this.remove);
 
-		/* populate user entry for /me */
+		/* first populate user entry for /me */
 		this.collection.add(Drupal.settings.me);
+
+		/* ... then populate with stored subscriptions */
+		_.each(Drupal.settings.subscriptions, function(sub) {
+			sub.show = false;
+			this.collection.add(sub);
+		}, this);
 	},
 
 	events: {
@@ -307,6 +313,11 @@ Flukso.UserView = Backbone.View.extend({
 
 	add: function(user) {
 		$(this.el).append(this.template(user.attributes));
+
+		if (user.get('show') == false) {
+			var sel = '.avatar [uid=' + user.get('uid') + ']';
+			$(sel).parent().addClass('grey-out');
+		}
 	},
 
 	remove: function(e) {

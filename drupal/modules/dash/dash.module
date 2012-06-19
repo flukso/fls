@@ -59,12 +59,14 @@ function _dash_render() {
   drupal_add_js(DASH_PATH . '/js/flukso.js');
 
   drupal_add_js(
-    array( 'me' =>
-      array(
+    array(
+      'me' => array(
         'uid'    => (int)$user->uid,
         'name'   => $user->name,
         'avatar' => _gravatar_get_account_user_picture($user)
-      )
+      ),
+
+      'subscriptions' => _dash_subs($user->uid)
     ), 'setting');
 
   $fd = fopen(DASH_HTML, 'r');
@@ -72,6 +74,43 @@ function _dash_render() {
   fclose($fd);
 
   return $body;
+}
+
+function _dash_subs($uid) {
+  $sql = "SELECT subscriptions FROM {logger_users} WHERE uid = %d";
+  $subs_json = db_result(db_query($sql, $uid));
+
+  /* making sure the fluksonian did not set his account to private */
+  $result = db_query("
+    SELECT u.uid, u.name
+    FROM {users} u
+    INNER JOIN {logger_users} lu ON u.uid = lu.uid
+    WHERE u.uid IN (%s)
+    AND lu.private = %d
+  ", substr($subs_json, 1, -1), NOT_PRIVATE);
+
+  $subs = array();
+  while ($sub = db_fetch_object($result)) {
+    $account = user_load($sub->uid);
+
+    $subs[$sub->uid] = array(
+      'uid'     => (int)$sub->uid,
+      'name'    => $sub->name,
+      'avatar'  => _gravatar_get_account_user_picture($account)
+    );
+  }
+
+  /* subs should be ordered in the same sequence as in the JSON array */
+  $subs_php = json_decode($subs_json);
+  $subs_sorted = array();
+
+  foreach ($subs_php as $uid) {
+    if ($subs[$uid]) {
+      $subs_sorted[] = $subs[$uid];
+    }
+  };
+
+  return $subs_sorted;
 }
 
 /**
