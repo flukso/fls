@@ -175,7 +175,7 @@ article.comment .picture {
 /* theme icons in the nav-bar */
 .navbar .icon > li a {
   font-size: 20px;
-  padding: 9px 0 0 9px;
+  padding: 12px 0 0 9px;
 }
 
 .navbar a#cart {
