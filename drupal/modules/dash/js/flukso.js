@@ -321,7 +321,7 @@ Flukso.UserView = Backbone.View.extend({
 	},
 
 	events: {
-		'click .avatar': 'action',
+		'click .avatar': 'action'
 	},
 
 	action: function(e) {
