@@ -46,6 +46,14 @@ function dash_menu() {
     'type'              => MENU_CALLBACK,
   );
 
+  $items['dash/subscriptions'] = array(
+    'title'             => 'Post subscriptions updates',
+    'page callback'     => '_dash_subscriptions',
+    'access callback'   => 'user_access',
+    'access arguments'  => array('logger'),
+    'type'              => MENU_CALLBACK,
+  );
+
   return $items;
 } 
 
@@ -148,6 +156,35 @@ function _dash_user_autocomplete($string = '') {
      so use PHP's built-in json_encode instead */
   drupal_set_header('Content-Type: application/json');
   echo json_encode($matches);
+}
+
+function _dash_subscriptions() {
+  global $user;
+
+  $subs_json = @file_get_contents('php://input');
+  $subs_php = json_decode($subs_json);
+
+  $valid = true;
+
+  if (!is_array($subs_php)) {
+    $valid = false;
+  } else {
+    foreach ($subs_php as $uid) {
+      if (!is_int($uid) or $uid == (int)$user->uid) $valid = false;
+    }
+  }
+
+  if ($valid) {
+    db_query("
+      UPDATE {logger_users}
+      SET subscriptions = '%s'
+      WHERE uid = %d
+    ", $subs_json, $user->uid);
+
+    echo '{synced: true}';
+  } else {
+    echo '{synced: false}';
+  }
 }
 
 /**

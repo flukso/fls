@@ -221,6 +221,7 @@ Flukso.chartDefaults = {
 
 Flukso.ChartState = Backbone.NestedModel.extend({
 	defaults: {
+		init: true,
 		reloadChart: true,
 		refreshData: false, /* toggle to refresh */
 		type: 'electricity',
@@ -276,6 +277,26 @@ Flukso.UserCollect = Backbone.Collection.extend({
 		return this.find(function(user) {
 			return user.get('uid') == uid;
 		});
+	},
+
+	getUids: function() {
+		return this.map(function(user) {
+			return user.get('uid');
+		});
+	},
+
+	syncUids: function() {
+		if (!Flukso.chartState.get('init')) {
+			/* skip the first uid entry (= /me) */
+			var subs = _.rest(this.getUids());
+			/* should be a PUT method but not all browsers seem to support it */
+			$.ajax({
+				type: 'POST',
+				url: '/dash/subscriptions',
+				contentType: 'application/json',
+				data: JSON.stringify(subs)
+			});
+		} 
 	}
 });
 
@@ -288,7 +309,6 @@ Flukso.UserView = Backbone.View.extend({
 
 		/* bind this view to the add and remove events of the collection */
 		this.collection.bind('add', this.add);
-		this.collection.bind('remove', this.remove);
 
 		/* first populate user entry for /me */
 		this.collection.add(Drupal.settings.me);
@@ -318,6 +338,8 @@ Flukso.UserView = Backbone.View.extend({
 			var sel = '.avatar [uid=' + user.get('uid') + ']';
 			$(sel).parent().addClass('grey-out');
 		}
+
+		this.collection.syncUids();
 	},
 
 	remove: function(e) {
@@ -334,6 +356,7 @@ Flukso.UserView = Backbone.View.extend({
 		/* triggers a chain of actions that removes the
 		   entries in userCollect and sensorCollect */
 		this.collection.remove(user);
+		this.collection.syncUids();
 		
 		Flukso.chartState.set({
 			reloadChart: true,
@@ -427,6 +450,8 @@ Flukso.Sensor = Backbone.Model.extend({
 		Flukso.chartState.bind('change:unit', this.GET);
 		Flukso.chartState.bind('change:cumul', this.GET);
 		Flukso.userCollect.bind('change:show', this.GET);
+
+		this.GET();
 	},
 
 	decouple: function() {
@@ -572,7 +597,9 @@ Flukso.SensorCollect = Backbone.Collection.extend({
 				water: count.water
 			}});
 
-			Flukso.chartState.set({refreshData: !Flukso.chartState.get('refreshData')});
+			/* do not refresh all sensors when users & sensors are still being populated */
+			if (!Flukso.chartState.get('init'))
+				Flukso.chartState.set({refreshData: !Flukso.chartState.get('refreshData')});
 		};
 
 		/* Bind the function to the object. So whenever the function is called, the value
@@ -775,6 +802,9 @@ Flukso.ChartView = Backbone.View.extend({
 		if (notReady) { 
 			return this;
 		};
+
+		/* init has finished when the chart renders for the first time */
+		Flukso.chartState.set({init: false});
 
 		var type = Flukso.chartState.get('type');
 		var interval = Flukso.chartState.get('interval');
