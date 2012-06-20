@@ -13,6 +13,9 @@
   <!--[if lt IE 9]>
     <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
   <![endif]-->
+  <!--[if IE 7]>
+    <link href="/sites/all/themes/framework/font-awesome/css/font-awesome-ie7.css" media="all" rel="stylesheet" type="text/css">
+  <![endif]-->
 </head>
 
 <body class="<?php print $body_classes; ?>">
