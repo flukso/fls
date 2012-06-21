@@ -380,6 +380,13 @@ Flukso.UserCtrlView = Backbone.View.extend({
 	el: '#fluksonian-ctrl',
 
 	initialize: function() {
+		if (Drupal.settings.me.uid == 0) {
+			$('#fluksonians').parent().remove();
+			$(this.el).parent().remove();
+			return;
+		}
+
+		$(this.el).show();
 		_.bindAll(this, 'add');
 
 		/* show is the default ctrl action */
