@@ -156,7 +156,7 @@ section[role=main] {
   min-height: 50%
 }
 
-/* give the submitted info a bith of breathing space */
+/* give the submitted info a bit of breathing space */
 h6.submitted {
   margin-bottom: 1em;
 }
@@ -175,7 +175,7 @@ article.comment .picture {
 /* theme icons in the nav-bar */
 .navbar .icon > li a {
   font-size: 20px;
-  padding: 9px 0 0 9px;
+  padding: 10px 0 0 9px;
 }
 
 .navbar a#cart {
@@ -223,6 +223,24 @@ article.comment .picture {
 #cart-form-products .form-item input {
   width: auto;
   text-align: right;
+}
+
+#fluksonians div.avatar {
+  float: left;
+  width: 50px;
+  height: 50px;
+  margin: 0 5px 6px 1px;
+}
+
+#fluksonians div.avatar.grey-out {
+  opacity: 0.4;
+  filter: alpha(opacity=40); /* msie */
+  background-color: #000;
+}
+
+#fluksonian-ctrl {
+  margin-top: 5px;
+  display: none;
 }
 
 /**

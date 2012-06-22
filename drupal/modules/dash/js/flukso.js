@@ -221,7 +221,9 @@ Flukso.chartDefaults = {
 
 Flukso.ChartState = Backbone.NestedModel.extend({
 	defaults: {
-		reload: true,
+		init: true,
+		reloadChart: true,
+		refreshData: false, /* toggle to refresh */
 		type: 'electricity',
 		interval: 'day',
 
@@ -247,11 +249,184 @@ Flukso.ChartState = Backbone.NestedModel.extend({
 	}
 });
 
+Flukso.User = Backbone.Model.extend({
+	defaults: {
+		uid: null,
+		name: null,
+		avatar: null,
+		show: true
+	},
+
+	initialize: function() {
+		Flukso.chartState.set({reloadChart: true});
+		Flukso.sensorCollect.GET(this.get('uid'), this.get('name'));
+
+		this.bind('remove', function() {
+			Flukso.sensorCollect.removeByUid(this.get('uid'));
+		});
+	}
+});
+
+Flukso.UserCollect = Backbone.Collection.extend({
+	model: Flukso.User,
+
+	initialize: function() {
+	},
+
+	getByUid: function(uid) {
+		return this.find(function(user) {
+			return user.get('uid') == uid;
+		});
+	},
+
+	getUids: function() {
+		return this.map(function(user) {
+			return user.get('uid');
+		});
+	},
+
+	syncUids: function() {
+		if (!Flukso.chartState.get('init')) {
+			/* skip the first uid entry (= /me) */
+			var subs = _.rest(this.getUids());
+			/* should be a PUT method but not all browsers seem to support it */
+			$.ajax({
+				type: 'POST',
+				url: '/dash/subscriptions',
+				contentType: 'application/json',
+				data: JSON.stringify(subs)
+			});
+		} 
+	}
+});
+
+Flukso.UserView = Backbone.View.extend({
+	el: '#fluksonians',
+	template: _.template($('#avatar-add').html()),
+
+	initialize: function() {
+		_.bindAll(this, 'action', 'add', 'remove', 'show');
+
+		/* bind this view to the add and remove events of the collection */
+		this.collection.bind('add', this.add);
+
+		/* first populate user entry for /me */
+		this.collection.add(Drupal.settings.me);
+
+		/* ... then populate with stored subscriptions */
+		_.each(Drupal.settings.subscriptions, function(sub) {
+			sub.show = false;
+			this.collection.add(sub);
+		}, this);
+	},
+
+	events: {
+		'click .avatar': 'action'
+	},
+
+	action: function(e) {
+		if ($('#fluksonian-show').hasClass('active'))
+			this.show(e)
+		else
+			this.remove(e);
+	},
+
+	add: function(user) {
+		$(this.el).append(this.template(user.attributes));
+
+		if (user.get('show') == false) {
+			var sel = '.avatar [uid=' + user.get('uid') + ']';
+			$(sel).parent().addClass('grey-out');
+		}
+
+		this.collection.syncUids();
+	},
+
+	remove: function(e) {
+		var sel = e.target;
+		var uid = Number($(sel).attr('uid'));
+		var user = this.collection.getByUid(uid);
+
+		/* /me cannot be removed from the chart */
+		if (Drupal.settings.me.uid == uid) {
+			return
+		};
+
+		$(sel).parent().remove();
+		/* triggers a chain of actions that removes the
+		   entries in userCollect and sensorCollect */
+		this.collection.remove(user);
+		this.collection.syncUids();
+		
+		Flukso.chartState.set({
+			reloadChart: true,
+			refreshData: !Flukso.chartState.get('refreshData')
+		});
+	},
+
+	show: function(e) {
+		var sel = e.target;
+		var uid = Number($(sel).attr('uid'));
+		var user = this.collection.getByUid(uid);
+
+		user.set({show: !user.get('show')});
+		$(sel).parent().toggleClass('grey-out');
+
+		Flukso.chartState.set({reloadChart: true});
+	}
+});
+
+Flukso.UserCtrlView = Backbone.View.extend({
+	el: '#fluksonian-ctrl',
+
+	initialize: function() {
+		if (Drupal.settings.me.uid == 0) {
+			$('#fluksonians').parent().remove();
+			$(this.el).parent().remove();
+			return;
+		}
+
+		$(this.el).show();
+		_.bindAll(this, 'add');
+
+		/* show is the default ctrl action */
+		$('#fluksonian-show').addClass('active');
+		/* init typeahead */
+		this.add();
+	},
+
+	add: function() {
+		var that = this;
+
+		$('#fluksonian-add').typeahead({
+			source: function(typeahead, query) {
+				return $.getJSON('/dash/user/autocomplete/' + query)
+					.success(function(data) {
+						typeahead.process(data);
+					});
+			},
+
+			property: 'name',
+
+			onselect: function (fluksonian) {
+				/*  reject duplicate entries */
+				if (!that.collection.getByUid(fluksonian.uid)) {
+					that.collection.add(fluksonian);
+				}
+
+				/* clear the typeahead's text input */
+				$('#fluksonian-add').val('');
+			}
+		});
+	}
+});
+
 Flukso.Sensor = Backbone.Model.extend({
 	defaults: {
 //		sensor: null,
 		id: null, /* sensor id doubling as backbone model id */
 		uid: null,
+		userName: null,
 		type: null,
 		'function': null,
 		interval: null,
@@ -276,16 +451,29 @@ Flukso.Sensor = Backbone.Model.extend({
 		});
 
 		this.GET = _.bind(this.GET, this);
+		Flukso.chartState.bind('change:refreshData', this.GET);
 		Flukso.chartState.bind('change:type', this.GET);
 		Flukso.chartState.bind('change:interval', this.GET);
 		Flukso.chartState.bind('change:unit', this.GET);
 		Flukso.chartState.bind('change:cumul', this.GET);
+		Flukso.userCollect.bind('change:show', this.GET);
 
-		this.GET();	
+		this.GET();
+	},
+
+	decouple: function() {
+		Flukso.chartState.unbind('change:refreshData', this.GET);
+		Flukso.chartState.unbind('change:type', this.GET);
+		Flukso.chartState.unbind('change:interval', this.GET);
+		Flukso.chartState.unbind('change:unit', this.GET);
+		Flukso.chartState.unbind('change:cumul', this.GET);
+		Flukso.userCollect.unbind('change:show', this.GET);
 	},
 
 	GET: function() {
-		if (Flukso.chartState.get('type') != this.get('type')) {
+		if (Flukso.chartState.get('type') != this.get('type')
+			|| !Flukso.userCollect.getByUid(this.get('uid')).get('show'))
+		{
 			return;
 		};
 
@@ -355,17 +543,33 @@ Flukso.SensorCollect = Backbone.Collection.extend({
 			callback: '?callback=?',
 			version: '1.0'
 		};
-
-		/* fetch the user's own sensors */
-		this.GET(Drupal.settings.uid);
 	},
 
-	/* sort by function (=name) */
 	comparator: function(sensor) {
-		return sensor.get('function');
+		var user = Flukso.userCollect.getByUid(sensor.get('uid'));
+		/* truncate leading c and pad with zeros */
+		var userPosition = 1000 + Number(user.cid.substring(1));
+		/* primary sort on user insertion order, secondary on sensor name */
+		var sensorPosition = userPosition + sensor.get('function').toLowerCase();
+		return sensorPosition;
 	},
 
-	GET: function(uid) {
+	getByUid: function(uid) {
+		return this.filter(function(sensor) {
+			return sensor.get('uid') == uid;
+		});
+	},
+
+	removeByUid: function(uid) {
+		var that = this;
+
+		_.each(this.getByUid(uid), function(sensor) {
+			that.remove(sensor);
+			sensor.decouple();
+		});
+	},
+
+	GET: function(uid, name) {
 		function process(sensors) {
 			/* We have to fetch each counter separately, not as an object.
 			 * If not, the count:change will not trigger properly
@@ -381,6 +585,7 @@ Flukso.SensorCollect = Backbone.Collection.extend({
 				this.add({
 					id: sensors[i].sensor,
 					uid: Number(uid),
+					userName: name,
 					type: sensors[i].type,
 					'function': sensors[i]['function'],
 					localUrl: sensors[i].ip == 'undefined' ?
@@ -398,6 +603,10 @@ Flukso.SensorCollect = Backbone.Collection.extend({
 				gas: count.gas,
 				water: count.water
 			}});
+
+			/* do not refresh all sensors when users & sensors are still being populated */
+			if (!Flukso.chartState.get('init'))
+				Flukso.chartState.set({refreshData: !Flukso.chartState.get('refreshData')});
 		};
 
 		/* Bind the function to the object. So whenever the function is called, the value
@@ -452,7 +661,7 @@ Flukso.TypeView = Backbone.View.extend({
 		var sel = e.target;
 		this.model.set({type: $(sel).attr('id')});
 		this.model.set({cumul: false}); /* making sure we don't trigger cumul on a power unit */
-		this.model.set({reload: true});
+		this.model.set({reloadChart: true});
 	}
 });
 
@@ -485,7 +694,7 @@ Flukso.IntervalView = Backbone.View.extend({
 
 		var sel = e.target;
 		this.model.set({interval: $(sel).attr('id')});
-		this.model.set({reload: true});
+		this.model.set({reloadChart: true});
 	}
 });
 
@@ -538,7 +747,7 @@ Flukso.UnitView = Backbone.View.extend({
 		}});
 
         this.model.set({cumul: $(sel).hasClass('cumul')});
-		this.model.set({reload: true});
+		this.model.set({reloadChart: true});
 	}
 });
 
@@ -601,6 +810,9 @@ Flukso.ChartView = Backbone.View.extend({
 			return this;
 		};
 
+		/* init has finished when the chart renders for the first time */
+		Flukso.chartState.set({init: false});
+
 		var type = Flukso.chartState.get('type');
 		var interval = Flukso.chartState.get('interval');
 
@@ -617,7 +829,11 @@ Flukso.ChartView = Backbone.View.extend({
 
 		/* filter out the sensors we wish to display */
 		var sensors = this.filter(function(sensor) {
-			return sensor.get('type') == type && sensor.get('interval') == interval;
+			return sensor.get('type') == type
+				&& sensor.get('interval') == interval
+				&& Flukso.userCollect.getByUid(sensor.get('uid')).get('show')
+				&& _.find(sensor.get('data'), function(point) {
+					return point[1] != 'nan'});
 		});
 
 		var series = _.map(sensors, function(sensor) {
@@ -642,7 +858,7 @@ Flukso.ChartView = Backbone.View.extend({
 			};
 
 			var entry = {
-				name: sensor.get('function'),
+				name: sensor.get('userName') + '.' + sensor.get('function'),
 				data: _.map(cumul ? _.filter(sensor.get('data'), truncatePoint) : sensor.get('data'), formatPoint),
 				step: true,
 				tooltip: {
@@ -654,8 +870,8 @@ Flukso.ChartView = Backbone.View.extend({
 		});
 
 		/* real-time chart should not reload the second time */
-		if (Flukso.chartState.get('reload')) {
-			Flukso.chartState.set({reload: false});
+		if (Flukso.chartState.get('reloadChart')) {
+			Flukso.chartState.set({reloadChart: false});
 
 			/* deep config object copy */
 			var config = $.extend(true, {}, Flukso.chartDefaults);
@@ -696,7 +912,7 @@ Flukso.Router = Backbone.Router.extend({
 		Flukso.chartState.set({
 			type: type,
 			interval: interval,
-			reload: true
+			reloadChart: true
 		});
 	}
 })
@@ -705,12 +921,15 @@ Flukso.Router = Backbone.Router.extend({
 $(function() {
 	Flukso.chartState = new Flukso.ChartState();
 	Flukso.sensorCollect = new Flukso.SensorCollect();
-	
+	Flukso.userCollect = new Flukso.UserCollect();
+
 	Flukso.typeView = new Flukso.TypeView({model: Flukso.chartState});
 	Flukso.intervalView = new Flukso.IntervalView({model: Flukso.chartState});
 	Flukso.unitView = new Flukso.UnitView({model: Flukso.chartState});
 	Flukso.alertView = new Flukso.AlertView({model: Flukso.chartState});
 	Flukso.chartView = new Flukso.ChartView({collection: Flukso.sensorCollect});
+	Flukso.userView = new Flukso.UserView({collection: Flukso.userCollect});
+	Flukso.userCtrlView = new Flukso.UserCtrlView({collection: Flukso.userCollect});
 
 	Flukso.router = new Flukso.Router();
 	Backbone.history.start({root: "/dash"});
