@@ -143,7 +143,8 @@ function _dash_user_autocomplete($string = '') {
       WHERE ur.rid = %d
       AND lu.private = %d
       AND LOWER(u.name) LIKE LOWER('%%%s%%')
-    ", FLUKSONIAN, NOT_PRIVATE, $string, 0, 5);
+      AND NOT u.uid = %d
+    ", FLUKSONIAN, NOT_PRIVATE, $string, (int)$user->uid, 0, 5);
 
     while ($fluksonian = db_fetch_object($result)) {
       $account = user_load($fluksonian->uid);
