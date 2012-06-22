@@ -7,7 +7,7 @@ stylesheets[all][] = style.css
 stylesheets[all][] = font-awesome/css/font-awesome.css
 
 scripts[] = lib/json2.js
-scripts[] = lib/bootstrap.js
+scripts[] = lib/bootstrap.min.js
 scripts[] = js/tweaks.js
 
 regions[left] = Left sidebar
