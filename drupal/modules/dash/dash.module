@@ -74,7 +74,7 @@ function _dash_render() {
         'avatar' => _gravatar_get_account_user_picture($user)
       ),
 
-      'subscriptions' => _dash_subs($user->uid)
+      'subscriptions' => _dash_subs((int)$user->uid)
     ), 'setting');
 
   $fd = fopen(DASH_HTML, 'r');
@@ -85,6 +85,9 @@ function _dash_render() {
 }
 
 function _dash_subs($uid) {
+  if (!_dash_subs_participate($uid))
+    return Array();
+
   $sql = "SELECT subscriptions FROM {logger_users} WHERE uid = %d";
   $subs_json = db_result(db_query($sql, $uid));
 
@@ -128,9 +131,10 @@ function _dash_subs($uid) {
  *   user query string
  */
 function _dash_user_autocomplete($string = '') {
+  global $user;
   $matches = array();
 
-  if ($string) {
+  if (_dash_subs_participate((int)$user->uid) && $string) {
     $result = db_query_range("
       SELECT u.uid, u.name
       FROM {users} u
@@ -139,14 +143,15 @@ function _dash_user_autocomplete($string = '') {
       WHERE ur.rid = %d
       AND lu.private = %d
       AND LOWER(u.name) LIKE LOWER('%%%s%%')
-    ", FLUKSONIAN, NOT_PRIVATE, $string, 0, 5);
+      AND NOT u.uid = %d
+    ", FLUKSONIAN, NOT_PRIVATE, $string, (int)$user->uid, 0, 5);
 
-    while ($user = db_fetch_object($result)) {
-      $account = user_load($user->uid);
+    while ($fluksonian = db_fetch_object($result)) {
+      $account = user_load($fluksonian->uid);
 
       $matches[] = array(
-        'uid' =>  (int)$user->uid,
-        'name' => $user->name,
+        'uid' =>  (int)$fluksonian->uid,
+        'name' => $fluksonian->name,
         'avatar' => _gravatar_get_account_user_picture($account)
       );
     }
@@ -174,7 +179,9 @@ function _dash_subscriptions() {
     }
   }
 
-  if ($valid) {
+  drupal_set_header('Content-Type: application/json');
+
+  if (_dash_subs_participate((int)$user->uid) && $valid) {
     db_query("
       UPDATE {logger_users}
       SET subscriptions = '%s'
@@ -185,6 +192,11 @@ function _dash_subscriptions() {
   } else {
     echo '{synced: false}';
   }
+}
+
+function _dash_subs_participate($uid) {
+  $sql = "SELECT private FROM {logger_users} WHERE uid = %d";
+  return (int)db_result(db_query($sql, $uid)) == 0 ? true : false;
 }
 
 /**
