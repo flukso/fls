@@ -15,6 +15,7 @@
   <![endif]-->
   <!--[if IE 7]>
     <link href="/sites/all/themes/framework/font-awesome/css/font-awesome-ie7.css" media="all" rel="stylesheet" type="text/css">
+    <style>.nav.pull-right.icon > li > a {padding: 15px 0 0 9px;}</style>
   <![endif]-->
 </head>
 
