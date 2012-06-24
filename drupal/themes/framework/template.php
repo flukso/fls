@@ -117,7 +117,7 @@ function framework_comment_wrapper($content, $node) {
  * Allow theming of publishing information.
  */
 function framework_node_submitted($node) {
-  return t('Published by !username on !datetime',
+  return t('by !username on !datetime',
     array(
       '!username' => '<span class="author">'. theme('username', $node). '</span>',
       '!datetime' => '<time datetime="!fulldatetime" pubdate>'. format_date($node->created). '</time>',

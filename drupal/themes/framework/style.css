@@ -45,9 +45,58 @@ Equation for font sizing:
  * 1.OVERRIDES
  */
 
+@font-face {
+  font-family: 'Droid Sans';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Droid Sans'), local('DroidSans'), url('http://themes.googleusercontent.com/static/fonts/droidsans/v3/s-BiyweUPV0v-yRb-cjciBsxEYwM7FgeyaSgU71cLG0.woff') format('woff');
+} 
+
 body {
+  margin: 0;
+  font-family: "Droid Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 21px;
+  color: #333333;
   background-color: #f5f5f5;
   padding-top: 90px; /* 60px to make the container go all the way to the bottom of the topbar */
+}
+
+p {
+  margin: 0 0 9px;
+  font-family: "Droid Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 21px;
+}
+
+textarea {
+  font-family: "Droid Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.navbar-search .search-query {
+  font-family: "Droid Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  font-weight: normal;
+  line-height: 1;
+}
+
+label, input, button, select, textarea {
+  font-family: "Droid Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 21px;
+}
+
+input, textarea, select, .uneditable-input {
+    font-size: 15px;
+    line-height: 21px;
+}
+
+li {
+  line-height: 21px;
+}
+
+[role="main"] img {
+  margin: 12px 0 8px 0;
 }
 
 fieldset {
@@ -86,7 +135,8 @@ td.uc-discounts-cart-pane-table-cell,
 #cart-form-products td.subtotal,
 .cart-review th.price,
 .cart-review td.price,
-.cart-review td.subtotal {
+.cart-review td.subtotal,
+tr.review-button-row td {
   text-align: right;
 }
 
@@ -98,7 +148,7 @@ td.uc-discounts-cart-pane-table-cell,
 }
 
 fieldset#payment-pane .table {
-  width: 65%;
+  width: 80%;
 }
 
 tr.even, tr.odd {
@@ -164,7 +214,12 @@ h6.submitted {
 /* align the user picture accompanying the comment */
 article.comment .picture {
   float: left;
-  margin: 3px 0.5em 0 0;
+  margin: -8px 0.5em 0 0;
+}
+
+/* Slightly increase padding for navbar anchors */
+.navbar .nav > li > a {
+  padding: 11px 10px 8px;
 }
 
 /* alter navbar brand padding */
@@ -175,7 +230,7 @@ article.comment .picture {
 /* theme icons in the nav-bar */
 .navbar .icon > li a {
   font-size: 20px;
-  padding: 10px 0 0 9px;
+  padding: 11px 0 0 8px;
 }
 
 .navbar a#cart {
@@ -202,8 +257,14 @@ article.comment .picture {
   border: 1px solid rgba(0, 0, 0, 0.15);
 }
 
-#install-step img {
+.well h3,
+.well h4 {
+  margin-bottom: 10px;
+}
+
+.install-step img {
   float: left;
+  margin: 0;
   padding-right: 8px;
 }
 
@@ -241,6 +302,10 @@ article.comment .picture {
 #fluksonian-ctrl {
   margin-top: 5px;
   display: none;
+}
+
+#fluksonians img {
+  margin: 0;
 }
 
 /**
@@ -430,11 +495,11 @@ ul.inline li {
 }
 
 .comment header {
-  margin-bottom: 1em;
+  margin-bottom: 0.5em;
 }
 
 .comment .content {
- margin-left: 5.4em;
+ margin-left: 4.4em;
 }
 
 /**
