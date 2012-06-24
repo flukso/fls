@@ -49,7 +49,7 @@ Equation for font sizing:
   font-family: 'Droid Sans';
   font-style: normal;
   font-weight: normal;
-  src: local('Droid Sans'), local('DroidSans'), url('http://themes.googleusercontent.com/static/fonts/droidsans/v3/s-BiyweUPV0v-yRb-cjciBsxEYwM7FgeyaSgU71cLG0.woff') format('woff');
+  src: local('Droid Sans'), local('DroidSans'), url('https://themes.googleusercontent.com/static/fonts/droidsans/v3/s-BiyweUPV0v-yRb-cjciBsxEYwM7FgeyaSgU71cLG0.woff') format('woff');
 } 
 
 body {
