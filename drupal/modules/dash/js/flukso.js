@@ -111,6 +111,8 @@ Flukso.unitEnergyFactor = {
 	}
 };
 
+Flukso.fontFamily = '"Droid Sans", "Helvetica Neue", Helvetica, Arial, sans-serif';
+
 Flukso.chartDefaults = {
 	chart: {
 		renderTo: 'chart',
@@ -175,16 +177,17 @@ Flukso.chartDefaults = {
 		labels: {
 			style: {
 				color: '#000',
-				font: '13px "Helvetica Neue", Helvetica, Arial, sans-serif'
+				fontSize: '13px',
+				fontFamily: Flukso.fontFamily
 			}
 		},
 
 		title: {
 			style: {
 				color: '#333',
-				fontWeight: 'bold',
-				fontSize: '14px',
-				fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'
+				fontWeight: 'normal',
+				fontSize: '15px',
+				fontFamily: Flukso.fontFamily
 			}
 		}
 	},
@@ -202,16 +205,17 @@ Flukso.chartDefaults = {
 		labels: {
 			style: {
 				color: '#000',
-				font: '13px "Helvetica Neue", Helvetica, Arial, sans-serif'
+				fontSize: '13px',
+				fontFamily: Flukso.fontFamily
 			}
 		},
 
 		title: {
 			style: {
 				color: '#333',
-				fontWeight: 'bold',
-				fontSize: '14px',
-				fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'
+				fontWeight: 'normal',
+				fontSize: '15px',
+				fontFamily: Flukso.fontFamily
 			}
 		}
 	},
