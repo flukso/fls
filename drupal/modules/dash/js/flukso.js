@@ -628,26 +628,32 @@ Flukso.SensorCollect = Backbone.Collection.extend({
 });
 
 Flukso.TypeView = Backbone.View.extend({
-	el: '#type',
+	el: '[menu=type]',
 
 	initialize: function() {
-		_.bindAll(this, 'render');
+		_.bindAll(this, 'render', 'clickButton');
 		this.model.bind('change:type', this.render);
+
+		/* use JQuery to register the event handler since
+		   the backbone implementation only attaches to the
+		   first element */
+		$('[menu=type]').click(this.clickButton);
+
 		this.render();
 	},
 
 	render: function() {
 		/* no radio-style behaviour in drop-downs*/
-		$("#type li a").removeClass("active");
+		$("[menu=type] li a").removeClass("active");
 		/* activate button based on chart model */
-		var id = '#' + this.model.get('type');
-		$(id).button("toggle");
+		var sel = '[type=' + this.model.get('type') + ']';
+		$(sel).button("toggle");
 
 		return this;
 	},
 
 	events: {
-		"click": "clickButton"
+//		"click": "clickButton"
 	},
 
 	clickButton: function(e) {
@@ -663,61 +669,67 @@ Flukso.TypeView = Backbone.View.extend({
 		 * [1] https://github.com/addyosmani/backbone-fundamentals#views
 		 */
 		var sel = e.target;
-		this.model.set({type: $(sel).attr('id')});
+		this.model.set({type: $(sel).attr('type')});
 		this.model.set({cumul: false}); /* making sure we don't trigger cumul on a power unit */
 		this.model.set({reloadChart: true});
 	}
 });
 
 Flukso.IntervalView = Backbone.View.extend({
-	el: '#interval',
+	el: '[menu=interval]',
 
 	initialize: function() {
 		/* needed when render is called as a callback to the change event */
-		_.bindAll(this, 'render');
+		_.bindAll(this, 'render', 'clickButton');
 		this.model.bind('change:interval', this.render);
+
+		$('[menu=interval]').click(this.clickButton);
+
 		this.render();
 	},
 
 	render: function() {
 		/* no radio-style behaviour in drop-downs*/
-		$("#interval li a").removeClass("active");
+		$("[menu=interval] li a").removeClass("active");
 		/* activate tabs based on chart model */
-		var id = '#' + this.model.get('interval');
-		$(id).button("toggle");
+		var sel = '[interval=' + this.model.get('interval') + ']';
+		$(sel).button("toggle");
 
 		return this;
 	},
 
 	events: {
-		"click": "clickButton"
+//		"click": "clickButton"
 	},
 
 	clickButton: function(e) {
 		Flukso.alertView.clear();
 
 		var sel = e.target;
-		this.model.set({interval: $(sel).attr('id')});
+		this.model.set({interval: $(sel).attr('interval')});
 		this.model.set({reloadChart: true});
 	}
 });
 
 Flukso.UnitView = Backbone.View.extend({
-	el: '#unit',
+	el: '[menu=unit]',
 
 	initialize: function() {
 		/* needed when render is called as a callback to the change event */
-		_.bindAll(this, 'render');
+		_.bindAll(this, 'render', 'clickDropdown');
 		this.model.bind('change:type', this.render);
 		this.model.bind('change:interval', this.render);
+
+        $('[menu=unit]').click(this.clickDropdown);
+
 		this.render();
 	},
 
 	render: function() {
-		$("#unit.dropdown-menu a").hide();
+		$("[menu=unit].dropdown-menu a").hide();
 
 		/* show only relevant units in dropdown */
-		var cls = '#unit.dropdown-menu a.' + this.model.get('type');
+		var cls = '[menu=unit].dropdown-menu a.' + this.model.get('type');
 
 		if (this.model.get('interval') == 'minute') {
 			cls += '.rt';
@@ -729,7 +741,7 @@ Flukso.UnitView = Backbone.View.extend({
 	},
 
 	events: {
-		"click": "clickDropdown"
+//		"click": "clickDropdown"
 	},
 
 	clickDropdown: function(e) {
@@ -742,7 +754,7 @@ Flukso.UnitView = Backbone.View.extend({
 		};
 
 		var sel = e.target;
-		unit[this.model.get('type')] = $(sel).attr('id');
+		unit[this.model.get('type')] = $(sel).attr('unit');
 
 		this.model.set({unit: {
 			electricity: unit.electricity,
