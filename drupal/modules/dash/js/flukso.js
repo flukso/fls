@@ -645,8 +645,9 @@ Flukso.TypeView = Backbone.View.extend({
 	render: function() {
 		/* no radio-style behaviour in drop-downs*/
 		$("[menu=type] li a").removeClass("active");
-		/* activate button based on chart model */
-		var sel = '[type=' + this.model.get('type') + ']';
+		/* activate button based on chart model
+		   IE doesn't like 'type' as an attribute */
+		var sel = '[typ=' + this.model.get('type') + ']';
 		$(sel).button("toggle");
 
 		return this;
@@ -669,7 +670,7 @@ Flukso.TypeView = Backbone.View.extend({
 		 * [1] https://github.com/addyosmani/backbone-fundamentals#views
 		 */
 		var sel = e.target;
-		this.model.set({type: $(sel).attr('type')});
+		this.model.set({type: $(sel).attr('typ')});
 		this.model.set({cumul: false}); /* making sure we don't trigger cumul on a power unit */
 		this.model.set({reloadChart: true});
 	}
