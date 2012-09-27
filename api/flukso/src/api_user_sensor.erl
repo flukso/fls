@@ -89,7 +89,7 @@ content_types_provided(ReqData, State) ->
         {[{"application/json", to_json}], ReqData, State}.
 
 to_json(ReqData, #state{uid = Uid} = State) when Uid == 0 ->
-    to_json(ReqData, State#state{uid = 1});
+    to_json(ReqData, State#state{uid = ?UID_DEMO});
 to_json(ReqData, #state{uid = Uid, jsonp = Jsonp} = State) ->
     {data, Result} = mysql:execute(pool, user_sensor, [Uid]),
 

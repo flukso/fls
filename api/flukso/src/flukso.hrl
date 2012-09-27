@@ -53,6 +53,9 @@
 -define(FACTOR_WATT,         3600).     % Wh/s -> Watt
 -define(FACTOR_LPERDAY, 24 * 3600).     % L/s -> L/day
 
+% special uid's
+-define(UID_DEMO, 3).
+
 % alarm/logging severity levels
 -define(EMERGENCY, 0).
 -define(ALERT,     1).
