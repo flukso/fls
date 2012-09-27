@@ -65,20 +65,23 @@ malformed_request(ReqData, _State) ->
      end,
     ReqData, State}.
 
-is_authorized(ReqData, #state{uid = ClientUid, session = Session} = State) ->
+is_authorized(ReqData, #state{uid = RequestUid, session = Session} = State) ->
     {data, Result} = mysql:execute(pool, session, [Session]),
 
     case mysql:get_result_rows(Result) of
         [[1]] ->
             {true, ReqData, State};
-        [[SessionUid]] ->
-            {case ClientUid of
-                 SessionUid -> true;
-                 _NonMatchingUids -> "Session does not match reported user id."
+        [[SessionUid]] when SessionUid == RequestUid ->
+            {true, ReqData, State};
+        [[_SessionUid]] ->
+            {data, Private} = mysql:execute(pool, user_private, [RequestUid]),
+
+            {case mysql:get_result_rows(Private) of
+                 [[0]] -> true;
+                 [[1]] -> "This user prefers to keep his sensors private."
              end,
              ReqData, State};
-
-        _NoSidMatch ->
+        _NoSessionIdMatch ->
             {"Session id entry not found.", ReqData, State}
     end.
 

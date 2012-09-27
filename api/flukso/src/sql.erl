@@ -131,6 +131,14 @@
        WHERE
            lm.uid = ? AND enabled = 1">>).
 
+-define(SQL_USER_PRIVATE,
+    <<"SELECT
+           private
+       FROM
+           logger_users
+       WHERE
+           uid = ?">>).
+
 -define(SQL_TIMEZONE,
     <<"SELECT
            timezone
@@ -217,6 +225,7 @@
      {sensor_update, ?SQL_SENSOR_UPDATE},
      {sensor_config, ?SQL_SENSOR_CONFIG},
      {user_sensor, ?SQL_USER_SENSOR},
+     {user_private, ?SQL_USER_PRIVATE},
      {timezone, ?SQL_TIMEZONE},
      {device_key, ?SQL_DEVICE_KEY},
      {device_props, ?SQL_DEVICE_PROPS},
