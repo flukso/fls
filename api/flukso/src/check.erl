@@ -120,13 +120,15 @@ times(Interval, undefined, undefined, Resolution) ->
         {_, false} ->
             {false, false, false, false};
         {IntervalSec, ResolutionSec} -> 
+            MaxIntervalSec = erlang:min(IntervalSec, max_interval(ResolutionSec)),
+
             AlignedEnd =
                 align(up, Now, ResolutionSec),
 
             % make sure we return IntervalSec/ResolutionSec entries
             % so we add ResolutionSec to AlignedEnd - IntervalSec
             AlignedStart =
-                align(down, AlignedEnd - IntervalSec + ResolutionSec, ResolutionSec),
+                align(down, AlignedEnd - MaxIntervalSec + ResolutionSec, ResolutionSec),
 
             {AlignedStart, AlignedEnd, ResolutionSec, true}
     end;
@@ -142,13 +144,19 @@ times(undefined, Start, End, Resolution) ->
         {_, _, false} ->
             {false, false, false, false};
         {{match, [{0,_}]}, {match, [{0,_}]}, ResolutionSec} ->
+            {MinStart, MaxEnd, _, _} = times("decade", undefined, undefined, Resolution),
+            
             AlignedStart =
-                align(down, list_to_integer(Start), ResolutionSec),
+                align(down, erlang:max(list_to_integer(Start), MinStart), ResolutionSec),
 
+            % using down now instead of up since MaxEnd is already aligned up
             AlignedEnd =
-                align(up, list_to_integer(End), ResolutionSec),
+                align(down, erlang:min(list_to_integer(End), MaxEnd), ResolutionSec),
 
-            {AlignedStart, AlignedEnd, ResolutionSec, true};
+            case AlignedEnd >= AlignedStart of
+                true -> {AlignedStart, AlignedEnd, ResolutionSec, true};
+                false -> {false, false, false, false}
+            end;
 
         _ -> {false, false, false, false}
     end;
@@ -235,4 +243,15 @@ time_to_seconds(Time) ->
     case lists:keyfind(Time, 1, Times) of
         false -> false;
         {_Time, TimeSec} -> TimeSec
+    end.
+
+max_interval(Resolution) ->
+    MaxIntervals = [{?MINUTE, ?DAY},
+                    {?QUARTER, ?WEEK},
+                    {?DAY, ?YEAR},
+                    {?WEEK, ?DECADE}],
+
+    case lists:keyfind(Resolution, 1, MaxIntervals) of
+        false -> false;
+        {_Resolution, MaxInterval} -> MaxInterval
     end.
