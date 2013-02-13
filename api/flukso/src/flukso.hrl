@@ -17,6 +17,9 @@
 %% @doc Common definitions
 
 
+-define(DISABLE, 0).
+-define(ENABLE,  1).
+
 % fs paths
 -define(SYSLOG_PATH,   "var/data/syslog/").
 -define(RRD_BASE_PATH,   "var/data/base/").

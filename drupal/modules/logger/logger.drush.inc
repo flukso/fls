@@ -260,23 +260,7 @@ function _logger_create_node($serial, $country ="", $uid = 0) {
 
       if (!($result && $insert)) drush_set_error('LOGGER_CREATE_METER_ENTRY', dt('Error creating meter entry for @meter.', array('@meter' => $meter)));
 
-      // create the meter base rrd
-      if (!file_exists($path->base . $meter .'.rrd')) {
-        $command = $path->root .'/rrdtool create '. $path->base . $meter .'.rrd -b 1199487600 -s 60 DS:meter:DERIVE:8640000:-20:20 RRA:AVERAGE:0.5:1:1440 RRA:AVERAGE:0.5:15:672 RRA:AVERAGE:0.5:1440:365 RRA:AVERAGE:0.5:10080:520';
-        system($command, $return);
-        if (!($return == 0)) {
-          drush_set_error('LOGGER_CREATE_RRD_BASE_ERROR', dt('Error creating the base @meter rrd.', array('@meter' => $meter)));
-        }
-      }
-
-      // create the meter night rrd
-      if (!file_exists($path->night . $meter .'.rrd')) {
-        $command = $path->root .'/rrdtool create '. $path->night . $meter .'.rrd -b 1199487600 -s 86400 DS:meter:GAUGE:8640000:-20:20 RRA:AVERAGE:0.5:1:365 RRA:AVERAGE:0.5:7:520';
-        system($command, $return);
-        if (!($return == 0)) {
-          drush_set_error('LOGGER_CREATE_RRD_NIGHT_ERROR', dt('Error creating the night @meter rrd.', array('@meter' => $meter)));
-        }
-      }
+      // rrd's of sensors (a.k.a. meters) are now generated on-the-fly when enabling the sensor
 
       if (!drush_get_error()) {
 	drush_log(dt('Successfully created the meter: @meter with token: @token', array('@meter' => $meter, '@token' => $token)), 'ok');

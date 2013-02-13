@@ -19,7 +19,9 @@
 -module(rrd).
 -author('Bart Van Der Meerssche <bart.vandermeerssche@flukso.net>').
 
--export([fetch/5,
+-export([create/1,
+
+         fetch/5,
          fetch/6,
 
          update/2,
@@ -30,6 +32,34 @@
 
 -include("flukso.hrl").
 
+
+create(Sensor) ->
+    case file:read_file_info(path(base, Sensor)) of
+        {error, enoent} ->
+            Arg_base = erlrrd:c([
+                path(base, Sensor),
+                "-b 1199487600",
+                "-s 60",
+                "DS:meter:DERIVE:8640000:-20:20",
+                "RRA:AVERAGE:0.5:1:1440",
+                "RRA:AVERAGE:0.5:15:672",
+                "RRA:AVERAGE:0.5:1440:365",
+                "RRA:AVERAGE:0.5:10080:520"
+            ]),
+            Arg_night = erlrrd:c([
+                path(night, Sensor),
+                "-b 1199487600",
+                "-s 86400",
+                "DS:meter:GAUGE:8640000:-20:20",
+                "RRA:AVERAGE:0.5:1:365",
+                "RRA:AVERAGE:0.5:7:520"
+            ]),
+            erlrrd:create(Arg_base),
+            erlrrd:create(Arg_night);
+
+        {ok, _Fileinfo} ->
+            {error, eexist}
+    end.
 
 fetch(Sensor, Start, End, Resolution, Factor) ->
     fetch(base, Sensor, Start, End, Resolution, Factor).

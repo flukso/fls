@@ -230,7 +230,7 @@ process_post(ReqData, State) ->
     case Payload of
         {undefined, undefined} ->
             {false, ReqData, State};
-	{Measurements, undefined} ->
+        {Measurements, undefined} ->
             process_measurements(Measurements, ReqData, State);
         {undefined, Config} ->
             process_config(Config, ReqData, State);
@@ -252,8 +252,14 @@ process_config({struct, Params}, ReqData, #state{sensor = Sensor} = State) ->
             Sensor],
 
     {updated, _Result} = mysql:execute(pool, sensor_config, Args),
+    rrd_provision(Sensor, proplists:get_value(<<"enable">>, Params)),
 
     {true, ReqData, State}.
+
+rrd_provision(_Sensor, ?DISABLE) ->
+    {ok, noop};
+rrd_provision(Sensor, ?ENABLE) ->
+    rrd:create(Sensor).
 
 % JSON: {"measurements":[[<TS1>,<VALUE1>],...,[<TSn>,<VALUEn>]]}
 % Mochijson2: {struct,[{<<"measurements">>,[[<TS1>,<VALUE1>],...,[<TSn>,<VALUEn>]]}]}
