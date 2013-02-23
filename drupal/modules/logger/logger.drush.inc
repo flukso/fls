@@ -146,8 +146,8 @@ function _logger_load_device($row, $created) {
 }
 
 /**
- * Loads all sensors of a single device into the {logger_meters} database table,
- * loads a token for each sensor in {logger_tokens} and creates the base/night rrds.
+ * Loads all sensors of a single device into the {logger_meters} database table and
+ * loads a token for each sensor in {logger_tokens}.
  *
  * @param $row       An array containing a single row from the csv file.
  * @param $created   The entry ceation time.
@@ -157,17 +157,13 @@ function _logger_load_sensors($row, $created) {
   $permissions = 62;
   $device = $row[1];
 
-  for ($i = 1; $i < 7; $i++) {
+  for ($i = 1; $i < 65; $i++) {
     $sensor = $row[$i + 3];
 
     _logger_load_sensor($i, $sensor, $device, $created);
 
     $token  = md5(uniqid(rand(), TRUE));
     _logger_load_token($token, $sensor, $permissions);
-
-    module_load_include('inc', 'logger', 'logger.rrd');
-    logger_rrd_base_create($sensor);
-    logger_rrd_night_create($sensor);
   }
 }
 
