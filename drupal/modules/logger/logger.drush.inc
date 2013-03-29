@@ -156,8 +156,16 @@ function _logger_load_device($row, $created) {
 function _logger_load_sensors($row, $created) {
   $permissions = 62;
   $device = $row[1];
+  $sensor_hw = (int)$row[3];
 
-  for ($i = 1; $i < 65; $i++) {
+  if ($sensor_hw == 21) {
+    $max_i = 6
+  }
+  elseif ($sensor_hw == 22) {
+    $max_i = 64
+  }
+
+  for ($i = 1; $i <= $max_i ; $i++) {
     $sensor = $row[$i + 3];
 
     _logger_load_sensor($i, $sensor, $device, $created);
