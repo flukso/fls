@@ -102,6 +102,7 @@ process_post(ReqData, #state{device = Device} = State) ->
 
     {struct, JsonData} = mochijson2:decode(wrq:req_body(ReqData)),
 
+    Time       = proplists:get_value(<<"time">>      , JsonData),
     Version    = proplists:get_value(<<"version">>   , JsonData),
     Reset      = proplists:get_value(<<"reset">>     , JsonData),
     Uptime     = proplists:get_value(<<"uptime">>    , JsonData),
@@ -118,7 +119,7 @@ process_post(ReqData, #state{device = Device} = State) ->
     NewResets = Resets + Reset,
 
     mysql:execute(pool, device_update,
-        [check:unix(), Version, 0, NewResets, Uptime, Memtotal, Memfree, Memcached, Membuffers, Ip, Port, Device]),
+        [check:unix(), Time, Version, 0, NewResets, Uptime, Memtotal, Memfree, Memcached, Membuffers, Ip, Port, Device]),
 
 
     JsonResponse = mochijson2:encode({struct, [{<<"upgrade">>,        Upgrade},

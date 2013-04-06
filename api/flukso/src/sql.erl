@@ -170,6 +170,7 @@
            logger_devices
        SET
            access = ?,
+           time = ?,
            version = ?,
            upgrade = ?,
            resets = ?,
