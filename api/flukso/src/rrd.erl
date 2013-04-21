@@ -81,10 +81,11 @@ fetch(Rrd, Sensor, Start, End, Resolution, Factor) ->
                     || [X] <- Response, string:str(X, ":") == 11],
 
             Datapoints = [[list_to_integer(X), y(Y, Factor)]
-                    || [X, Y] <- Filtered, string:len(Y) /= 3],
+                    || [X, Y] <- Filtered, (string:len(Y) /= 3) and (string:len(Y) /= 4)],
 
-            Nans = [[list_to_integer(X), list_to_binary(Y)]
-                    || [X, Y] <- Filtered, string:len(Y) == 3],
+            % filter out nan and -nan
+            Nans = [[list_to_integer(X), <<"nan">>]
+                    || [X, Y] <- Filtered, (string:len(Y) == 3) or (string:len(Y) == 4)],
 
             {ok, Datapoints, Nans};
 
