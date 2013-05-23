@@ -21,7 +21,8 @@
 // $Id$
 //
 
-define(FLM02_UPGRADE_TARGET, 215);
+define(FLM02_16M_UPGRADE_TARGET, 216);
+define(FLM02_32M_UPGRADE_TARGET, 223);
 
 /**
  * Callback function for the user/x/devices page's drupal_get_form
@@ -116,16 +117,23 @@ function _logger_account_device_upgrade($did) {
   $device = db_fetch_object(db_query("SELECT serial, version, upgrade
                                       FROM {logger_devices}
                                       WHERE device = '%s' AND uid = %d", $did, $user->uid));
- 
+
+  if ($device->version >= 200 && $device->serial >= 2e6) {
+    $upgrade_target = FLM02_32M_UPGRADE_TARGET;
+  }
+  elseif ($device->version >= 200 && $device->serial >= 1e6) {
+    $upgrade_target = FLM02_16M_UPGRADE_TARGET;
+  }
+
   if ($device->version >= 200
-      && $device->version < FLM02_UPGRADE_TARGET
+      && $device->version < $upgrade_target
       && $device->upgrade == 0) {
     db_query("UPDATE {logger_devices}
               SET upgrade = %d
-              WHERE device = '%s'", FLM02_UPGRADE_TARGET, $did);
+              WHERE device = '%s'", $upgrade_target, $did);
 
     $msg = "The FLM with serial FL%08s will be upgraded to firmware version %d at the next FLM heartbeat.";
-    drupal_set_message(sprintf($msg, $device->serial, FLM02_UPGRADE_TARGET));
+    drupal_set_message(sprintf($msg, $device->serial, $upgrade_target));
   };
 
   // return to the user/x/devices page
@@ -171,12 +179,19 @@ function theme_logger_account_devices($form) {
     $row[] = seconds_to_dayshours($device->uptime);
 
     $remove = sprintf('user/%d/device/%s/remove', $user->uid, $device->device);
- 
+
+    if ($device->version >= 200 && $device->serial >= 2e6) {
+      $upgrade_target = FLM02_32M_UPGRADE_TARGET;
+    }
+    elseif ($device->version >= 200 && $device->serial >= 1e6) {
+      $upgrade_target = FLM02_16M_UPGRADE_TARGET;
+    }
+
     if ($device->version >= 200
-        && $device->version < FLM02_UPGRADE_TARGET
+        && $device->version < $upgrade_target
         && $device->upgrade == 0) {
       $upgrade = sprintf('user/%d/device/%s/upgrade', $user->uid, $device->device);
-      $attributes = array('title' => 'Upgrade the firmware of this FLM02 to version ' . FLM02_UPGRADE_TARGET);
+      $attributes = array('title' => 'Upgrade the firmware of this FLM02 to version ' . $upgrade_target);
 
       $row[] = l(t('remove'), $remove) . ' ' .
                l(t('upgrade'), $upgrade, array('attributes' => $attributes));
