@@ -24,6 +24,7 @@
          malformed_request/2,
          is_authorized/2,
          content_types_provided/2,
+         timeseries_to_csv/2,
          timeseries_to_json/2,
          param_to_json/2,
          update_to_json/2,
@@ -168,14 +169,42 @@ is_auth_GET(ReqData, #state{sensor = Sensor, token = Token, session = Session} =
     ReqData, State}.
 
 content_types_provided(ReqData, #state{return = Return} = State) -> 
-        {[{"application/json",
+        Csv = {"text/csv",
+            case Return of
+                timeseries -> timeseries_to_csv;
+                _ -> dummy_callback
+            end},
+
+        Json = {"application/json",
            case Return of
                timeseries -> timeseries_to_json;
                param -> param_to_json;
                update -> update_to_json;
                _ -> dummy_callback  % for POST
-           end}],
-        ReqData, State}.
+           end},
+
+        {[Csv, Json], ReqData, State}.
+
+timeseries_to_csv(ReqData, #state{sensor     = Sensor,
+                                  start      = Start,
+                                  'end'      = End,
+                                  resolution = Resolution,
+                                  factor     = Factor} = State) ->
+    case wrq:get_qs_value("interval", ReqData) of
+        "night"   -> Rrd = night;
+        _Interval -> Rrd = base
+    end,
+
+    case rrd:fetch(Rrd, Sensor, Start, End, Resolution, Factor) of
+        {ok, Datapoints, Nans} ->
+            Datapoints2 = [[X, integer_to_list(Y)] || [X, Y] <- Datapoints],
+            Merge = lists:merge(Datapoints2, Nans),
+            Reply = [[integer_to_list(X), ",", Y, "\r\n"] || [X, Y] <- Merge],
+            {Reply, ReqData, State};
+
+        {error, _Reason} ->
+            {{halt, 404}, ReqData, State}
+    end.
 
 timeseries_to_json(ReqData, #state{sensor     = Sensor,
                                    start      = Start,
