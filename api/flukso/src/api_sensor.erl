@@ -183,7 +183,7 @@ content_types_provided(ReqData, #state{return = Return} = State) ->
                _ -> dummy_callback  % for POST
            end},
 
-        {[Csv, Json], ReqData, State}.
+        {[Json, Csv], ReqData, State}.
 
 timeseries_to_csv(ReqData, #state{sensor     = Sensor,
                                   start      = Start,
