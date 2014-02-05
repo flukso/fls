@@ -60,6 +60,14 @@
        WHERE
            meter = ? AND token = ?">>).
 
+-define(SQL_MASTER_TOKEN_UID,
+    <<"SELECT
+           token
+       FROM
+           logger_users
+       WHERE
+           uid = ? AND token = ?">>).
+
 -define(SQL_SENSOR_KEY,
     <<"SELECT
            sha
@@ -220,6 +228,7 @@
      {session, ?SQL_SESSION},
      {permissions, ?SQL_PERMISSIONS},
      {master_token, ?SQL_MASTER_TOKEN},
+     {master_token_uid, ?SQL_MASTER_TOKEN_UID},
      {sensor_key, ?SQL_SENSOR_KEY},
      {sensor_props, ?SQL_SENSOR_PROPS},
      {sensor_param, ?SQL_SENSOR_PARAM},

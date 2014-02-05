@@ -49,6 +49,10 @@ malformed_request(ReqData, _State) ->
     {Uid, ValidUid} =
         check:uid(wrq:path_info(uid, ReqData)),
 
+    {Token, ValidToken} =
+        check:token(wrq:get_req_header("X-Token", ReqData),
+                    wrq:get_qs_value("token", ReqData)),
+
     {Session, ValidSession} =
         check:session(wrq:get_cookie_value(check:session_name(), ReqData)),
 
@@ -56,24 +60,32 @@ malformed_request(ReqData, _State) ->
         check:jsonp(wrq:get_qs_value("callback", ReqData)),
 
     State = #state{uid     = Uid,
+                   token   = Token,
                    session = Session,
                    jsonp   = Jsonp},
 
-    {case {ValidVersion, ValidUid, ValidSession, ValidJsonp} of
+    {case {ValidVersion, ValidUid, ValidToken or ValidSession, ValidJsonp} of
         {true, true, true, true} -> false;
         _ -> true
      end,
     ReqData, State}.
 
-is_authorized(ReqData, #state{uid = RequestUid, session = Session} = State) ->
+is_authorized(ReqData, #state{uid = RequestUid, token = Token, session = Session} = State) ->
     {data, Result} = mysql:execute(pool, session, [Session]),
+    {data, Master} = mysql:execute(pool, master_token_uid, [RequestUid, Token]),
 
-    case mysql:get_result_rows(Result) of
-        [[1]] ->
+    TokenBin = case is_list(Token) of
+        true -> list_to_binary(Token);
+        false -> <<"">>
+    end,
+
+    case { mysql:get_result_rows(Result),
+           mysql:get_result_rows(Master) } of
+        {[[1]], []} ->
             {true, ReqData, State};
-        [[SessionUid]] when SessionUid == RequestUid ->
+        {[[SessionUid]], []} when SessionUid == RequestUid ->
             {true, ReqData, State};
-        [[_SessionUid]] ->
+        {[[_SessionUid]], []} ->
             {data, Private} = mysql:execute(pool, user_private, [RequestUid]),
 
             {case mysql:get_result_rows(Private) of
@@ -81,8 +93,10 @@ is_authorized(ReqData, #state{uid = RequestUid, session = Session} = State) ->
                  [[1]] -> "This user prefers to keep his sensors private."
              end,
              ReqData, State};
-        _NoSessionIdMatch ->
-            {"Session id entry not found.", ReqData, State}
+        {[], [[TokenBin]]} ->
+            {true, ReqData, State};
+        _NoMatch ->
+            {"Access refused", ReqData, State}
     end.
 
 content_types_provided(ReqData, State) -> 
