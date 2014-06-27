@@ -294,14 +294,14 @@ rrd_provision(Sensor, ?ENABLE) ->
 % Mochijson2: {struct,[{<<"measurements">>,[[<TS1>,<VALUE1>],...,[<TSn>,<VALUEn>]]}]}
 process_measurements(Measurements, ReqData, #state{sensor = Sensor} = State) ->
     Data = [[integer_to_list(Time), ":", integer_to_list(Counter), " "]
-        || [Time, Counter] <- Measurements],
+        || [Time, Counter] <- Measurements, is_integer(Counter)],
 
     [LastTimestamp, LastValue] = lists:last(Measurements),
 
     {data, Result} = mysql:execute(pool, sensor_props, [Sensor]),
     [[Uid, _Device, Midnight]] = mysql:get_result_rows(Result),
 
-    case rrd:update(Sensor, Data) of    
+    case rrd:update(Sensor, Data) of
         {ok, _Response} ->
             Response = "ok",
 
