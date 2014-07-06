@@ -75,7 +75,7 @@ is_auth_POST(ReqData, #state{device = Device, digest = ClientDigest} = State) ->
     case mysql:get_result_rows(Result) of
         [[Key]] ->
             Data = wrq:req_body(ReqData),
-            <<X:160/big-unsigned-integer>> = crypto:sha_mac(Key, Data),
+            <<X:160/big-unsigned-integer>> = crypto:hmac(sha, Key, Data),
             ServerDigest = lists:flatten(io_lib:format("~40.16.0b", [X])),
 
             {case ServerDigest of
@@ -126,7 +126,7 @@ process_post(ReqData, #state{device = Device} = State) ->
                                                {<<"timestamp">>, check:unix()}
                                               ]}),
 
-    <<X:160/big-unsigned-integer>> = crypto:sha_mac(Key, JsonResponse),
+    <<X:160/big-unsigned-integer>> = crypto:hmac(sha, Key, JsonResponse),
     Digest = lists:flatten(io_lib:format("~40.16.0b", [X])),
 
     DigestedReqData = wrq:set_resp_header("X-Digest", Digest, ReqData), 

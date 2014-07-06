@@ -38,8 +38,12 @@ start_link() ->
     ensure_started(erlrrd),
     ensure_started(mysql),
     sql:prepare(),
+    ensure_started(asn1),
+    ensure_started(public_key),
     ensure_started(ssl),
     ensure_started(esmtp),
+    ensure_started(inets),
+    ensure_started(mochiweb),
     ensure_started(webmachine),
     flukso_sup:start_link().
 
@@ -51,8 +55,12 @@ start() ->
     ensure_started(erlrrd),
     ensure_started(mysql),
     sql:prepare(),
+    ensure_started(asn1),
+    ensure_started(public_key),
     ensure_started(ssl),
     ensure_started(esmtp),
+    ensure_started(inets),
+    ensure_started(mochiweb),
     ensure_started(webmachine),
     application:start(flukso).
 

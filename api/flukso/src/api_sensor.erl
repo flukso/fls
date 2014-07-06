@@ -140,7 +140,7 @@ is_auth_POST(ReqData, #state{sensor = Sensor, digest = ClientDigest} = State) ->
     case mysql:get_result_rows(Result) of
         [[Key]] ->
             Data = wrq:req_body(ReqData),
-            <<X:160/big-unsigned-integer>> = crypto:sha_mac(Key, Data),
+            <<X:160/big-unsigned-integer>> = crypto:hmac(sha, Key, Data),
             ServerDigest = lists:flatten(io_lib:format("~40.16.0b", [X])),
 
             {case ServerDigest of
