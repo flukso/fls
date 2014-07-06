@@ -44,6 +44,9 @@ start_link() ->
     ensure_started(esmtp),
     ensure_started(inets),
     ensure_started(mochiweb),
+    LogHandlers = [{webmachine_access_log_handler, ["var/log"]},
+                   {webmachine_error_log_handler, ["var/log"]}],
+    application:set_env(webmachine, log_handlers, LogHandlers),
     ensure_started(webmachine),
     flukso_sup:start_link().
 
@@ -61,6 +64,9 @@ start() ->
     ensure_started(esmtp),
     ensure_started(inets),
     ensure_started(mochiweb),
+    LogHandlers = [{webmachine_access_log_handler, ["var/log"]},
+                   {webmachine_error_log_handler, ["var/log"]}],
+    application:set_env(webmachine, log_handlers, LogHandlers),
     ensure_started(webmachine),
     application:start(flukso).
 
