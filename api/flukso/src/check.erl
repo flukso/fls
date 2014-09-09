@@ -25,6 +25,7 @@
          sensor/1,
          device/1,
          uid/1,
+         tmpo/3,
  
          token/2,
          digest/1,
@@ -67,6 +68,13 @@ device(Device) ->
 uid(Uid) ->
     UidInt = (catch list_to_integer(Uid)),
     {UidInt, is_number(UidInt)}.
+
+tmpo(Rid, Lvl, Bid) ->
+    RidInt = (catch list_to_integer(Rid)),
+    LvlInt = (catch list_to_integer(Lvl)),
+    BidInt = (catch list_to_integer(Bid)),
+    {RidInt, LvlInt, BidInt,
+        is_number(RidInt) and is_number(LvlInt) and is_number(BidInt)}.
 
 token(undefined, undefined) ->
     {false, false};
