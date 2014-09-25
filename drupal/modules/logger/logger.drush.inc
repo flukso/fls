@@ -164,6 +164,9 @@ function _logger_load_sensors($row, $created) {
   elseif ($sensor_hw == 22) {
     $max_i = 64;
   }
+  elseif ($sensor_hw == 32) {
+    $max_i = 128;
+  }
 
   for ($i = 1; $i <= $max_i ; $i++) {
     $sensor = $row[$i + 3];
