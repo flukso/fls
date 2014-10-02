@@ -101,8 +101,12 @@ to_json(ReqData, State) ->
 to_gzip(ReqData, State = #state{sensor = Sensor, rid = Rid, lvl = Lvl, bid = Bid}) ->
 	{data, Result} = mysql:execute(pool, tmpo_block, [Sensor, Rid, Lvl, Bid, "gz"]),
 	Block = mysql:get_result_rows(Result),
-	{case Block of
-		[[Data]] -> Data;
-		_ -> {halt, 404}
-	end, ReqData, State}.
+
+	case Block of
+		[[Data]] ->
+			{Data, ReqData, State};
+		_ ->
+			ReqData1 = wrq:remove_resp_header("Content-Encoding", ReqData),
+			{{halt, 404}, ReqData1, State}
+	end.
 
