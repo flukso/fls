@@ -24,6 +24,7 @@
 	malformed_request/2,
 	is_authorized/2,
 	content_types_provided/2,
+	to_json/2,
 	to_gzip/2]).
 
 -include_lib("webmachine/include/webmachine.hrl").
@@ -81,9 +82,21 @@ is_authorized(ReqData, State = #state{sensor = Sensor, token = Token, session = 
 		{[], [], []} -> "Access refused" 
 	end, ReqData, State}.
 
+encodings_provided(ReqData, State) ->
+	Encodings = [
+		{"identity", fun(X) -> X end},
+		{"gzip", fun(X) -> X end}],
+	{Encodings, ReqData, State}.
+
 content_types_provided(ReqData, State) ->
-	Ctypes = [{"application/gzip", to_gzip}],
+	Ctypes = [
+		{"application/gzip", to_gzip},
+		{"application/json", to_json}], % should always be used with gzip encoding!
 	{Ctypes, ReqData, State}.
+
+to_json(ReqData, State) ->
+	ReqData1 = wrq:set_resp_header("Content-Encoding", "gzip", ReqData),
+	to_gzip(ReqData1, State).
 
 to_gzip(ReqData, State = #state{sensor = Sensor, rid = Rid, lvl = Lvl, bid = Bid}) ->
 	{data, Result} = mysql:execute(pool, tmpo_block, [Sensor, Rid, Lvl, Bid, "gz"]),
