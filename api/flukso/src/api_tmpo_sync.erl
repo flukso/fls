@@ -122,14 +122,17 @@ to_json(ReqData, State = #state{
 	end.
 
 monotonous(Blocks) ->
-	monotonous(Blocks, 0).
+	monotonous(Blocks, 0, 0).
 
-monotonous([], _) ->
+monotonous([], _Srid, _Stail) ->
 	true;
-monotonous([[_Rid, Lvl, Bid, _Ext] | Blocks], Stail) ->
+monotonous([[Rid, Lvl, Bid, _Ext] | Blocks], Srid, Stail) when Rid > Srid ->
+    Btail = tail(Lvl, Bid),
+    monotonous(Blocks, Rid, Btail);
+monotonous([[Rid, Lvl, Bid, _Ext] | Blocks], Srid, Stail) when Rid =:= Srid ->
 	Btail = tail(Lvl, Bid),
 	case Btail > Stail of
-		true -> monotonous(Blocks, Btail);
+		true -> monotonous(Blocks, Srid, Btail);
 		false -> false
 	end.
 
