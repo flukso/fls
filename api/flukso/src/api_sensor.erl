@@ -46,9 +46,10 @@ allowed_methods(ReqData, State) ->
     {['POST', 'GET'], ReqData, State}.
 
 malformed_request(ReqData, State) ->
+    ReqData1 = wrq:set_resp_header("Access-Control-Allow-Origin", "*", ReqData),
     case wrq:method(ReqData) of
-        'POST' -> malformed_POST(ReqData, State);
-        'GET'  -> malformed_GET(ReqData, State)
+        'POST' -> malformed_POST(ReqData1, State);
+        'GET'  -> malformed_GET(ReqData1, State)
     end.
 
 malformed_POST(ReqData, _State) ->

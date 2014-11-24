@@ -63,10 +63,11 @@ malformed_request(ReqData, _State) ->
 		bid = Bid,
 		token = Token,
 		session = Session},
+	ReqData1 = wrq:set_resp_header("Access-Control-Allow-Origin", "*", ReqData),
 
 	case {ValidVersion, ValidSensor, ValidTmpo, ValidToken or ValidSession} of
-		{true, true, true, true} -> {false, ReqData, State};
-		_ -> {true, ReqData, State}
+		{true, true, true, true} -> {false, ReqData1, State};
+		_ -> {true, ReqData1, State}
 	end.
 
 is_authorized(ReqData, State = #state{sensor = Sensor, token = Token, session = Session}) ->

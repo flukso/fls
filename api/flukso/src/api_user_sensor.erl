@@ -63,12 +63,13 @@ malformed_request(ReqData, _State) ->
                    token   = Token,
                    session = Session,
                    jsonp   = Jsonp},
+    ReqData1 = wrq:set_resp_header("Access-Control-Allow-Origin", "*", ReqData),
 
     {case {ValidVersion, ValidUid, ValidToken or ValidSession, ValidJsonp} of
         {true, true, true, true} -> false;
         _ -> true
      end,
-    ReqData, State}.
+    ReqData1, State}.
 
 is_authorized(ReqData, #state{uid = RequestUid, token = Token, session = Session} = State) ->
     {data, Result} = mysql:execute(pool, session, [Session]),
