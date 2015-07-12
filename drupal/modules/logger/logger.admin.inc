@@ -22,7 +22,7 @@
 //
 
 define(FLM02_16M_UPGRADE_TARGET, 216);
-define(FLM02_32M_UPGRADE_TARGET, 232);
+define(FLM02_32M_UPGRADE_TARGET, 246);
 
 /**
  * Callback function for the user/x/devices page's drupal_get_form
