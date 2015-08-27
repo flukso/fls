@@ -187,17 +187,21 @@ function theme_logger_account_devices($form) {
       $upgrade_target = FLM02_16M_UPGRADE_TARGET;
     }
 
+    $button_remove = array('class' => 'btn btn-warning', 'role' => 'button');
     if ($device->version >= 200
         && $device->version < $upgrade_target
         && $device->upgrade == 0) {
       $upgrade = sprintf('user/%d/device/%s/upgrade', $user->uid, $device->device);
-      $attributes = array('title' => 'Upgrade the firmware of this FLM02 to version ' . $upgrade_target);
-
-      $row[] = l(t('remove'), $remove) . ' ' .
-               l(t('upgrade'), $upgrade, array('attributes' => $attributes));
+      //$attributes = array('title' => 'Upgrade the firmware of this FLM02 to version ' . $upgrade_target);
+      $button_upgrade = array(
+        'class' => 'btn btn-success',
+        'role' => 'button',
+        'title' => 'Upgrade the firmware of this FLM02 to version ' . $upgrade_target);
+      $row[] = l(t('remove'), $remove, array('attributes' => $button_remove)) . ' ' .
+               l(t('upgrade'), $upgrade, array('attributes' => $button_upgrade));
     }
     else {
-      $row[] = l(t('remove'), $remove);
+      $row[] = l(t('remove'), $remove, array('attributes' => $button_remove));
     }
 
     $rows[] = $row;
