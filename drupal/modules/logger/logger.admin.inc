@@ -192,7 +192,6 @@ function theme_logger_account_devices($form) {
         && $device->version < $upgrade_target
         && $device->upgrade == 0) {
       $upgrade = sprintf('user/%d/device/%s/upgrade', $user->uid, $device->device);
-      //$attributes = array('title' => 'Upgrade the firmware of this FLM02 to version ' . $upgrade_target);
       $button_upgrade = array(
         'class' => 'btn btn-success',
         'role' => 'button',
