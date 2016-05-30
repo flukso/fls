@@ -36,6 +36,7 @@ function _sensor_account() {
        ON lm.meter = lt.meter
      WHERE lm.uid = %d
      AND (lm.type = '%s' OR lm.type = '%s' OR lm.type = '%s')
+     AND lm.function IS NOT NULL
      AND lm.enabled = %d
      ORDER BY lm.function, lm.type";
 
