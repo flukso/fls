@@ -137,7 +137,7 @@
        FROM
            (logger_meters lm INNER JOIN logger_devices ld ON lm.device = ld.device)
        WHERE
-           lm.uid = ? AND enabled = 1">>).
+           lm.uid = ? AND lm.function IS NOT NULL AND enabled = 1">>).
 
 -define(SQL_USER_PRIVATE,
     <<"SELECT
