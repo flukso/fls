@@ -105,15 +105,18 @@ lastupdate(Sensor) ->
     lastupdate(base, Sensor).
 
 lastupdate(Rrd, Sensor) ->
-    {ok, [_, _, [UpdateString]]} = erlrrd:lastupdate(path(Rrd, Sensor)),
+    lastupdate1(erlrrd:lastupdate(path(Rrd, Sensor))).
+
+lastupdate1({ok, [_, _, [UpdateString]]}) ->
     [Timestamp, Counter] = re:split(UpdateString, "[:][ ]", [{return,list}]),
     
     [list_to_integer(Timestamp),
         case Counter of
             "UNKN" -> <<"NaN">>;
             _ -> list_to_integer(Counter)
-        end].
-
+        end];
+lastupdate1({error, _}) ->
+    null.
 
 % helper functions
 path(Rrd, Sensor) ->
