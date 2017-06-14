@@ -97,17 +97,17 @@ content_types_provided(ReqData, State) ->
 	{Ctypes, ReqData, State}.
 
 to_json(ReqData, State = #state{iter = 4}) ->
-	{{halt, 500}, ReqData, State};
+	{{halt, 597}, ReqData, State};
 to_json(ReqData, State = #state{
 	sensor = Sensor, rid = Rid, lvl = Lvl, bid = Bid, jsonp = Jsonp, iter = Iter}) ->
 	Bid20 = Bid - (Bid rem ?TMPO_BLOCK20_SPAN),
 	{data, Result} = mysql:execute(pool, tmpo_sync, [Sensor, Rid, Bid20]),
 	Blocks = mysql:get_result_rows(Result),
 	case monotonous(Blocks) of
-		false ->
-			timer:sleep(100), %ms
+		{false, [Erid, Elvl, Ebid, _Eext]} ->
+			clean(Sensor, Erid, Elvl, Ebid),
 			to_json(ReqData, State#state{iter = Iter + 1});
-		true ->
+		{true, _} ->
 			Tail = tail(Lvl, Bid),
 			FilteredBlocks = [{struct, [
 				{<<"rid">>, RidB},
@@ -123,19 +123,34 @@ to_json(ReqData, State = #state{
 	end.
 
 monotonous(Blocks) ->
-	monotonous(Blocks, 0, 0).
+	monotonous(Blocks, [], 0, 0).
 
-monotonous([], _Srid, _Stail) ->
-	true;
-monotonous([[Rid, Lvl, Bid, _Ext] | Blocks], Srid, Stail) when Rid > Srid ->
-    Btail = tail(Lvl, Bid),
-    monotonous(Blocks, Rid, Btail);
-monotonous([[Rid, Lvl, Bid, _Ext] | Blocks], Srid, Stail) when Rid =:= Srid ->
+monotonous([], _Pblock, _Srid, _Stail) ->
+	{true, []};
+monotonous([Nblock = [Rid, Lvl, Bid, _Ext] | Blocks], _Pblock, Srid, _Stail) when Rid > Srid ->
+	Btail = tail(Lvl, Bid),
+	monotonous(Blocks, Nblock, Rid, Btail);
+monotonous([Nblock = [Rid, Lvl, Bid, _Ext] | Blocks], Pblock, Srid, Stail) when Rid =:= Srid ->
 	Btail = tail(Lvl, Bid),
 	case Btail > Stail of
-		true -> monotonous(Blocks, Srid, Btail);
-		false -> false
+		true -> monotonous(Blocks, Nblock, Srid, Btail);
+		false -> {false, Pblock}
 	end.
 
 tail(Lvl, Bid) ->
 	Bid + trunc(math:pow(2, Lvl)) - 1.
+
+clean(Sid, Rid, Lvl, Bid) when Lvl > 8 ->
+	LastChild = last_child(Lvl, Bid),
+	mysql:execute(pool, tmpo_clean, [Sid, Rid, Lvl - 4, LastChild]),
+	clean(Sid, Rid, Lvl - 4, LastChild),
+	{ok, tmpo_block_cleaning_done};
+clean(_, _, _, _) ->
+	{ok, no_tmpo_block_cleaning_needed}.
+
+last_child(Lvl, Bid) ->
+	Bid + 15 * blocksize(Lvl - 4).
+
+blocksize(Lvl) ->
+	trunc(math:pow(2, Lvl)).
+
