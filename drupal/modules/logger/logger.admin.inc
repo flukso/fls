@@ -23,6 +23,7 @@
 
 define(FLM02_16M_UPGRADE_TARGET, 216);
 define(FLM02_32M_UPGRADE_TARGET, 250);
+define(FLM03_UPGRADE_TARGET, 378);
 
 /**
  * Callback function for the user/x/devices page's drupal_get_form
@@ -118,7 +119,10 @@ function _logger_account_device_upgrade($did) {
                                       FROM {logger_devices}
                                       WHERE device = '%s' AND uid = %d", $did, $user->uid));
 
-  if ($device->version >= 200 && $device->serial >= 2e6) {
+  if ($device->version >= 300) {
+    $upgrade_target = FLM03_UPGRADE_TARGET + $device->version % 2;
+  }
+  elseif ($device->version >= 200 && $device->serial >= 2e6) {
     $upgrade_target = FLM02_32M_UPGRADE_TARGET;
   }
   elseif ($device->version >= 200 && $device->serial >= 1e6) {
@@ -180,7 +184,10 @@ function theme_logger_account_devices($form) {
 
     $remove = sprintf('user/%d/device/%s/remove', $user->uid, $device->device);
 
-    if ($device->version >= 200 && $device->serial >= 2e6) {
+    if ($device->version >= 300) {
+      $upgrade_target = FLM03_UPGRADE_TARGET + $device->version % 2;
+    }
+    elseif ($device->version >= 200 && $device->serial >= 2e6) {
       $upgrade_target = FLM02_32M_UPGRADE_TARGET;
     }
     elseif ($device->version >= 200 && $device->serial >= 1e6) {
@@ -195,7 +202,7 @@ function theme_logger_account_devices($form) {
       $button_upgrade = array(
         'class' => 'btn btn-success',
         'role' => 'button',
-        'title' => 'Upgrade the firmware of this FLM02 to version ' . $upgrade_target);
+        'title' => 'Upgrade the firmware of this FLM to version ' . $upgrade_target);
       $row[] = l(t('remove'), $remove, array('attributes' => $button_remove)) . ' ' .
                l(t('upgrade'), $upgrade, array('attributes' => $button_upgrade));
     }
