@@ -908,6 +908,82 @@ Flukso.ChartView = Backbone.View.extend({
 	}
 });
 
+Flukso.ExportView = Backbone.View.extend({
+	el: '#export-ctrl',
+
+	initialize: function() {
+    },
+
+	render: function() {
+	},
+
+	events: {
+		'click': 'clickButton'
+	},
+
+	clickButton: function(e) {
+		var type = Flukso.chartState.get('type');
+		var interval = Flukso.chartState.get('interval');
+
+		if (interval == 'minute') {
+			var unit = Flukso.chartState.get('unitRt.' + type);
+			var factor = 1;
+		} else {
+			var unit = Flukso.chartState.get('unit.' + type);
+			var factor = Flukso.unitPowerFactor[type][unit] ?
+				Flukso.unitPowerFactor[type][unit] : Flukso.unitEnergyFactor[type][unit][interval];
+		};
+
+		/* we only export our own sensors */
+		var sensors = Flukso.sensorCollect.filter(function(sensor) {
+			return sensor.get('type') == type
+				&& sensor.get('interval') == interval
+				&& sensor.get('uid') == Drupal.settings.me.uid
+		});
+
+		function stamp(point) {
+			var time = new Date(point[0]);
+			return [time.toISOString()];
+		};
+
+		var json = {
+			'fields': [''],
+			'data': _.map(sensors[0].get('data'), stamp)
+		}
+
+		_.each(sensors, function(sensor) {
+			json.fields.push(sensor.get('function'));
+			_.each(sensor.get('data'), function(point, idx, list) {
+				json.data[idx].push(point[1] == 'nan' ? '' : point[1]);
+			});
+		});
+
+		var csv = Papa.unparse(json);
+
+		var now = new Date();
+		var dateTime = now.getFullYear() + '-' + now.getMonth()+1 + '-' +
+				now.getDate() + '-' + now.getHours() +
+				now.getMinutes() + now.getSeconds();
+		var fileName = 'flukso-' + dateTime + '.csv';
+		var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+		if (navigator.msSaveBlob) { // IE 10+
+			navigator.msSaveBlob(blob, fileName);
+		} else {
+			var link = document.createElement('a');
+			if (link.download !== undefined) { // feature detection
+				// Browsers that support HTML5 download attribute
+				var url = URL.createObjectURL(blob);
+				link.setAttribute('href', url);
+				link.setAttribute('download', fileName);
+				link.style = 'visibility:hidden';
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+			}
+		}
+	}
+});
+
 Flukso.Router = Backbone.Router.extend({
 	routes: {
 		":type/:interval" : "gotoChart"
@@ -932,7 +1008,7 @@ Flukso.Router = Backbone.Router.extend({
 			reloadChart: true
 		});
 	}
-})
+});
 
 /* setup & glue code */
 $(function() {
@@ -947,6 +1023,7 @@ $(function() {
 	Flukso.chartView = new Flukso.ChartView({collection: Flukso.sensorCollect});
 	Flukso.userView = new Flukso.UserView({collection: Flukso.userCollect});
 	Flukso.userCtrlView = new Flukso.UserCtrlView({collection: Flukso.userCollect});
+	Flukso.exportView = new Flukso.ExportView({collection: Flukso.sensorCollect});
 
 	Flukso.router = new Flukso.Router();
 	Backbone.history.start({root: "/dash"});
