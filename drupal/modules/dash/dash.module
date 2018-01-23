@@ -65,7 +65,7 @@ function _dash_render() {
   drupal_add_js(DASH_PATH . '/js/backbone-nested-v1.0.3.min.js');
   drupal_add_js(DASH_PATH . '/js/highstock.min.js');
   drupal_add_js(DASH_PATH . '/js/papaparse.min.js');
-  drupal_add_js(DASH_PATH . '/js/flukso.js');
+  drupal_add_js(DASH_PATH . '/js/flukso.min.js');
 
   drupal_add_js(
     array(
