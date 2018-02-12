@@ -275,9 +275,7 @@ article.comment .picture {
   padding-right: 8px;
 }
 
-#install-download a {
-  display: block;
-  width: auto;
+#install-manual {
   font-size: 18px;
   margin-bottom: 20px;
 }
