@@ -23,6 +23,7 @@ define('STATIC_PATH', drupal_get_path('module', 'static'));
 define('SPLASH_HTML', STATIC_PATH . '/tpl/splash.html');
 define('ABOUT_HTML', STATIC_PATH . '/tpl/about.html');
 define('INSTALL_HTML', STATIC_PATH . '/tpl/install.html');
+define('CONTACT_HTML', STATIC_PATH . '/tpl/contact.html');
 define('FRAMEWORK_PATH', drupal_get_path('theme', 'framework'));
 
 /**
@@ -54,6 +55,15 @@ function static_menu() {
     'description'         => 'Fluksometer installation overview',
     'page callback'       => '_static_render',
     'page arguments'      => array(INSTALL_HTML),
+    'access callback'     => TRUE,
+    'type'                => MENU_CALLBACK,
+  );
+
+ $items['contact'] = array(
+    'title'               => '',
+    'description'         => 'Flukso contact page',
+    'page callback'       => '_static_render',
+    'page arguments'      => array(CONTACT_HTML),
     'access callback'     => TRUE,
     'type'                => MENU_CALLBACK,
   );
