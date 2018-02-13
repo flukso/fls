@@ -42,7 +42,6 @@
               <li class="forum"><a href="/forum">Forum</a></li>
               <li class="source"><a href="https://github.com/flukso">Source</a></li>
               <li class="dash"><a href="/dash">Dash</a></li>
-              <li class="contact"><a href="/contact">Contact</a></li>
               <li class="shop cart checkout"><a href="/shop">Shop</a></li>
            </ul>
 
@@ -77,7 +76,7 @@
              || strpos($_GET['q'],   "forum") === 0
              || strpos($_GET['q'],    "dash") === 0) { ?>
         <div class="span10 offset1">
-      <?php } elseif (strpos($_GET['q'],  "splash") === 0
+      <?php } elseif (strpos($_GET['q'],   "about") === 0
                    || strpos($_GET['q'], "catalog") === 0) { ?>
         <div class="span12">
       <?php } else { ?>
