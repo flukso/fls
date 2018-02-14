@@ -78,7 +78,7 @@ function _logger_account_devices_submit($form, &$form_state) {
     db_query("INSERT INTO {users_roles} (uid, rid) VALUES (%d, %d)", $user->uid, $rid);
 
     $master_token = md5(uniqid(rand(), TRUE));
-    db_query("INSERT INTO {logger_users} (uid, token, private) VALUES (%d, '%s', %d)", $user->uid, $master_token, 0);
+    db_query("INSERT INTO {logger_users} (uid, token, private) VALUES (%d, '%s', %d)", $user->uid, $master_token, 1);
   }
 
   drupal_set_message(sprintf("The FLM with serial FL%08s is now associated with your account.", $serial));
