@@ -139,6 +139,19 @@
        WHERE
            lm.uid = ? AND lm.function IS NOT NULL AND enabled = 1">>).
 
+-define(SQL_USER_DEVICE,
+    <<"SELECT
+           device,
+           serial,
+           access,
+           version,
+           resets,
+           uptime
+       FROM
+           logger_devices
+       WHERE
+           uid = ?">>).
+
 -define(SQL_USER_PRIVATE,
     <<"SELECT
            private
@@ -260,6 +273,7 @@
      {sensor_update, ?SQL_SENSOR_UPDATE},
      {sensor_config, ?SQL_SENSOR_CONFIG},
      {user_sensor, ?SQL_USER_SENSOR},
+     {user_device, ?SQL_USER_DEVICE},
      {user_private, ?SQL_USER_PRIVATE},
      {timezone, ?SQL_TIMEZONE},
      {device_key, ?SQL_DEVICE_KEY},
