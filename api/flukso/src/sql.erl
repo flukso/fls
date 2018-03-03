@@ -45,7 +45,7 @@
            sid = ?">>).
 
 -define(SQL_PERMISSIONS,
-    <<"SELECT 
+    <<"SELECT
            permissions
        FROM
            logger_tokens
@@ -205,6 +205,30 @@
        WHERE
            device = ?">>).
 
+-define(SQL_DEVICE_UID,
+    <<"SELECT
+           uid
+       FROM
+           logger_devices
+       WHERE
+           device = ?">>).
+
+-define(SQL_DEVICE_SENSOR,
+    <<"SELECT
+           meter,
+           config,
+           ports,
+           type,
+           subtype,
+           function,
+           data_type,
+           kid
+       FROM
+           logger_meters
+       WHERE
+           device = ? AND enabled = 1 AND
+           (function IS NOT NULL OR kid IS NOT NULL)">>).
+
 -define(SQL_ALARM_SENSOR_LOAD,
     <<"SELECT
            sensor,
@@ -235,7 +259,7 @@
        WHERE
            meter = ?">>).
 
--define(SQL_TMPO_SYNC, 
+-define(SQL_TMPO_SYNC,
     <<"SELECT
             rid, lvl, bid, ext
        FROM
@@ -279,6 +303,8 @@
      {device_key, ?SQL_DEVICE_KEY},
      {device_props, ?SQL_DEVICE_PROPS},
      {device_update, ?SQL_DEVICE_UPDATE},
+     {device_uid, ?SQL_DEVICE_UID},
+     {device_sensor, ?SQL_DEVICE_SENSOR},
      {alarm_sensor_load, ?SQL_ALARM_SENSOR_LOAD},
      {alarm_sensor_update, ?SQL_ALARM_SENSOR_UPDATE},
      {alarm_sensor_props, ?SQL_ALARM_SENSOR_PROPS},
